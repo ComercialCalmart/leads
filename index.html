@@ -212,8 +212,7 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
   </div>
   <div class="header-actions">
     <button class="btn btn-ghost" onclick="exportJSON()">↑ Backup</button>
-    <label class="btn btn-ghost" style="cursor:pointer;">↓ Restaurar <input type="file" accept=".json" onchange="importJSON(event)" style="display:none"></label>
-    <label class="btn btn-ghost" style="cursor:pointer;">↓ CSV <input type="file" accept=".csv,.txt" onchange="importCSV(event)" style="display:none"></label>
+    <label class="btn btn-ghost" style="cursor:pointer;">↓ XLS <input type="file" accept=".csv,.xls,.xlsx,.txt" onchange="importCSV(event)" style="display:none"></label>
     <button class="btn btn-primary" onclick="openModal()">+ Novo Lead</button>
   </div>
 </header>
@@ -789,10 +788,21 @@ function updateBadge() {
 
 // ── EXPORT / IMPORT JSON ─────────────────────────────────
 function exportJSON() {
-  const blob = new Blob([JSON.stringify(contacts,null,2)], {type:'application/json'});
+  const headers = ['ID','Nome','Empresa','Marketplace','WhatsApp','Email','Cidade','UF','CNPJ','Status','Próx. Contato','ML URL','Amazon URL','Shopee URL','Site Oficial','Instagram','Observações','Criado em','Atualizado em'];
+  const rows = contacts.map(c => [
+    c.id, c.contato||'', c.nome||'', c.mkt||'', c.zap||'', c.email||'',
+    c.cidade||'', c.estado||'', c.cnpj||'', c.status||'', c.prox||'',
+    c.urlMl||'', c.urlAz||'', c.urlSh||'', c.urlSite||'', c.insta||'', c.obs||'',
+    c.createdAt||'', c.updatedAt||''
+  ]);
+  const table = [headers, ...rows].map(r =>
+    r.map(v => `<td>${String(v).replace(/</g,'&lt;')}</td>`).join('')
+  ).map(r => `<tr>${r}</tr>`).join('');
+  const xls = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8"></head><body><table>${table}</table></body></html>`;
+  const blob = new Blob([xls], {type:'application/vnd.ms-excel;charset=utf-8'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = `calmart_leads_${new Date().toISOString().slice(0,10)}.json`;
+  a.download = `calmart_leads_${new Date().toISOString().slice(0,10)}.xls`;
   a.click();
 }
 function importJSON(e) {
