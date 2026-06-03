@@ -707,6 +707,24 @@ function mktBadge(v) {
 function fmtPhone(p) {
   return (p||'').replace(/\D/g,'');
 }
+
+// Formata número para padrão brasileiro: (DDD) 9 XXXX-XXXX ou (DDD) XXXX-XXXX
+function formatZap(raw) {
+  const d = (raw||'').replace(/\D/g,'');
+  if (!d) return raw;
+  // remove 55 do início se vier completo
+  const n = d.startsWith('55') && d.length > 11 ? d.slice(2) : d;
+  if (n.length === 11) {
+    // celular: (XX) 9 XXXX-XXXX
+    return `(${n.slice(0,2)}) ${n.slice(2,3)} ${n.slice(3,7)}-${n.slice(7)}`;
+  }
+  if (n.length === 10) {
+    // fixo: (XX) XXXX-XXXX
+    return `(${n.slice(0,2)}) ${n.slice(2,6)}-${n.slice(6)}`;
+  }
+  // não reconhecido — devolve como veio
+  return raw;
+}
 function wazLink(zap, display) {
   if (!zap) return '<span style="color:#ccc">—</span>';
   const num = fmtPhone(zap);
@@ -793,7 +811,7 @@ function formData() {
   const g = k => (document.getElementById('f-'+k)||{}).value||'';
   return {
     nome: g('nome').trim(), contato: g('contato').trim(), mkt: g('mkt'), status: g('status')||'NOVO',
-    zap: g('zap').trim(), email: g('email').trim(),
+    zap: formatZap(g('zap').trim()), email: g('email').trim(),
     cidade: g('cidade').trim(), estado: g('estado').trim().toUpperCase(),
     cnpj: g('cnpj').trim(), prox: g('prox'),
     urlMl: g('url-ml').trim(), urlAz: g('url-az').trim(),
@@ -809,7 +827,15 @@ async function saveContact() {
   try {
     if (editingId) {
       const idx = contacts.findIndex(x=>x.id===editingId);
-      if (idx>-1) { contacts[idx] = {...contacts[idx], ...data}; await dbUpsert(contacts[idx]); }
+      if (idx>-1) {
+        contacts[idx] = {...contacts[idx], ...data};
+        await dbUpsert(contacts[idx]);
+      } else {
+        // não achou localmente mas existe no banco — upsert direto
+        data.id = editingId;
+        await dbUpsert(data);
+        contacts.unshift(data);
+      }
     } else {
       data.id = genId(); data.createdAt = data.updatedAt = new Date().toISOString();
       contacts.unshift(data); await dbUpsert(data);
@@ -817,7 +843,10 @@ async function saveContact() {
     const ts = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
     setStatus(`Salvo ${ts}`);
     closeModal(); renderTable(); updateBadge();
-  } catch(e) { setStatus('Erro ao salvar: '+e.message, false); }
+  } catch(e) {
+    setStatus('Erro ao salvar: '+e.message, false);
+    closeModal();
+  }
 }
 
 // ── DELETE ────────────────────────────────────────────────
@@ -838,7 +867,10 @@ async function confirmDelete() {
 async function inlineSave(id, field, value) {
   const idx = contacts.findIndex(x=>x.id===id);
   if (idx<0) return;
-  contacts[idx][field] = field==='estado' ? value.toUpperCase() : value;
+  let v = value;
+  if (field === 'estado') v = v.toUpperCase();
+  if (field === 'zap')    v = formatZap(v);
+  contacts[idx][field] = v;
   contacts[idx].updatedAt = new Date().toISOString();
   try {
     await dbUpsert(contacts[idx]);
