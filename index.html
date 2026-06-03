@@ -303,16 +303,11 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
 .cad-save-btn.saved { background: var(--green); border-color: var(--green); }
 .cad-phase:hover { background: #f0efe9; }
 .cad-phase.active-phase:hover { background: var(--black); }
-.cad-col { display: flex; flex-direction: column; min-width: 0; }
-.cad-col-header {
-  background: var(--black); color: var(--white);
-  padding: 12px 18px; display: flex; align-items: baseline; gap: 10px;
-  border-radius: var(--radius) var(--radius) 0 0;
-}
-.cad-col-name { font-size: 14px; font-weight: 900; letter-spacing: 3px; text-transform: uppercase; }
-.cad-col-sub { font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; opacity: .35; }
-.cad-col .cad-grid { border-radius: 0 0 var(--radius) var(--radius); }
-@media (max-width: 900px) { .cad-cols { grid-template-columns: 1fr; } }
+.cad-vendor-bar { display: flex; gap: 0; border: 2px solid var(--black); border-radius: var(--radius); overflow: hidden; width: fit-content; }
+.cad-vendor-btn { font-family: var(--font); font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; padding: 10px 28px; border: none; background: var(--white); color: #aaa; transition: all .15s; border-right: 1px solid var(--gray); }
+.cad-vendor-btn:last-child { border-right: none; }
+.cad-vendor-btn:hover { background: var(--body-bg); color: var(--black); }
+.cad-vendor-btn.active { background: var(--black); color: var(--white); }
 
 </style>
 </head>
@@ -470,23 +465,14 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
       </div>
     </div>
 
-    <!-- Duas colunas -->
-    <div class="cad-cols">
-      <div class="cad-col">
-        <div class="cad-col-header">
-          <span class="cad-col-name">Diego</span>
-          <span class="cad-col-sub">Cadência individual</span>
-        </div>
-        <div class="cad-grid" id="cad-grid-diego"></div>
-      </div>
-      <div class="cad-col">
-        <div class="cad-col-header">
-          <span class="cad-col-name">Matheus</span>
-          <span class="cad-col-sub">Cadência individual</span>
-        </div>
-        <div class="cad-grid" id="cad-grid-matheus"></div>
-      </div>
+    <!-- Seletor de vendedor -->
+    <div class="cad-vendor-bar">
+      <button class="cad-vendor-btn active" id="vbtn-diego" onclick="cadSelectVendedor('diego')">Diego</button>
+      <button class="cad-vendor-btn" id="vbtn-matheus" onclick="cadSelectVendedor('matheus')">Matheus</button>
     </div>
+
+    <!-- Grid único, troca de acordo com o vendedor selecionado -->
+    <div class="cad-grid" id="cad-grid-active"></div>
 
   </div>
 </div>
@@ -1496,8 +1482,18 @@ function saveCadencia(vendedor) {
   ));
 }
 
+let cadVendedorAtivo = 'diego';
+
+function cadSelectVendedor(v) {
+  cadVendedorAtivo = v;
+  document.querySelectorAll('.cad-vendor-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById(`vbtn-${v}`);
+  if (btn) btn.classList.add('active');
+  renderCadenciaCol(v);
+}
+
 function renderCadenciaCol(vendedor) {
-  const grid = document.getElementById(`cad-grid-${vendedor}`);
+  const grid = document.getElementById('cad-grid-active');
   if (!grid) return;
   const steps = cadData[vendedor];
   grid.innerHTML = steps.map((step, i) => {
@@ -1538,7 +1534,7 @@ function cadJumpPhase(n) {
   document.querySelectorAll('.cad-phase').forEach((el, i) => {
     el.classList.toggle('active-phase', i + 1 === n);
   });
-  const anchor = document.getElementById(`cad-msg-diego_cad_${n}`);
+  const anchor = document.getElementById(`cad-msg-${cadVendedorAtivo}_cad_${n}`);
   if (anchor) {
     const step = anchor.closest('.cad-step');
     if (step) step.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1547,7 +1543,7 @@ function cadJumpPhase(n) {
 
 function renderCadencia() {
   loadCadencia();
-  VENDEDORES.forEach(v => renderCadenciaCol(v));
+  cadSelectVendedor('diego');
 }
 
 function cadSaveStep(vendedor, stepId) {
