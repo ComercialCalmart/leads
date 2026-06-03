@@ -301,7 +301,11 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
 }
 .cad-save-btn:hover { background: #333; }
 .cad-save-btn.saved { background: var(--green); border-color: var(--green); }
-.cad-phase:hover { background: #f0efe9; }
+.leads-table th.sortable { cursor: pointer; user-select: none; }
+.leads-table th.sortable:hover { background: #f0efe9; }
+.leads-table th .sort-arrow { margin-left: 4px; opacity: .35; font-size: 9px; }
+.leads-table th.sort-asc .sort-arrow,
+.leads-table th.sort-desc .sort-arrow { opacity: 1; color: var(--black); }
 .cad-phase.active-phase:hover { background: var(--black); }
 .cad-vendor-bar { display: flex; gap: 0; border: 2px solid var(--black); border-radius: var(--radius); overflow: hidden; width: fit-content; }
 .cad-vendor-btn { font-family: var(--font); font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; padding: 10px 28px; border: none; background: var(--white); color: #aaa; transition: all .15s; border-right: 1px solid var(--gray); }
@@ -373,16 +377,16 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
           <thead>
             <tr>
               <th style="width:24px">#</th>
-              <th style="width:80px">Nome</th>
-              <th style="min-width:130px">Empresa</th>
-              <th style="width:68px">Loja</th>
+              <th style="width:80px" class="sortable" data-sort="contato" onclick="sortTable('contato')">Nome <span class="sort-arrow">↕</span></th>
+              <th style="min-width:130px" class="sortable" data-sort="nome" onclick="sortTable('nome')">Empresa <span class="sort-arrow">↕</span></th>
+              <th style="width:68px" class="sortable" data-sort="mkt" onclick="sortTable('mkt')">Loja <span class="sort-arrow">↕</span></th>
               <th style="min-width:110px">WhatsApp</th>
               <th style="min-width:130px">Email</th>
-              <th style="width:80px">Cidade</th>
-              <th style="width:34px" class="c">UF</th>
+              <th style="width:80px" class="sortable" data-sort="cidade" onclick="sortTable('cidade')">Cidade <span class="sort-arrow">↕</span></th>
+              <th style="width:34px" class="c sortable" data-sort="estado" onclick="sortTable('estado')">UF <span class="sort-arrow">↕</span></th>
               <th style="min-width:90px">CNPJ</th>
-              <th style="width:110px">Status</th>
-              <th style="width:88px" class="c">Próx. Contato</th>
+              <th style="width:110px" class="sortable" data-sort="status" onclick="sortTable('status')">Status <span class="sort-arrow">↕</span></th>
+              <th style="width:88px" class="c sortable" data-sort="prox" onclick="sortTable('prox')">Próx. Contato <span class="sort-arrow">↕</span></th>
               <th style="width:100px" class="c">Links</th>
               <th style="width:68px"></th>
             </tr>
@@ -651,6 +655,8 @@ function toRow(c) {
 
 let contacts = [];
 let editingId = null;
+let sortField = null;
+let sortDir = 'asc';
 let deletingId = null;
 let pendingDups = [];
 let pendingNew = [];
@@ -908,6 +914,26 @@ function showObs(id) {
 }
 
 // ── FILTER ────────────────────────────────────────────────
+function sortTable(field) {
+  if (sortField === field) {
+    sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortField = field;
+    sortDir = 'asc';
+  }
+  // update header arrows
+  document.querySelectorAll('.leads-table th.sortable').forEach(th => {
+    th.classList.remove('sort-asc','sort-desc');
+    const arrow = th.querySelector('.sort-arrow');
+    if (arrow) arrow.textContent = '↕';
+    if (th.dataset.sort === field) {
+      th.classList.add(sortDir === 'asc' ? 'sort-asc' : 'sort-desc');
+      if (arrow) arrow.textContent = sortDir === 'asc' ? '↑' : '↓';
+    }
+  });
+  renderTable();
+}
+
 function getFiltered() {
   const q     = (document.getElementById('search-input')?.value||'').toLowerCase();
   const fSt   = document.getElementById('filter-status')?.value||'';
@@ -916,7 +942,7 @@ function getFiltered() {
   const today = new Date(); today.setHours(0,0,0,0);
   const in7   = new Date(today); in7.setDate(in7.getDate()+7);
 
-  return contacts.filter(c => {
+  const list = contacts.filter(c => {
     if (q) {
       const haystack = [c.nome,c.zap,c.email,c.cidade,c.estado,c.cnpj].join(' ').toLowerCase();
       if (!haystack.includes(q)) return false;
@@ -931,6 +957,18 @@ function getFiltered() {
     } else if (fProx) { return false; }
     return true;
   });
+
+  if (sortField) {
+    const dir = sortDir === 'asc' ? 1 : -1;
+    list.sort((a, b) => {
+      const va = (a[sortField]||'').toLowerCase();
+      const vb = (b[sortField]||'').toLowerCase();
+      if (va < vb) return -1 * dir;
+      if (va > vb) return  1 * dir;
+      return 0;
+    });
+  }
+  return list;
 }
 
 // ── TABLE ─────────────────────────────────────────────────
