@@ -301,7 +301,8 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
 }
 .cad-save-btn:hover { background: #333; }
 .cad-save-btn.saved { background: var(--green); border-color: var(--green); }
-.cad-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 0; }
+.cad-phase:hover { background: #f0efe9; }
+.cad-phase.active-phase:hover { background: var(--black); }
 .cad-col { display: flex; flex-direction: column; min-width: 0; }
 .cad-col-header {
   background: var(--black); color: var(--white);
@@ -442,27 +443,27 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
 
     <!-- Mapa visual das fases -->
     <div class="cad-header-bar">
-      <div class="cad-phase active-phase">
+      <div class="cad-phase active-phase" onclick="cadJumpPhase(1)" style="cursor:pointer">
         <div class="cad-phase-num">Fase 1</div>
         <div class="cad-phase-name">Abertura</div>
         <div class="cad-phase-meta">Dia 1 · Zap</div>
       </div>
-      <div class="cad-phase">
+      <div class="cad-phase" onclick="cadJumpPhase(2)" style="cursor:pointer">
         <div class="cad-phase-num">Fase 2</div>
         <div class="cad-phase-name">Reforço</div>
         <div class="cad-phase-meta">Dia 4 · Zap</div>
       </div>
-      <div class="cad-phase">
+      <div class="cad-phase" onclick="cadJumpPhase(3)" style="cursor:pointer">
         <div class="cad-phase-num">Fase 3</div>
         <div class="cad-phase-name">Virada</div>
         <div class="cad-phase-meta">Dia 9 · Zap</div>
       </div>
-      <div class="cad-phase">
+      <div class="cad-phase" onclick="cadJumpPhase(4)" style="cursor:pointer">
         <div class="cad-phase-num">Fase 4</div>
         <div class="cad-phase-name">Apresentação</div>
         <div class="cad-phase-meta">Sob demanda</div>
       </div>
-      <div class="cad-phase">
+      <div class="cad-phase" onclick="cadJumpPhase(5)" style="cursor:pointer">
         <div class="cad-phase-num">Fase 5</div>
         <div class="cad-phase-name">Proposta</div>
         <div class="cad-phase-meta">Sob demanda</div>
@@ -1440,12 +1441,16 @@ Se quiser entender melhor o que trabalhamos antes de decidir, é só falar. Cons
       intent: 'Objetivo: consolidar credibilidade. Enviado apenas quando o prospect sinalizou interesse.',
       msg: `[Edite aqui a apresentação institucional — ${nome}]
 
-— Calmart em números (35 anos, volumes, market share)
-— Estrutura fabril e capacidade produtiva
-— Diferenciais competitivos vs concorrência
-— Presença no marketplace (reviews, posição, giro)
-— Logística e prazo de entrega por região
-— Clientes e parceiros de referência`
+35 anos de mercado — solidez, histórico e capacidade comprovada.
+
+Nossa estrutura fabril foi construída para projetos variados com capacidade de produção on time, sem gargalo e sem surpresa no prazo.
+
+Diferenciais que fazem diferença na prática:
+— Preços competitivos com produção 100% local
+— Linha de produção de excelência
+— Produtos com centenas de milhares de vendas comprovadas junto aos nossos parceiros de marketplace
+
+Logística ágil e local — entrega rápida, menos fricção operacional para o seu negócio.`
     },
     {
       id: `${vendedor}_cad_5`,
@@ -1527,6 +1532,17 @@ function renderCadenciaCol(vendedor) {
       </div>
     </div>`;
   }).join('');
+}
+
+function cadJumpPhase(n) {
+  document.querySelectorAll('.cad-phase').forEach((el, i) => {
+    el.classList.toggle('active-phase', i + 1 === n);
+  });
+  const anchor = document.getElementById(`cad-msg-diego_cad_${n}`);
+  if (anchor) {
+    const step = anchor.closest('.cad-step');
+    if (step) step.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 }
 
 function renderCadencia() {
