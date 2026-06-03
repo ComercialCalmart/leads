@@ -967,7 +967,12 @@ function renderTable() {
       <td style="font-weight:700;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(c.nome)}">${esc(c.nome)} ${obsIcon}</td>
       <td>${mktBadge(c.mkt)}</td>
       <td>${makeInlineText(c,'zap',c.zap,'(XX) 9 XXXX-XXXX')}</td>
-      <td>${makeInlineText(c,'email',c.email,'email@loja.com')}</td>
+      <td style="white-space:nowrap">${c.email
+        ? `<span style="display:inline-flex;align-items:center;gap:5px">
+            <a href="mailto:${esc(c.email)}" class="email-link" title="${esc(c.email)}">${esc(c.email)}</a>
+            <button onclick="copyEmail('${esc(c.email)}',this)" style="font-family:var(--font);font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;border-radius:2px;padding:2px 6px;border:1px solid #ddd;background:transparent;color:#aaa;transition:all .12s" title="Copiar email">⎘</button>
+           </span>`
+        : '<span style="color:#ccc">—</span>'}</td>
       <td style="font-size:11px">${c.cidade ? esc(c.cidade) : '<span style="color:#ccc">—</span>'}</td>
       <td class="c" style="font-size:10px;font-weight:700;letter-spacing:1px">${c.estado||'<span style="color:#ccc">—</span>'}</td>
       <td>${makeInlineText(c,'cnpj',c.cnpj,'CNPJ')}</td>
@@ -1560,6 +1565,17 @@ function renderCadenciaCol(vendedor) {
       </div>
     </div>`;
   }).join('');
+}
+
+function copyEmail(email, btn) {
+  navigator.clipboard.writeText(email).then(() => {
+    btn.textContent = '✓'; btn.style.color = 'var(--green)'; btn.style.borderColor = 'var(--green)';
+    setTimeout(() => { btn.textContent = '⎘'; btn.style.color = '#aaa'; btn.style.borderColor = '#ddd'; }, 1600);
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = email; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    btn.textContent = '✓'; setTimeout(() => { btn.textContent = '⎘'; }, 1600);
+  });
 }
 
 function cadJumpPhase(n) {
