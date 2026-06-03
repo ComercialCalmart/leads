@@ -301,8 +301,17 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
 }
 .cad-save-btn:hover { background: #333; }
 .cad-save-btn.saved { background: var(--green); border-color: var(--green); }
-.cad-step.cad-edit-only .cad-step-header { background: #222; }
-.cad-edit-only .cad-textarea { min-height: 200px; }
+.cad-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 0; }
+.cad-col { display: flex; flex-direction: column; min-width: 0; }
+.cad-col-header {
+  background: var(--black); color: var(--white);
+  padding: 12px 18px; display: flex; align-items: baseline; gap: 10px;
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.cad-col-name { font-size: 14px; font-weight: 900; letter-spacing: 3px; text-transform: uppercase; }
+.cad-col-sub { font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; opacity: .35; }
+.cad-col .cad-grid { border-radius: 0 0 var(--radius) var(--radius); }
+@media (max-width: 900px) { .cad-cols { grid-template-columns: 1fr; } }
 
 </style>
 </head>
@@ -429,7 +438,7 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
 
 <!-- CADÊNCIA COMERCIAL PAGE -->
 <div id="page-cadencia" class="page">
-  <div class="container" style="max-width:820px">
+  <div class="container" style="max-width:1400px">
 
     <!-- Mapa visual das fases -->
     <div class="cad-header-bar">
@@ -460,8 +469,22 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
       </div>
     </div>
 
-    <div class="cad-grid" id="cad-grid">
-      <!-- Renderizado via JS -->
+    <!-- Duas colunas -->
+    <div class="cad-cols">
+      <div class="cad-col">
+        <div class="cad-col-header">
+          <span class="cad-col-name">Diego</span>
+          <span class="cad-col-sub">Cadência individual</span>
+        </div>
+        <div class="cad-grid" id="cad-grid-diego"></div>
+      </div>
+      <div class="cad-col">
+        <div class="cad-col-header">
+          <span class="cad-col-name">Matheus</span>
+          <span class="cad-col-sub">Cadência individual</span>
+        </div>
+        <div class="cad-grid" id="cad-grid-matheus"></div>
+      </div>
     </div>
 
   </div>
@@ -1364,64 +1387,58 @@ const SEEDS = [
 ];
 
 // ── CADÊNCIA COMERCIAL ────────────────────────────────────
-const CAD_DEFAULTS = [
-  {
-    id: 'cad_1',
-    num: 'Fase 1',
-    title: 'Abertura',
-    meta: 'Dia 1 · WhatsApp',
-    intent: 'Objetivo: gerar curiosidade. O prospect deve sentir que foi notado por mérito, não abordado por volume.',
-    editTitle: false,
-    msg: `Olá, [NOME]. Tudo certo?
+const VENDEDORES = ['diego', 'matheus'];
+
+function buildSteps(vendedor) {
+  const nome = vendedor === 'diego' ? 'Diego' : 'Matheus';
+  return [
+    {
+      id: `${vendedor}_cad_1`,
+      num: 'Fase 1', title: 'Abertura', meta: 'Dia 1 · WhatsApp', editTitle: false,
+      intent: 'Objetivo: gerar curiosidade. O prospect deve sentir que foi notado por mérito, não abordado por volume.',
+      msg: `Olá, [NOME]. Tudo certo?
 
 Vi a operação de vocês no Mercado Livre e achei interessante o que estão construindo.
 
-Sou [SEU NOME], da Calmart — indústria com mais de 35 anos de atuação, e nos últimos anos alguns dos nossos itens da linha pet ultrapassaram 500 mil unidades vendidas só no marketplace.
+Sou ${nome}, da Calmart — indústria com mais de 35 anos de atuação, e nos últimos anos alguns dos nossos itens da linha pet ultrapassaram 500 mil unidades vendidas só no marketplace.
 
 Ainda estou mapeando algumas operações que fazem sentido para expandir. A de vocês apareceu.
 
 Se quiser, posso te mandar um resumo rápido do que trabalhamos — sem compromisso nenhum.`
-  },
-  {
-    id: 'cad_2',
-    num: 'Fase 2',
-    title: 'Reforço',
-    meta: 'Dia 4 · WhatsApp',
-    intent: 'Objetivo: reativar sem pressão. Deixar claro que a decisão de continuar é dele. Nunca cobrar resposta.',
-    editTitle: false,
-    msg: `Oi, [NOME].
+    },
+    {
+      id: `${vendedor}_cad_2`,
+      num: 'Fase 2', title: 'Reforço', meta: 'Dia 4 · WhatsApp', editTitle: false,
+      intent: 'Objetivo: reativar sem pressão. Deixar claro que a decisão de continuar é dele.',
+      msg: `Oi, [NOME].
 
 Só passando para não perder o fio.
 
 Caso minha mensagem anterior tenha passado batido, sem problema — a operação de vocês continua interessante do nosso lado.
 
-Se tiver um momento, posso te passar uma visão rápida das categorias que estamos desenvolvendo. É mais fácil avaliar com números na mão.`
-  },
-  {
-    id: 'cad_3',
-    num: 'Fase 3',
-    title: 'Virada',
-    meta: 'Dia 9 · WhatsApp',
-    intent: 'Objetivo: criar micro-comprometimento. Dar ao prospect uma saída digna (não tenho interesse) ou uma entrada fácil (manda mais info). Essa é a última tentativa fria.',
-    editTitle: false,
-    msg: `Oi, [NOME].
+Se tiver um momento, posso te passar uma visão rápida das categorias que estamos desenvolvendo. É mais fácil avaliar com números na mão.
+
+— ${nome}`
+    },
+    {
+      id: `${vendedor}_cad_3`,
+      num: 'Fase 3', title: 'Virada', meta: 'Dia 9 · WhatsApp', editTitle: false,
+      intent: 'Objetivo: criar micro-comprometimento. Dar ao prospect uma saída digna ou uma entrada fácil. Última tentativa fria.',
+      msg: `Oi, [NOME].
 
 Última vez que passo aqui para não tomar seu tempo.
 
 Se não fizer sentido agora, tudo bem — guardo o contato e retomo em outro momento.
 
-Se quiser entender melhor o que trabalhamos antes de decidir, é só falar. Consigo adaptar o que envio para o perfil da operação de vocês.`
-  },
-  {
-    id: 'cad_4',
-    num: 'Fase 4',
-    title: 'Apresentação Institucional',
-    meta: 'Sob demanda · PDF ou Zap',
-    intent: 'Objetivo: consolidar credibilidade. Enviado apenas quando o prospect sinalizou interesse. Nunca antes.',
-    editTitle: true,
-    msg: `[Edite aqui sua apresentação institucional]
+Se quiser entender melhor o que trabalhamos antes de decidir, é só falar. Consigo adaptar o que envio para o perfil da operação de vocês.
 
-Sugestão de estrutura:
+— ${nome}`
+    },
+    {
+      id: `${vendedor}_cad_4`,
+      num: 'Fase 4', title: 'Apresentação', meta: 'Sob demanda · PDF ou Zap', editTitle: true,
+      intent: 'Objetivo: consolidar credibilidade. Enviado apenas quando o prospect sinalizou interesse.',
+      msg: `[Edite aqui a apresentação institucional — ${nome}]
 
 — Calmart em números (35 anos, volumes, market share)
 — Estrutura fabril e capacidade produtiva
@@ -1429,17 +1446,12 @@ Sugestão de estrutura:
 — Presença no marketplace (reviews, posição, giro)
 — Logística e prazo de entrega por região
 — Clientes e parceiros de referência`
-  },
-  {
-    id: 'cad_5',
-    num: 'Fase 5',
-    title: 'Portfólio e Proposta',
-    meta: 'Sob demanda · PDF ou reunião',
-    intent: 'Objetivo: fechar. Só chega aqui quem pediu. Seja direto, específico e fácil de dizer sim.',
-    editTitle: true,
-    msg: `[Edite aqui seu portfólio e condições comerciais]
-
-Sugestão de estrutura:
+    },
+    {
+      id: `${vendedor}_cad_5`,
+      num: 'Fase 5', title: 'Proposta', meta: 'Sob demanda · PDF ou reunião', editTitle: true,
+      intent: 'Objetivo: fechar. Só chega aqui quem pediu. Seja direto, específico e fácil de dizer sim.',
+      msg: `[Edite aqui o portfólio e condições comerciais — ${nome}]
 
 — Linha pet: itens mais vendidos + top SKUs no ML
 — Fotos e descrições prontas para listing
@@ -1447,49 +1459,52 @@ Sugestão de estrutura:
 — Condições de pagamento e pedido mínimo
 — Prazo de entrega por região
 — Suporte para onboarding no marketplace`
-  }
-];
-
-let cadSteps = [];
-
-function loadCadencia() {
-  try {
-    const saved = localStorage.getItem('calmart_cadencia');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      // merge: preserva campos novos do default, atualiza msg/title se salvos
-      cadSteps = CAD_DEFAULTS.map(def => {
-        const s = parsed.find(p => p.id === def.id);
-        return s ? { ...def, title: s.title || def.title, msg: s.msg || def.msg } : { ...def };
-      });
-    } else {
-      cadSteps = CAD_DEFAULTS.map(d => ({ ...d }));
     }
-  } catch {
-    cadSteps = CAD_DEFAULTS.map(d => ({ ...d }));
-  }
+  ];
 }
 
-function saveCadencia() {
-  localStorage.setItem('calmart_cadencia', JSON.stringify(
-    cadSteps.map(s => ({ id: s.id, title: s.title, msg: s.msg }))
+const cadData = {}; // { diego: [...steps], matheus: [...steps] }
+
+function loadCadencia() {
+  VENDEDORES.forEach(v => {
+    try {
+      const saved = localStorage.getItem(`calmart_cad_${v}`);
+      const defaults = buildSteps(v);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        cadData[v] = defaults.map(def => {
+          const s = parsed.find(p => p.id === def.id);
+          return s ? { ...def, title: s.title || def.title, msg: s.msg || def.msg } : { ...def };
+        });
+      } else {
+        cadData[v] = defaults;
+      }
+    } catch {
+      cadData[v] = buildSteps(v);
+    }
+  });
+}
+
+function saveCadencia(vendedor) {
+  localStorage.setItem(`calmart_cad_${vendedor}`, JSON.stringify(
+    cadData[vendedor].map(s => ({ id: s.id, title: s.title, msg: s.msg }))
   ));
 }
 
-function renderCadencia() {
-  loadCadencia();
-  const grid = document.getElementById('cad-grid');
+function renderCadenciaCol(vendedor) {
+  const grid = document.getElementById(`cad-grid-${vendedor}`);
   if (!grid) return;
-  grid.innerHTML = cadSteps.map((step, i) => {
-    const textareaId = `cad-msg-${step.id}`;
-    const titleId    = `cad-title-${step.id}`;
-    const titleHTML  = step.editTitle
+  const steps = cadData[vendedor];
+  grid.innerHTML = steps.map((step, i) => {
+    const taId    = `cad-msg-${step.id}`;
+    const titleId = `cad-title-${step.id}`;
+    const titleHTML = step.editTitle
       ? `<input id="${titleId}" value="${esc(step.title)}"
            style="background:transparent;border:none;color:var(--white);font-family:var(--font);
                   font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
                   flex:1;outline:none;min-width:0"
-           oninput="cadSteps[${i}].title=this.value"
-           onblur="saveCadencia()">`
+           oninput="cadData['${vendedor}'][${i}].title=this.value"
+           onblur="saveCadencia('${vendedor}')">`
       : `<span class="step-title-text">${esc(step.title)}</span>`;
 
     return `<div class="cad-step${step.editTitle?' cad-edit-only':''}">
@@ -1497,51 +1512,52 @@ function renderCadencia() {
         <span class="step-num">${esc(step.num)}</span>
         ${titleHTML}
         ${step.meta ? `<span class="cad-step-meta">${esc(step.meta)}</span>` : ''}
-        <button class="cad-copy-btn" onclick="cadCopy('${step.id}','${textareaId}',this)">⎘ Copiar</button>
+        <button class="cad-copy-btn" onclick="cadCopy('${taId}',this)">⎘ Copiar</button>
       </div>
       ${step.intent ? `<div class="cad-intent">${esc(step.intent)}</div>` : ''}
       <div class="cad-step-body">
-        <textarea class="cad-textarea" id="${textareaId}"
-          oninput="cadSteps[${i}].msg=this.value"
-          onblur="cadSaveStep(this, '${step.id}')"
+        <textarea class="cad-textarea" id="${taId}"
+          oninput="cadData['${vendedor}'][${i}].msg=this.value"
+          onblur="cadSaveStep('${vendedor}','${step.id}')"
           placeholder="Digite o conteúdo desta etapa...">${esc(step.msg)}</textarea>
       </div>
       <div class="cad-step-footer">
         <span class="cad-save-hint" id="cad-hint-${step.id}">Edite e salva automaticamente</span>
-        <button class="cad-save-btn" id="cad-sbtn-${step.id}" onclick="cadSaveStep(null,'${step.id}')">Salvar</button>
+        <button class="cad-save-btn" id="cad-sbtn-${step.id}" onclick="cadSaveStep('${vendedor}','${step.id}')">Salvar</button>
       </div>
     </div>`;
   }).join('');
 }
 
-function cadSaveStep(ta, stepId) {
-  // se chamado via onblur, pega valor do textarea; se via botão, pega do DOM
-  const i = cadSteps.findIndex(s => s.id === stepId);
+function renderCadencia() {
+  loadCadencia();
+  VENDEDORES.forEach(v => renderCadenciaCol(v));
+}
+
+function cadSaveStep(vendedor, stepId) {
+  const steps = cadData[vendedor];
+  const i = steps.findIndex(s => s.id === stepId);
   if (i < 0) return;
   const el = document.getElementById('cad-msg-' + stepId);
-  if (el) cadSteps[i].msg = el.value;
-  // title se editável
+  if (el) steps[i].msg = el.value;
   const tel = document.getElementById('cad-title-' + stepId);
-  if (tel) cadSteps[i].title = tel.value;
-  saveCadencia();
+  if (tel) steps[i].title = tel.value;
+  saveCadencia(vendedor);
   const hint = document.getElementById('cad-hint-' + stepId);
   const sbtn = document.getElementById('cad-sbtn-' + stepId);
   if (hint) { hint.textContent = 'Salvo ✓'; setTimeout(()=>{ if(hint) hint.textContent='Edite e salva automaticamente'; }, 1800); }
   if (sbtn) { sbtn.classList.add('saved'); sbtn.textContent='Salvo ✓'; setTimeout(()=>{ sbtn.classList.remove('saved'); sbtn.textContent='Salvar'; }, 1800); }
 }
 
-function cadCopy(stepId, textareaId, btn) {
-  const el = document.getElementById(textareaId);
+function cadCopy(taId, btn) {
+  const el = document.getElementById(taId);
   if (!el) return;
   navigator.clipboard.writeText(el.value).then(() => {
-    const orig = btn.textContent;
     btn.textContent = '✓ Copiado!';
     btn.classList.add('copied');
     setTimeout(() => { btn.textContent = '⎘ Copiar'; btn.classList.remove('copied'); }, 1800);
   }).catch(() => {
-    // fallback
-    el.select();
-    document.execCommand('copy');
+    el.select(); document.execCommand('copy');
     btn.textContent = '✓ Copiado!';
     setTimeout(() => { btn.textContent = '⎘ Copiar'; }, 1800);
   });
