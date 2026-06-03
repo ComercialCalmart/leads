@@ -171,36 +171,58 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
 .dup-btn:hover { border-color: var(--black); color: var(--black); }
 .dup-btn.primary { background: var(--black); color: var(--white); border-color: var(--black); }
 
-/* STATS */
-.stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; padding: 20px; }
-.stat-card { border: 1.5px solid var(--black); border-radius: var(--radius); padding: 18px 16px; background: var(--white); }
-.stat-card.highlight { background: var(--black); color: var(--white); }
-.stat-label { font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #888; margin-bottom: 6px; }
-.stat-card.highlight .stat-label { color: rgba(255,255,255,.4); }
-.stat-value { font-size: 36px; font-weight: 900; line-height: 1; letter-spacing: -1px; }
-.stat-sub { font-size: 10px; color: #aaa; margin-top: 3px; }
-.stat-card.highlight .stat-sub { color: rgba(255,255,255,.3); }
-.funnel-wrap { padding: 0 20px 20px; }
-.funnel-row { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--gray); }
-.funnel-row:last-child { border-bottom: none; }
-.funnel-label { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #777; width: 120px; flex-shrink: 0; }
-.funnel-bar-wrap { flex: 1; height: 16px; background: var(--gray); border-radius: 2px; overflow: hidden; }
-.funnel-bar { height: 100%; background: var(--black); border-radius: 2px; transition: width .4s; }
-.funnel-count { font-size: 13px; font-weight: 900; width: 32px; text-align: right; flex-shrink: 0; }
-.funnel-pct { font-size: 10px; color: #aaa; width: 36px; text-align: right; flex-shrink: 0; }
+/* DASHBOARD EXECUTIVE */
+.dash-kpi-row { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; }
+.dash-charts-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.dash-chart-card { flex:1; min-width:0; }
+
+.kpi-card { background:var(--white); border:2px solid var(--black); border-radius:var(--radius); padding:20px 18px 16px; display:flex; flex-direction:column; gap:4px; }
+.kpi-card.kpi-dark { background:var(--black); border-color:var(--black); }
+.kpi-card.kpi-accent { border-left:5px solid var(--black); }
+.kpi-eyebrow { font-size:8px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:#aaa; }
+.kpi-card.kpi-dark .kpi-eyebrow { color:rgba(255,255,255,.35); }
+.kpi-number { font-size:42px; font-weight:900; line-height:1; letter-spacing:-2px; color:var(--black); }
+.kpi-card.kpi-dark .kpi-number { color:var(--white); }
+.kpi-number.green { color:var(--green); }
+.kpi-number.red   { color:var(--red); }
+.kpi-number.yellow{ color:var(--yellow); }
+.kpi-delta { font-size:10px; font-weight:700; color:#bbb; margin-top:2px; }
+.kpi-delta.up   { color:var(--green); }
+.kpi-delta.down { color:var(--red); }
+
+/* FUNNEL COMPACT */
+.funnel-wrap { padding:16px 20px 20px; }
+.funnel-row { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--gray); }
+.funnel-row:last-child { border-bottom:none; }
+.funnel-label { font-size:9px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#777; width:110px; flex-shrink:0; }
+.funnel-bar-wrap { flex:1; height:12px; background:var(--gray); border-radius:2px; overflow:hidden; }
+.funnel-bar { height:100%; background:var(--black); border-radius:2px; transition:width .5s cubic-bezier(.4,0,.2,1); }
+.funnel-count { font-size:13px; font-weight:900; width:28px; text-align:right; flex-shrink:0; }
+.funnel-pct { font-size:9px; color:#aaa; width:32px; text-align:right; flex-shrink:0; }
+
+/* MKT INLINE BARS */
+.mkt-row { display:flex; align-items:center; gap:10px; }
+.mkt-label { font-size:9px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#555; width:90px; flex-shrink:0; }
+.mkt-bar-wrap { flex:1; height:10px; background:var(--gray); border-radius:2px; overflow:hidden; }
+.mkt-bar { height:100%; border-radius:2px; transition:width .5s cubic-bezier(.4,0,.2,1); }
+.mkt-n { font-size:12px; font-weight:900; width:24px; text-align:right; flex-shrink:0; }
+.mkt-pct { font-size:9px; color:#aaa; width:30px; text-align:right; }
 
 /* CHART */
 .chart-wrap { width:100%; overflow-x:auto; }
-.chart-svg { display:block; }
-.chart-bar { transition: opacity .12s; cursor:default; }
-.chart-bar:hover { opacity:.75; }
-.chart-label { font-family:var(--font); font-size:10px; fill:#888; }
+.chart-svg { display:block; min-width:100%; }
+.chart-bar { transition:opacity .12s; cursor:default; }
+.chart-bar:hover { opacity:.7; }
 .chart-value { font-family:var(--font); font-size:10px; font-weight:700; fill:#333; }
-.chart-month { font-family:var(--font); font-size:9px; fill:#aaa; letter-spacing:.5px; text-transform:uppercase; }
+.chart-month { font-family:var(--font); font-size:9px; fill:#bbb; letter-spacing:.5px; }
 .chart-empty { font-family:var(--font); font-size:11px; fill:#ccc; letter-spacing:2px; text-transform:uppercase; }
+.chart-line { stroke:#eee; stroke-width:1; }
+.chart-grid  { stroke:#f3f3f0; stroke-width:1; stroke-dasharray:3,3; }
 
-/* TOOLTIP */
-[title] { position: relative; }
+@media (max-width:800px) {
+  .dash-charts-row { grid-template-columns:1fr; }
+  .dash-kpi-row { grid-template-columns:repeat(2,1fr); }
+}
 
 @media (max-width: 640px) {
   .page-header { padding: 20px; flex-direction: column; align-items: flex-start; gap: 14px; }
@@ -297,27 +319,35 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
 
 <!-- DASHBOARD PAGE -->
 <div id="page-dash" class="page">
-  <div class="container">
-    <div class="section">
-      <div class="section-title"><span>Visão Geral</span></div>
-      <div class="stats-grid" id="stats-overview"></div>
+  <div class="container" style="max-width:1100px">
+
+    <!-- KPIs principais -->
+    <div id="dash-kpis" class="dash-kpi-row"></div>
+
+    <!-- Gráficos lado a lado -->
+    <div class="dash-charts-row">
+      <div class="section dash-chart-card">
+        <div class="section-title"><span>Leads Cadastrados / Mês</span></div>
+        <div id="chart-leads" style="padding:24px 20px 20px"></div>
+      </div>
+      <div class="section dash-chart-card">
+        <div class="section-title"><span>Fechamentos / Mês</span></div>
+        <div id="chart-fechados" style="padding:24px 20px 20px"></div>
+      </div>
     </div>
-    <div class="section">
-      <div class="section-title"><span>Crescimento Mensal — Leads Cadastrados</span></div>
-      <div style="padding:24px 20px 16px" id="chart-leads"></div>
+
+    <!-- Funil + MKT lado a lado -->
+    <div class="dash-charts-row">
+      <div class="section dash-chart-card">
+        <div class="section-title"><span>Funil de Progresso</span></div>
+        <div class="funnel-wrap" id="stats-funnel"></div>
+      </div>
+      <div class="section dash-chart-card">
+        <div class="section-title"><span>Por Marketplace</span></div>
+        <div id="stats-mkt" style="padding:20px;display:flex;flex-direction:column;gap:12px"></div>
+      </div>
     </div>
-    <div class="section">
-      <div class="section-title"><span>Crescimento Mensal — Fechamentos</span></div>
-      <div style="padding:24px 20px 16px" id="chart-fechados"></div>
-    </div>
-    <div class="section">
-      <div class="section-title"><span>Funil por Status</span></div>
-      <div class="funnel-wrap" id="stats-funnel"></div>
-    </div>
-    <div class="section">
-      <div class="section-title"><span>Por Marketplace</span></div>
-      <div class="stats-grid" id="stats-mkt"></div>
-    </div>
+
   </div>
 </div>
 
@@ -1053,92 +1083,142 @@ function renderBarChart(containerId, data, color) {
   const el = document.getElementById(containerId);
   if (!el) return;
   const keys = Object.keys(data);
-  if (!keys.length) {
-    el.innerHTML = `<svg width="100%" height="80"><text class="chart-empty" x="50%" y="44" text-anchor="middle">Sem dados ainda</text></svg>`;
+  if (!keys.length || keys.every(k=>data[k]===0)) {
+    el.innerHTML = `<svg width="100%" height="90"><text class="chart-empty" x="50%" y="48" text-anchor="middle">Sem dados ainda</text></svg>`;
     return;
   }
-  const vals = keys.map(k => data[k]);
+  const vals = keys.map(k=>data[k]);
   const maxVal = Math.max(...vals, 1);
-  const W = Math.max(keys.length * 56, 400);
-  const H = 140;
-  const BAR_W = 36;
-  const PAD_L = 10;
-  const PAD_B = 32;
-  const chartH = H - PAD_B - 16;
+  const N = keys.length;
+  const BAR_W = 28;
+  const GAP   = 16;
+  const COL   = BAR_W + GAP;
+  const PAD_L = 8;
+  const PAD_R = 8;
+  const H     = 130;
+  const PAD_B = 36;
+  const PAD_T = 20;
+  const chartH = H - PAD_B - PAD_T;
+  const W = PAD_L + N * COL + PAD_R;
+  const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
 
-  const bars = keys.map((k, i) => {
+  // grid lines
+  const gridLines = [0.25,0.5,0.75,1].map(f => {
+    const y = PAD_T + chartH * (1-f);
+    return `<line class="chart-grid" x1="${PAD_L}" y1="${y}" x2="${W-PAD_R}" y2="${y}"/>`;
+  }).join('');
+
+  const bars = keys.map((k,i) => {
     const v = data[k];
-    const barH = Math.max(v > 0 ? Math.round((v / maxVal) * chartH) : 0, 0);
-    const x = PAD_L + i * 56 + (56 - BAR_W) / 2;
-    const y = H - PAD_B - barH;
-    const valueY = y - 5;
-    const labelY = H - PAD_B + 14;
-    const yearY  = H - PAD_B + 25;
+    const barH = Math.max(v>0 ? Math.round((v/maxVal)*chartH) : 2, v>0?4:2);
+    const x = PAD_L + i * COL;
+    const y = PAD_T + chartH - barH;
     const [yr, mo] = k.split('-');
-    const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
     const moLabel = months[parseInt(mo)-1];
-
+    const isLast = i === N-1;
+    const fillColor = isLast ? color : color+'99';
     return `
-      <rect class="chart-bar" x="${x}" y="${y}" width="${BAR_W}" height="${barH}" fill="${color}" rx="2"/>
-      ${v > 0 ? `<text class="chart-value" x="${x + BAR_W/2}" y="${valueY}" text-anchor="middle">${v}</text>` : ''}
-      <text class="chart-month" x="${x + BAR_W/2}" y="${labelY}" text-anchor="middle">${moLabel}</text>
-      <text class="chart-month" x="${x + BAR_W/2}" y="${yearY}" text-anchor="middle">${yr}</text>
+      <rect class="chart-bar" x="${x}" y="${y}" width="${BAR_W}" height="${barH}" fill="${fillColor}" rx="2"/>
+      ${v>0 ? `<text class="chart-value" x="${x+BAR_W/2}" y="${y-5}" text-anchor="middle" fill="${isLast?color:'#999'}">${v}</text>` : ''}
+      <text class="chart-month" x="${x+BAR_W/2}" y="${H-PAD_B+14}" text-anchor="middle">${moLabel}</text>
+      <text class="chart-month" x="${x+BAR_W/2}" y="${H-PAD_B+24}" text-anchor="middle" style="font-size:8px">${yr.slice(2)}</text>
     `;
   }).join('');
 
   el.innerHTML = `<div class="chart-wrap">
-    <svg class="chart-svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
-      <line x1="${PAD_L}" y1="${H-PAD_B}" x2="${W-PAD_L}" y2="${H-PAD_B}" stroke="#eee" stroke-width="1"/>
-      ${bars}
-    </svg>
-  </div>`;
+    <svg class="chart-svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="min-width:${Math.min(W,100)}%">
+      <line class="chart-line" x1="${PAD_L}" y1="${H-PAD_B}" x2="${W-PAD_R}" y2="${H-PAD_B}"/>
+      ${gridLines}${bars}
+    </svg></div>`;
 }
 
 function renderDash() {
   const total = contacts.length;
-  const pct = n => total ? Math.round(n/total*100) : 0;
+  const pct = (n,d) => (d||total) ? Math.round(n/(d||total)*100) : 0;
   const count = v => contacts.filter(c=>c.status===v).length;
   const today = new Date(); today.setHours(0,0,0,0);
   const vencidos = contacts.filter(c=>c.prox && new Date(c.prox+'T00:00:00')<today).length;
 
-  // mes atual
   const thisMo = new Date().toISOString().slice(0,7);
-  const leadsThisMo = contacts.filter(c => monthKey(c.createdAt)===thisMo).length;
-  const fechadosThisMo = contacts.filter(c => c.status==='FECHADO' && monthKey(c.updatedAt)===thisMo).length;
+  const prevMo = (() => { const d=new Date(); d.setMonth(d.getMonth()-1); return d.toISOString().slice(0,7); })();
+  const leadsThisMo = contacts.filter(c=>monthKey(c.createdAt)===thisMo).length;
+  const leadsPrevMo = contacts.filter(c=>monthKey(c.createdAt)===prevMo).length;
+  const fechAll     = count('FECHADO');
+  const fechThisMo  = contacts.filter(c=>c.status==='FECHADO' && monthKey(c.updatedAt)===thisMo).length;
+  const fechPrevMo  = contacts.filter(c=>c.status==='FECHADO' && monthKey(c.updatedAt)===prevMo).length;
+  const txConv      = pct(fechAll, total);
 
-  document.getElementById('stats-overview').innerHTML = `
-    <div class="stat-card highlight"><div class="stat-label">Total Leads</div><div class="stat-value">${total}</div><div class="stat-sub">cadastros</div></div>
-    <div class="stat-card"><div class="stat-label">Fechados</div><div class="stat-value" style="color:var(--green)">${count('FECHADO')}</div><div class="stat-sub">${pct(count('FECHADO'))}% do total</div></div>
-    <div class="stat-card"><div class="stat-label">Negociando</div><div class="stat-value" style="color:var(--yellow)">${count('NEGOC')}</div><div class="stat-sub">${pct(count('NEGOC'))}% do total</div></div>
-    <div class="stat-card"><div class="stat-label">Perdidos</div><div class="stat-value" style="color:var(--red)">${count('PERDIDO')}</div><div class="stat-sub">${pct(count('PERDIDO'))}% do total</div></div>
-    <div class="stat-card"><div class="stat-label">Novos este mês</div><div class="stat-value">${leadsThisMo}</div><div class="stat-sub">leads cadastrados</div></div>
-    <div class="stat-card"><div class="stat-label">Fechados este mês</div><div class="stat-value" style="color:var(--green)">${fechadosThisMo}</div><div class="stat-sub">conversões</div></div>
-    <div class="stat-card"><div class="stat-label">Follow-ups Vencidos</div><div class="stat-value" style="color:var(--red)">${vencidos}</div><div class="stat-sub">aguardando ação</div></div>
+  function delta(cur, prev) {
+    if (!prev && !cur) return '';
+    if (!prev) return `<span class="kpi-delta up">↑ novo</span>`;
+    const d = cur - prev;
+    if (d === 0) return `<span class="kpi-delta">= mesmo período</span>`;
+    const cls = d > 0 ? 'up' : 'down';
+    const arrow = d > 0 ? '↑' : '↓';
+    return `<span class="kpi-delta ${cls}">${arrow} ${Math.abs(d)} vs mês anterior</span>`;
+  }
+
+  document.getElementById('dash-kpis').innerHTML = `
+    <div class="kpi-card kpi-dark">
+      <div class="kpi-eyebrow">Pipeline Total</div>
+      <div class="kpi-number">${total}</div>
+      <div class="kpi-delta" style="color:rgba(255,255,255,.3)">leads ativos</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-eyebrow">Novos este mês</div>
+      <div class="kpi-number">${leadsThisMo}</div>
+      ${delta(leadsThisMo, leadsPrevMo)}
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-eyebrow">Fechamentos total</div>
+      <div class="kpi-number green">${fechAll}</div>
+      <div class="kpi-delta">${txConv}% conversão</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-eyebrow">Fechados este mês</div>
+      <div class="kpi-number green">${fechThisMo}</div>
+      ${delta(fechThisMo, fechPrevMo)}
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-eyebrow">Negociando</div>
+      <div class="kpi-number yellow">${count('NEGOC')}</div>
+      <div class="kpi-delta">${pct(count('NEGOC'))}% do pipeline</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-eyebrow">Follow-ups Vencidos</div>
+      <div class="kpi-number red">${vencidos}</div>
+      <div class="kpi-delta ${vencidos>0?'down':''}">aguardando ação</div>
+    </div>
   `;
 
-  // Gráficos mensais
-  const leadsData   = buildMonthlyData('createdAt');
-  const fechData    = buildMonthlyData('updatedAt', c => c.status === 'FECHADO');
-  renderBarChart('chart-leads',    leadsData, '#000');
-  renderBarChart('chart-fechados', fechData,  '#2a7a4b');
+  // Gráficos
+  renderBarChart('chart-leads',    buildMonthlyData('createdAt'),                             '#000');
+  renderBarChart('chart-fechados', buildMonthlyData('updatedAt', c=>c.status==='FECHADO'),    '#2a7a4b');
 
   // Funil
   const statusOrder = ['NOVO','TENT1','TENT2','TENT3','NEGOC','FECHADO','PERDIDO'];
+  const statusColors = { NOVO:'#ccc', TENT1:'#93c5fd', TENT2:'#c4b5fd', TENT3:'#fdba74', NEGOC:'#fcd34d', FECHADO:'#86efac', PERDIDO:'#fca5a5' };
   document.getElementById('stats-funnel').innerHTML = statusOrder.map(s=>{
     const n = count(s);
     return `<div class="funnel-row">
       <div class="funnel-label">${STATUS_LABELS[s]}</div>
-      <div class="funnel-bar-wrap"><div class="funnel-bar" style="width:${pct(n)}%"></div></div>
+      <div class="funnel-bar-wrap"><div class="funnel-bar" style="width:${pct(n)}%;background:${statusColors[s]}"></div></div>
       <div class="funnel-count">${n}</div>
       <div class="funnel-pct">${pct(n)}%</div>
     </div>`;
   }).join('');
 
-  // Por marketplace
+  // Marketplace
   const mkts = ['MELI','AMAZON','SHOPPEE','OUTRO'];
+  const mktColors = { MELI:'#fcd34d', AMAZON:'#fb923c', SHOPPEE:'#f87171', OUTRO:'#94a3b8' };
   document.getElementById('stats-mkt').innerHTML = mkts.map(m=>{
     const n = contacts.filter(c=>c.mkt===m).length;
-    return `<div class="stat-card"><div class="stat-label">${MKT_LABELS[m]}</div><div class="stat-value">${n}</div><div class="stat-sub">${pct(n)}%</div></div>`;
+    return `<div class="mkt-row">
+      <div class="mkt-label">${MKT_LABELS[m]}</div>
+      <div class="mkt-bar-wrap"><div class="mkt-bar" style="width:${pct(n)}%;background:${mktColors[m]}"></div></div>
+      <div class="mkt-n">${n}</div>
+      <div class="mkt-pct">${pct(n)}%</div>
+    </div>`;
   }).join('');
 }
 
