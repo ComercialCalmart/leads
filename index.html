@@ -934,8 +934,8 @@ function renderTable() {
       <td style="font-size:11px;color:#555;white-space:nowrap">${c.contato ? esc(c.contato) : '<span style="color:#ccc">—</span>'}</td>
       <td style="font-weight:700;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(c.nome)}">${esc(c.nome)} ${obsIcon}</td>
       <td>${mktBadge(c.mkt)}</td>
-      <td>${wazLink(c.zap)}</td>
-      <td>${c.email ? `<a href="mailto:${esc(c.email)}" class="email-link" title="${esc(c.email)}">${esc(c.email)}</a>` : '<span style="color:#ccc">—</span>'}</td>
+      <td>${makeInlineText(c,'zap',c.zap,'(XX) 9 XXXX-XXXX')}</td>
+      <td>${makeInlineText(c,'email',c.email,'email@loja.com')}</td>
       <td style="font-size:11px">${c.cidade ? esc(c.cidade) : '<span style="color:#ccc">—</span>'}</td>
       <td class="c" style="font-size:10px;font-weight:700;letter-spacing:1px">${c.estado||'<span style="color:#ccc">—</span>'}</td>
       <td>${makeInlineText(c,'cnpj',c.cnpj,'CNPJ')}</td>
@@ -1361,7 +1361,7 @@ async function sbUpsertMany(list) {
 
 // ── SEEDS ─────────────────────────────────────────────────
 const SEEDS = [
-  { id:'seed_abmidia', nome:'AB.MIDIA', contato:'', mkt:'MELI', zap:'(21) 3183-7713', email:'abmidia@infoabmidia.com.br',
+  { id:'seed_abmidia', nome:'AB.MIDIA', contato:'', mkt:'MELI', zap:'(21) 98133-4739', email:'abmidia@infoabmidia.com.br',
     cidade:'', estado:'', cnpj:'', status:'NOVO', prox:'',
     urlMl:'https://www.mercadolivre.com.br/loja/abmidia',
     urlAz:'', urlSh:'', urlSite:'https://www.infoabmidia.com.br/', insta:'', obs:'',
