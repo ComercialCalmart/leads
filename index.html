@@ -189,8 +189,15 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
 .funnel-count { font-size: 13px; font-weight: 900; width: 32px; text-align: right; flex-shrink: 0; }
 .funnel-pct { font-size: 10px; color: #aaa; width: 36px; text-align: right; flex-shrink: 0; }
 
-/* CSV INFO */
-.csv-info { padding: 12px 18px; background: #f9f9f6; border-bottom: 1px solid var(--gray); font-size: 11px; color: #666; }
+/* CHART */
+.chart-wrap { width:100%; overflow-x:auto; }
+.chart-svg { display:block; }
+.chart-bar { transition: opacity .12s; cursor:default; }
+.chart-bar:hover { opacity:.75; }
+.chart-label { font-family:var(--font); font-size:10px; fill:#888; }
+.chart-value { font-family:var(--font); font-size:10px; font-weight:700; fill:#333; }
+.chart-month { font-family:var(--font); font-size:9px; fill:#aaa; letter-spacing:.5px; text-transform:uppercase; }
+.chart-empty { font-family:var(--font); font-size:11px; fill:#ccc; letter-spacing:2px; text-transform:uppercase; }
 
 /* TOOLTIP */
 [title] { position: relative; }
@@ -294,6 +301,14 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
     <div class="section">
       <div class="section-title"><span>Visão Geral</span></div>
       <div class="stats-grid" id="stats-overview"></div>
+    </div>
+    <div class="section">
+      <div class="section-title"><span>Crescimento Mensal — Leads Cadastrados</span></div>
+      <div style="padding:24px 20px 16px" id="chart-leads"></div>
+    </div>
+    <div class="section">
+      <div class="section-title"><span>Crescimento Mensal — Fechamentos</span></div>
+      <div style="padding:24px 20px 16px" id="chart-fechados"></div>
     </div>
     <div class="section">
       <div class="section-title"><span>Funil por Status</span></div>
@@ -996,6 +1011,89 @@ async function importAllUpdate() {
 }
 
 // ── DASHBOARD ─────────────────────────────────────────────
+function monthKey(iso) {
+  if (!iso) return null;
+  return iso.slice(0, 7); // "2025-03"
+}
+function monthLabel(key) {
+  if (!key) return '';
+  const [y, m] = key.split('-');
+  const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  return months[parseInt(m)-1] + '/' + y.slice(2);
+}
+
+function buildMonthlyData(dateField, filterFn) {
+  const map = {};
+  contacts.filter(filterFn||(() => true)).forEach(c => {
+    const k = monthKey(c[dateField]);
+    if (!k) return;
+    map[k] = (map[k]||0) + 1;
+  });
+  // sort keys
+  const keys = Object.keys(map).sort();
+  // fill gaps for last 12 months
+  if (keys.length) {
+    const last = keys[keys.length-1];
+    const [ly, lm] = last.split('-').map(Number);
+    const all = [];
+    for (let i = 11; i >= 0; i--) {
+      let mm = lm - i; let yy = ly;
+      while (mm <= 0) { mm += 12; yy--; }
+      const k = `${yy}-${String(mm).padStart(2,'0')}`;
+      all.push(k);
+    }
+    const result = {};
+    all.forEach(k => result[k] = map[k]||0);
+    return result;
+  }
+  return map;
+}
+
+function renderBarChart(containerId, data, color) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const keys = Object.keys(data);
+  if (!keys.length) {
+    el.innerHTML = `<svg width="100%" height="80"><text class="chart-empty" x="50%" y="44" text-anchor="middle">Sem dados ainda</text></svg>`;
+    return;
+  }
+  const vals = keys.map(k => data[k]);
+  const maxVal = Math.max(...vals, 1);
+  const W = Math.max(keys.length * 56, 400);
+  const H = 140;
+  const BAR_W = 36;
+  const PAD_L = 10;
+  const PAD_B = 32;
+  const chartH = H - PAD_B - 16;
+
+  const bars = keys.map((k, i) => {
+    const v = data[k];
+    const barH = Math.max(v > 0 ? Math.round((v / maxVal) * chartH) : 0, 0);
+    const x = PAD_L + i * 56 + (56 - BAR_W) / 2;
+    const y = H - PAD_B - barH;
+    const valueY = y - 5;
+    const labelY = H - PAD_B + 14;
+    const yearY  = H - PAD_B + 25;
+    const [yr, mo] = k.split('-');
+    const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    const moLabel = months[parseInt(mo)-1];
+
+    return `
+      <rect class="chart-bar" x="${x}" y="${y}" width="${BAR_W}" height="${barH}" fill="${color}" rx="2"/>
+      ${v > 0 ? `<text class="chart-value" x="${x + BAR_W/2}" y="${valueY}" text-anchor="middle">${v}</text>` : ''}
+      <text class="chart-month" x="${x + BAR_W/2}" y="${labelY}" text-anchor="middle">${moLabel}</text>
+      <text class="chart-month" x="${x + BAR_W/2}" y="${yearY}" text-anchor="middle">${yr}</text>
+    `;
+  }).join('');
+
+  el.innerHTML = `<div class="chart-wrap">
+    <svg class="chart-svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+      <line x1="${PAD_L}" y1="${H-PAD_B}" x2="${W-PAD_L}" y2="${H-PAD_B}" stroke="#eee" stroke-width="1"/>
+      ${bars}
+    </svg>
+  </div>`;
+}
+
 function renderDash() {
   const total = contacts.length;
   const pct = n => total ? Math.round(n/total*100) : 0;
@@ -1003,14 +1101,28 @@ function renderDash() {
   const today = new Date(); today.setHours(0,0,0,0);
   const vencidos = contacts.filter(c=>c.prox && new Date(c.prox+'T00:00:00')<today).length;
 
+  // mes atual
+  const thisMo = new Date().toISOString().slice(0,7);
+  const leadsThisMo = contacts.filter(c => monthKey(c.createdAt)===thisMo).length;
+  const fechadosThisMo = contacts.filter(c => c.status==='FECHADO' && monthKey(c.updatedAt)===thisMo).length;
+
   document.getElementById('stats-overview').innerHTML = `
     <div class="stat-card highlight"><div class="stat-label">Total Leads</div><div class="stat-value">${total}</div><div class="stat-sub">cadastros</div></div>
-    <div class="stat-card"><div class="stat-label">Fechados</div><div class="stat-value" style="color:var(--green)">${count('FECHADO')}</div><div class="stat-sub">${pct(count('FECHADO'))}%</div></div>
-    <div class="stat-card"><div class="stat-label">Negociando</div><div class="stat-value" style="color:var(--yellow)">${count('NEGOC')}</div><div class="stat-sub">${pct(count('NEGOC'))}%</div></div>
-    <div class="stat-card"><div class="stat-label">Perdidos</div><div class="stat-value" style="color:var(--red)">${count('PERDIDO')}</div><div class="stat-sub">${pct(count('PERDIDO'))}%</div></div>
+    <div class="stat-card"><div class="stat-label">Fechados</div><div class="stat-value" style="color:var(--green)">${count('FECHADO')}</div><div class="stat-sub">${pct(count('FECHADO'))}% do total</div></div>
+    <div class="stat-card"><div class="stat-label">Negociando</div><div class="stat-value" style="color:var(--yellow)">${count('NEGOC')}</div><div class="stat-sub">${pct(count('NEGOC'))}% do total</div></div>
+    <div class="stat-card"><div class="stat-label">Perdidos</div><div class="stat-value" style="color:var(--red)">${count('PERDIDO')}</div><div class="stat-sub">${pct(count('PERDIDO'))}% do total</div></div>
+    <div class="stat-card"><div class="stat-label">Novos este mês</div><div class="stat-value">${leadsThisMo}</div><div class="stat-sub">leads cadastrados</div></div>
+    <div class="stat-card"><div class="stat-label">Fechados este mês</div><div class="stat-value" style="color:var(--green)">${fechadosThisMo}</div><div class="stat-sub">conversões</div></div>
     <div class="stat-card"><div class="stat-label">Follow-ups Vencidos</div><div class="stat-value" style="color:var(--red)">${vencidos}</div><div class="stat-sub">aguardando ação</div></div>
   `;
 
+  // Gráficos mensais
+  const leadsData   = buildMonthlyData('createdAt');
+  const fechData    = buildMonthlyData('updatedAt', c => c.status === 'FECHADO');
+  renderBarChart('chart-leads',    leadsData, '#000');
+  renderBarChart('chart-fechados', fechData,  '#2a7a4b');
+
+  // Funil
   const statusOrder = ['NOVO','TENT1','TENT2','TENT3','NEGOC','FECHADO','PERDIDO'];
   document.getElementById('stats-funnel').innerHTML = statusOrder.map(s=>{
     const n = count(s);
@@ -1022,6 +1134,7 @@ function renderDash() {
     </div>`;
   }).join('');
 
+  // Por marketplace
   const mkts = ['MELI','AMAZON','SHOPPEE','OUTRO'];
   document.getElementById('stats-mkt').innerHTML = mkts.map(m=>{
     const n = contacts.filter(c=>c.mkt===m).length;
