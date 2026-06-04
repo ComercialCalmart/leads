@@ -96,25 +96,25 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
 .date-futuro  { color: var(--green); font-weight: 600; }
 
 /* ICON LINKS */
-.icon-link { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 3px; text-decoration: none; font-size: 9px; font-weight: 900; letter-spacing: .5px; transition: opacity .12s; opacity: .85; }
-.icon-link:hover { opacity: 1; transform: scale(1.1); }
+.icon-link { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 4px; text-decoration: none; font-size: 9px; font-weight: 900; letter-spacing: .5px; transition: opacity .15s, transform .15s; opacity: .85; }
+.icon-link:hover { opacity: 1; transform: scale(1.12); }
 .il-ml   { background: #fff3cd; color: #92400e; border: 1.5px solid #fcd34d; }
 .il-az   { background: #fff4e8; color: #b45309; border: 1.5px solid #fbb975; }
 .il-sh   { background: #fff2e8; color: #c2410c; border: 1.5px solid #fb923c; }
 .il-site { background: #eff6ff; color: #1d4ed8; border: 1.5px solid #93c5fd; }
 .il-obs  { background: #f0fdf4; color: #15803d; border: 1.5px solid #86efac; cursor: default; font-size: 11px; }
 
-/* WHATSAPP */
-.waz-link { display: inline-flex; align-items: center; gap: 4px; text-decoration: none; color: #15803d; font-size: 11.5px; font-weight: 600; }
-.waz-link:hover { text-decoration: underline; }
-.waz-icon { width: 14px; height: 14px; flex-shrink: 0; }
-.email-link { color: #1d4ed8; text-decoration: none; font-size: 11px; }
-.email-link:hover { text-decoration: underline; }
+/* ICON CELLS — Zap, Email, Links */
+.td-icon { text-align: center; padding: 8px 10px !important; }
+.icon-svg { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 4px; transition: transform .15s, opacity .15s; cursor: pointer; }
+.icon-svg:hover { transform: scale(1.12); opacity: .85; }
+.icon-svg-dead { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 4px; opacity: .25; }
+.links-cell { display: inline-flex; align-items: center; gap: 5px; }
 
 /* INSTA SVG */
-.insta-icon { display: inline-block; width: 20px; height: 20px; vertical-align: middle; cursor: pointer; transition: transform .12s; }
-.insta-icon:hover { transform: scale(1.15); }
-.insta-off { filter: grayscale(1) opacity(.3); cursor: default; }
+.insta-icon { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; vertical-align: middle; cursor: pointer; transition: transform .15s; border-radius: 4px; }
+.insta-icon:hover { transform: scale(1.12); }
+.insta-off { opacity: .25; cursor: default; }
 .insta-off:hover { transform: none; }
 
 /* ACTION BTNS */
@@ -200,14 +200,6 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
 .funnel-count { font-size:13px; font-weight:900; width:28px; text-align:right; flex-shrink:0; }
 .funnel-pct { font-size:9px; color:#aaa; width:32px; text-align:right; flex-shrink:0; }
 
-/* MKT INLINE BARS */
-.mkt-row { display:flex; align-items:center; gap:10px; }
-.mkt-label { font-size:9px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#555; width:90px; flex-shrink:0; }
-.mkt-bar-wrap { flex:1; height:10px; background:var(--gray); border-radius:2px; overflow:hidden; }
-.mkt-bar { height:100%; border-radius:2px; transition:width .5s cubic-bezier(.4,0,.2,1); }
-.mkt-n { font-size:12px; font-weight:900; width:24px; text-align:right; flex-shrink:0; }
-.mkt-pct { font-size:9px; color:#aaa; width:30px; text-align:right; }
-
 /* CHART */
 .chart-wrap { width:100%; overflow-x:auto; }
 .chart-svg { display:block; min-width:100%; }
@@ -225,9 +217,91 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
 }
 
 @media (max-width: 640px) {
-  .page-header { padding: 20px; flex-direction: column; align-items: flex-start; gap: 14px; }
-  .container { padding: 16px 12px 60px; }
+  /* Header compacto */
+  .page-header { padding: 16px 16px 14px; flex-direction: row; align-items: center; gap: 10px; }
+  .page-header::after { display: none; }
+  .header-left h2 { font-size: 18px; letter-spacing: 3px; }
+  .header-left h1, .header-left p { display: none; }
+  .header-actions .btn-ghost { display: none; } /* esconde backup/xls no mobile */
+  .header-actions .btn-primary { padding: 8px 14px; font-size: 10px; }
+
+  /* Nav scroll horizontal */
+  .page-nav { padding: 0 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .page-nav::-webkit-scrollbar { display: none; }
+  .nav-tab { padding: 12px 14px; font-size: 9px; }
+
+  /* Container */
+  .container { padding: 12px 10px 80px; gap: 14px; }
+
+  /* Toolbar compacta */
+  .toolbar { padding: 10px 12px; gap: 6px; }
+  .search-input { width: 100%; font-size: 14px; padding: 9px 12px; }
+  .filter-select { font-size: 11px; padding: 8px 6px; flex: 1; }
+  .toolbar-count, .save-status { font-size: 9px; }
+
+  /* Tabela → cards no mobile */
+  .table-wrap { overflow-x: visible; }
+  .leads-table { display: block; }
+  .leads-table thead { display: none; }
+  .leads-table tbody { display: flex; flex-direction: column; gap: 10px; padding: 10px; }
+  .leads-table tr { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; background: var(--white); border: 1.5px solid var(--gray); border-radius: 4px; padding: 12px; position: relative; }
+  .leads-table tr:hover { background: var(--white); }
+  .leads-table td { padding: 0; border: none; font-size: 12px; display: flex; align-items: center; }
+
+  /* Card: célula # escondida */
+  .leads-table td:nth-child(1) { display: none; }
+  /* Nome (contato) + Empresa ocupam linha inteira */
+  .leads-table td:nth-child(2) { grid-column: 1 / -1; font-weight: 700; font-size: 13px; }
+  .leads-table td:nth-child(3) { grid-column: 1 / -1; font-weight: 700; font-size: 13px; }
+  /* Loja badge */
+  .leads-table td:nth-child(4) { }
+  /* Zap */
+  .leads-table td:nth-child(5) { }
+  /* Email */
+  .leads-table td:nth-child(6) { }
+  /* Cidade */
+  .leads-table td:nth-child(7) { font-size: 11px; color: #666; }
+  /* UF */
+  .leads-table td:nth-child(8) { font-size: 11px; font-weight: 700; }
+  /* CNPJ escondido no card */
+  .leads-table td:nth-child(9) { display: none; }
+  /* Status */
+  .leads-table td:nth-child(10) { grid-column: 1 / -1; }
+  /* Próx contato */
+  .leads-table td:nth-child(11) { grid-column: 1 / -1; }
+  /* Links */
+  .leads-table td:nth-child(12) { grid-column: 1 / -1; justify-content: flex-start; gap: 6px; }
+  /* Ações */
+  .leads-table td:nth-child(13) { grid-column: 1 / -1; justify-content: flex-end; }
+
+  /* Inline inputs maiores no mobile */
+  .inline-input { font-size: 13px; padding: 7px 8px; }
+  .inline-select { font-size: 12px; padding: 7px 6px; }
+  .inline-date { font-size: 12px; padding: 7px 6px; }
+
+  /* Botões de ação com area maior */
+  .btn-edit, .btn-del { padding: 8px 14px; font-size: 10px; }
+  .action-btns { gap: 8px; }
+
+  /* Modal fullscreen */
+  .modal-overlay { padding: 0; align-items: flex-end; }
+  .modal { max-width: 100%; max-height: 92vh; border-radius: 8px 8px 0 0; border-bottom: none; }
+  .modal-body { padding: 16px 14px; }
+  .modal-footer { padding: 12px 14px; }
+
+  /* Form grid 1 col */
   .form-grid { grid-template-columns: 1fr; }
+
+  /* Cadência mobile */
+  .cad-header-bar { grid-template-columns: 1fr 1fr; gap: 1px; }
+  .cad-cols { grid-template-columns: 1fr; }
+  .cad-textarea { font-size: 14px; min-height: 160px; }
+  .cad-step-header { flex-wrap: wrap; gap: 6px; }
+  .cad-step-meta { width: 100%; }
+
+  /* Dashboard mobile */
+  .dash-kpi-row { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .kpi-number { font-size: 32px; }
 }
 
 /* ── CADÊNCIA COMERCIAL ───────────────────────────── */
@@ -356,13 +430,6 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
           <option value="FECHADO">Fechado</option>
           <option value="PERDIDO">Perdido</option>
         </select>
-        <select class="filter-select" id="filter-mkt" onchange="renderTable()">
-          <option value="">Todos MKT</option>
-          <option value="MELI">Mercado Livre</option>
-          <option value="AMAZON">Amazon</option>
-          <option value="SHOPPEE">Shopee</option>
-          <option value="OUTRO">Outro</option>
-        </select>
         <select class="filter-select" id="filter-prox" onchange="renderTable()">
           <option value="">Próx. contato</option>
           <option value="vencido">Vencidos</option>
@@ -379,7 +446,6 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
               <th style="width:24px">#</th>
               <th style="width:80px" class="sortable" data-sort="contato" onclick="sortTable('contato')">Nome <span class="sort-arrow">↕</span></th>
               <th style="min-width:130px" class="sortable" data-sort="nome" onclick="sortTable('nome')">Empresa <span class="sort-arrow">↕</span></th>
-              <th style="width:68px" class="sortable" data-sort="mkt" onclick="sortTable('mkt')">Loja <span class="sort-arrow">↕</span></th>
               <th style="min-width:110px">WhatsApp</th>
               <th style="min-width:130px">Email</th>
               <th style="width:80px" class="sortable" data-sort="cidade" onclick="sortTable('cidade')">Cidade <span class="sort-arrow">↕</span></th>
@@ -426,10 +492,6 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
       <div class="section dash-chart-card">
         <div class="section-title"><span>Funil de Progresso</span></div>
         <div class="funnel-wrap" id="stats-funnel"></div>
-      </div>
-      <div class="section dash-chart-card">
-        <div class="section-title"><span>Por Marketplace</span></div>
-        <div id="stats-mkt" style="padding:20px;display:flex;flex-direction:column;gap:12px"></div>
       </div>
     </div>
 
@@ -758,10 +820,10 @@ function fmtDate(d) {
 function instaIcon(url, id) {
   const uid = 'ig_'+(id||'x');
   if (!url) {
-    return `<svg class="insta-icon insta-off" viewBox="0 0 24 24" fill="none"><rect x="2" y="2" width="20" height="20" rx="5.5" fill="#eee"/><circle cx="12" cy="12" r="4.5" stroke="#ccc" stroke-width="1.8" fill="none"/><circle cx="17.2" cy="6.8" r="1.1" fill="#ccc"/></svg>`;
+    return `<span class="insta-icon insta-off"><svg viewBox="0 0 24 24" width="22" height="22" fill="none"><rect x="2" y="2" width="20" height="20" rx="5.5" fill="#eee"/><circle cx="12" cy="12" r="4.5" stroke="#ccc" stroke-width="1.8" fill="none"/><circle cx="17.2" cy="6.8" r="1.1" fill="#ccc"/></svg></span>`;
   }
-  return `<a href="${esc(url)}" target="_blank" style="text-decoration:none">
-    <svg class="insta-icon" viewBox="0 0 24 24" fill="none">
+  return `<a href="${esc(url)}" target="_blank" class="insta-icon">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
       <rect x="2" y="2" width="20" height="20" rx="5.5" fill="url(#${uid})"/>
       <circle cx="12" cy="12" r="4.5" stroke="white" stroke-width="1.8" fill="none"/>
       <circle cx="17.2" cy="6.8" r="1.1" fill="white"/>
@@ -937,7 +999,6 @@ function sortTable(field) {
 function getFiltered() {
   const q     = (document.getElementById('search-input')?.value||'').toLowerCase();
   const fSt   = document.getElementById('filter-status')?.value||'';
-  const fMkt  = document.getElementById('filter-mkt')?.value||'';
   const fProx = document.getElementById('filter-prox')?.value||'';
   const today = new Date(); today.setHours(0,0,0,0);
   const in7   = new Date(today); in7.setDate(in7.getDate()+7);
@@ -948,7 +1009,6 @@ function getFiltered() {
       if (!haystack.includes(q)) return false;
     }
     if (fSt  && c.status !== fSt)  return false;
-    if (fMkt && c.mkt    !== fMkt) return false;
     if (fProx && c.prox) {
       const dt = new Date(c.prox+'T00:00:00');
       if (fProx==='vencido' && dt >= today) return false;
@@ -1003,25 +1063,32 @@ function renderTable() {
       <td style="color:#aaa;font-size:10px">${i+1}</td>
       <td style="font-size:11px;color:#555;white-space:nowrap">${c.contato ? esc(c.contato) : '<span style="color:#ccc">—</span>'}</td>
       <td style="font-weight:700;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(c.nome)}">${esc(c.nome)} ${obsIcon}</td>
-      <td>${mktBadge(c.mkt)}</td>
-      <td class="c" title="${esc(c.zap||'Sem número')}">${c.zap
-        ? `<a href="https://wa.me/55${fmtPhone(c.zap)}" target="_blank" style="display:inline-flex;text-decoration:none">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.116 1.524 5.845L.057 23.737a.5.5 0 0 0 .614.612l5.951-1.462A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.9 0-3.673-.508-5.2-1.393l-.373-.215-3.533.867.902-3.453-.234-.381A9.935 9.935 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+      <td class="td-icon" title="${esc(c.zap||'Sem número')}">${c.zap
+        ? `<a href="https://wa.me/55${fmtPhone(c.zap)}" target="_blank" class="icon-svg">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.116 1.524 5.845L.057 23.737a.5.5 0 0 0 .614.612l5.951-1.462A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.9 0-3.673-.508-5.2-1.393l-.373-.215-3.533.867.902-3.453-.234-.381A9.935 9.935 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
            </a>`
-        : `<svg viewBox="0 0 24 24" width="20" height="20" fill="#ccc"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.116 1.524 5.845L.057 23.737a.5.5 0 0 0 .614.612l5.951-1.462A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.9 0-3.673-.508-5.2-1.393l-.373-.215-3.533.867.902-3.453-.234-.381A9.935 9.935 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>`
+        : `<span class="icon-svg-dead"><svg viewBox="0 0 24 24" width="22" height="22" fill="#ccc"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.116 1.524 5.845L.057 23.737a.5.5 0 0 0 .614.612l5.951-1.462A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.9 0-3.673-.508-5.2-1.393l-.373-.215-3.533.867.902-3.453-.234-.381A9.935 9.935 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg></span>`
       }</td>
-      <td class="c" title="${esc(c.email||'Sem email')}">${c.email
-        ? `<span onclick="copyEmail('${esc(c.email)}',this)" style="display:inline-flex;cursor:pointer;transition:transform .12s" title="${esc(c.email)}">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#2a7a4b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 7 10-7"/></svg>
+      <td class="td-icon" title="${esc(c.email||'Sem email')}">${c.email
+        ? `<span onclick="copyEmail('${esc(c.email)}',this)" class="icon-svg">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
+              <rect x="2" y="5" width="20" height="14" rx="2.5" stroke="#25D366" stroke-width="1.6" fill="none"/>
+              <path d="M2 8l8.5 5.5a2 2 0 0 0 3 0L22 8" stroke="#25D366" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+            </svg>
            </span>`
-        : `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#ccc" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M2 7l10 7 10-7"/></svg>`
+        : `<span class="icon-svg-dead">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none">
+              <rect x="2" y="5" width="20" height="14" rx="2.5" stroke="#ccc" stroke-width="1.6" fill="none"/>
+              <path d="M2 8l8.5 5.5a2 2 0 0 0 3 0L22 8" stroke="#ccc" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+            </svg>
+           </span>`
       }</td>
       <td style="font-size:11px">${c.cidade ? esc(c.cidade) : '<span style="color:#ccc">—</span>'}</td>
       <td class="c" style="font-size:10px;font-weight:700;letter-spacing:1px">${c.estado||'<span style="color:#ccc">—</span>'}</td>
       <td>${makeInlineText(c,'cnpj',c.cnpj,'CNPJ')}</td>
       <td>${makeInlineStatus(c)}</td>
       <td class="c">${makeInlineDate(c)}</td>
-      <td class="c" style="white-space:nowrap">${links}</td>
+      <td class="td-icon"><div class="links-cell">${links}</div></td>
       <td>
         <div class="action-btns">
           <button class="btn-edit" onclick="openModal('${c.id}')">✎</button>
@@ -1415,18 +1482,6 @@ function renderDash() {
     </div>`;
   }).join('');
 
-  // Marketplace
-  const mkts = ['MELI','AMAZON','SHOPPEE','OUTRO'];
-  const mktColors = { MELI:'#fcd34d', AMAZON:'#fb923c', SHOPPEE:'#f87171', OUTRO:'#94a3b8' };
-  document.getElementById('stats-mkt').innerHTML = mkts.map(m=>{
-    const n = contacts.filter(c=>c.mkt===m).length;
-    return `<div class="mkt-row">
-      <div class="mkt-label">${MKT_LABELS[m]}</div>
-      <div class="mkt-bar-wrap"><div class="mkt-bar" style="width:${pct(n)}%;background:${mktColors[m]}"></div></div>
-      <div class="mkt-n">${n}</div>
-      <div class="mkt-pct">${pct(n)}%</div>
-    </div>`;
-  }).join('');
 }
 
 // ── BATCH UPSERT ──────────────────────────────────────────
