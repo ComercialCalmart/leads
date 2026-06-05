@@ -694,7 +694,12 @@ const SB_HDR = { 'Content-Type': 'application/json', 'apikey': SB_KEY, 'Authoriz
 async function sbFetch(path, opts={}) {
   const res = await fetch(SB_URL + '/rest/v1/' + path, { headers: SB_HDR, ...opts });
   if (!res.ok) { const e = await res.text(); throw new Error(e); }
-  return res.status === 204 ? null : res.json();
+  const ct = res.headers.get('content-type') || '';
+  const cl = res.headers.get('content-length');
+  if (res.status === 204 || cl === '0' || !ct.includes('json')) return null;
+  const text = await res.text();
+  if (!text || !text.trim()) return null;
+  try { return JSON.parse(text); } catch { return null; }
 }
 
 function setStatus(msg, ok=true) {
