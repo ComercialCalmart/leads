@@ -69,7 +69,7 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
 /* INLINE EDIT */
 .inline-input { font-family: var(--font); font-size: 11.5px; padding: 3px 6px; border: 1.5px solid var(--black); border-radius: 2px; background: var(--white); color: var(--black); width: 100%; min-width: 80px; }
 .inline-input:focus { outline: none; }
-.inline-select { font-family: var(--font); font-size: 11px; padding: 3px 5px; border: 1.5px solid var(--black); border-radius: 2px; background: var(--white); cursor: pointer; width: 100%; }
+.inline-select { font-family: var(--font); font-size: 11px; padding: 3px 5px; border: 1.5px solid var(--black); border-radius: 2px; background: var(--white); cursor: pointer; width: 100%; min-width: 120px; }
 .inline-date { font-family: var(--font); font-size: 11px; padding: 3px 5px; border: 1.5px solid var(--black); border-radius: 2px; background: var(--white); }
 .editable-cell { cursor: text; }
 .editable-cell:hover { background: #f0f0ec; }
@@ -452,7 +452,7 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
               <th style="width:80px" class="sortable" data-sort="cidade" onclick="sortTable('cidade')">Cidade <span class="sort-arrow">↕</span></th>
               <th style="width:34px" class="c sortable" data-sort="estado" onclick="sortTable('estado')">UF <span class="sort-arrow">↕</span></th>
               <th style="min-width:90px">CNPJ</th>
-              <th style="width:110px" class="sortable" data-sort="status" onclick="sortTable('status')">Status <span class="sort-arrow">↕</span></th>
+              <th style="width:130px" class="sortable" data-sort="status" onclick="sortTable('status')">Status <span class="sort-arrow">↕</span></th>
               <th style="width:88px" class="c sortable" data-sort="ultimo" onclick="sortTable('ultimo')">Últ. Contato <span class="sort-arrow">↕</span></th>
               <th style="width:88px" class="c sortable" data-sort="prox" onclick="sortTable('prox')">Próx. Contato <span class="sort-arrow">↕</span></th>
               <th style="width:100px" class="c">Links</th>
@@ -863,7 +863,8 @@ async function pickDate(id, field, txtId, iso) {
   const txtEl = document.getElementById(txtId);
   if (txtEl) {
     txtEl.value = iso ? iso.split('-').reverse().join('/') : '';
-    txtEl.className = txtEl.className.replace(/date-\w+/g,'').trim() + (iso ? ' '+dateClass(iso) : '');
+    const cls = field === 'ultimo' ? dateClassUltimo(iso) : dateClass(iso);
+    txtEl.className = txtEl.className.replace(/date-\w+/g,'').trim() + (iso ? ' '+cls : '');
   }
   await inlineSave(id, field, iso);
 }
@@ -874,6 +875,15 @@ function dateClass(d) {
   if (dt < today) return 'date-vencido';
   if (dt.getTime() === today.getTime()) return 'date-hoje';
   return 'date-futuro';
+}
+function dateClassUltimo(d) {
+  if (!d) return '';
+  const today = new Date(); today.setHours(0,0,0,0);
+  const dt    = new Date(d+'T00:00:00');
+  const days  = Math.floor((today - dt) / 86400000);
+  if (days <= 1)  return 'date-futuro';  // verde — recente
+  if (days <= 7)  return 'date-hoje';    // amarelo — atenção
+  return 'date-vencido';                 // vermelho — muito tempo
 }
 function fmtDate(d) {
   if (!d) return '<span style="color:#ccc">—</span>';
@@ -1037,7 +1047,7 @@ function makeInlineStatus(c) {
 function makeInlineDate(c, field) {
   field = field || 'prox';
   const val = c[field] || '';
-  const cls = dateClass(val);
+  const cls = field === 'ultimo' ? dateClassUltimo(val) : dateClass(val);
   const display = val ? val.split('-').reverse().join('/') : '';
   const uid = 'dp_' + field + '_' + c.id.replace(/[^a-z0-9]/gi,'');
   return `<span style="display:inline-flex;align-items:center;gap:3px;position:relative">
