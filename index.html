@@ -453,6 +453,7 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
               <th style="width:34px" class="c sortable" data-sort="estado" onclick="sortTable('estado')">UF <span class="sort-arrow">↕</span></th>
               <th style="min-width:90px">CNPJ</th>
               <th style="width:110px" class="sortable" data-sort="status" onclick="sortTable('status')">Status <span class="sort-arrow">↕</span></th>
+              <th style="width:88px" class="c sortable" data-sort="ultimo" onclick="sortTable('ultimo')">Últ. Contato <span class="sort-arrow">↕</span></th>
               <th style="width:88px" class="c sortable" data-sort="prox" onclick="sortTable('prox')">Próx. Contato <span class="sort-arrow">↕</span></th>
               <th style="width:100px" class="c">Links</th>
               <th style="width:68px"></th>
@@ -602,7 +603,11 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
         </div>
         <div class="form-group">
           <label>CNPJ</label>
-          <input type="text" id="f-cnpj" placeholder="00.000.000/0001-00">
+          <input type="text" id="f-cnpj" placeholder="00.000.000/0001-00" oninput="maskCnpj(this)" maxlength="18">
+        </div>
+        <div class="form-group">
+          <label>Último Contato</label>
+          <input type="text" id="f-ultimo" placeholder="dd/mm/aaaa" maxlength="10" oninput="maskDate(this)">
         </div>
         <div class="form-group">
           <label>Próximo Contato</label>
@@ -738,6 +743,7 @@ function fromRow(r) {
     cidade:r.cidade||'', estado:r.estado||'', cnpj:r.cnpj||'', prox:r.prox||'',
     urlMl:r.url_ml||'', urlAz:r.url_az||'', urlSh:r.url_sh||'',
     urlSite:r.url_site||'', insta:r.insta||'', obs:r.obs||'',
+    ultimo:r.ultimo||'',
     createdAt:r.created_at||'', updatedAt:r.updated_at||'' };
 }
 function toRow(c) {
@@ -746,6 +752,7 @@ function toRow(c) {
     cidade:c.cidade, estado:c.estado, cnpj:c.cnpj, prox:c.prox||null,
     url_ml:c.urlMl, url_az:c.urlAz, url_sh:c.urlSh,
     url_site:c.urlSite, insta:c.insta, obs:c.obs,
+    ultimo:c.ultimo||null,
     created_at:c.createdAt||new Date().toISOString(),
     updated_at:new Date().toISOString() };
 }
@@ -818,6 +825,18 @@ function wazLink(zap, display) {
   </a>`;
 }
 
+function formatCnpj(raw) {
+  const d = (raw||'').replace(/\D/g,'').slice(0,14);
+  if (!d) return '';
+  if (d.length <= 2)  return d;
+  if (d.length <= 5)  return `${d.slice(0,2)}.${d.slice(2)}`;
+  if (d.length <= 8)  return `${d.slice(0,2)}.${d.slice(2,5)}.${d.slice(5)}`;
+  if (d.length <= 12) return `${d.slice(0,2)}.${d.slice(2,5)}.${d.slice(5,8)}/${d.slice(8)}`;
+  return `${d.slice(0,2)}.${d.slice(2,5)}.${d.slice(5,8)}/${d.slice(8,12)}-${d.slice(12)}`;
+}
+function maskCnpj(el) {
+  el.value = formatCnpj(el.value);
+}
 function maskDate(el) {
   let v = el.value.replace(/\D/g,'').slice(0,8);
   if (v.length >= 5) v = v.slice(0,2)+'/'+v.slice(2,4)+'/'+v.slice(4);
@@ -834,19 +853,19 @@ function dateFromDisplay(v) {
   if (!d||!m||!y) return '';
   return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
 }
-async function saveDateInline(id, displayVal) {
+async function saveDateInline(id, field, displayVal) {
   const iso = dateFromDisplay(displayVal);
-  if (displayVal && !iso) return; // invalid — don't save
-  await inlineSave(id, 'prox', iso);
+  if (displayVal && !iso) return;
+  await inlineSave(id, field, iso);
 }
 
-async function pickDate(id, txtId, iso) {
+async function pickDate(id, field, txtId, iso) {
   const txtEl = document.getElementById(txtId);
   if (txtEl) {
     txtEl.value = iso ? iso.split('-').reverse().join('/') : '';
     txtEl.className = txtEl.className.replace(/date-\w+/g,'').trim() + (iso ? ' '+dateClass(iso) : '');
   }
-  await inlineSave(id, 'prox', iso);
+  await inlineSave(id, field, iso);
 }
 function dateClass(d) {
   if (!d) return '';
@@ -903,7 +922,7 @@ function openModal(id) {
 }
 function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); editingId=null; }
 
-const FORM_FIELDS = ['nome','contato','mkt','status','zap','email','cidade','estado','cnpj','prox','url-ml','url-az','url-sh','url-site','insta','obs'];
+const FORM_FIELDS = ['nome','contato','mkt','status','zap','email','cidade','estado','cnpj','prox','ultimo','url-ml','url-az','url-sh','url-site','insta','obs'];
 function clearForm() {
   FORM_FIELDS.forEach(k => {
     const el = document.getElementById('f-'+k);
@@ -917,8 +936,10 @@ function fillForm(c) {
   set('nome',c.nome); set('contato',c.contato); set('mkt',c.mkt); set('status',c.status||'NOVO');
   set('zap',c.zap); set('email',c.email); set('cidade',c.cidade); set('estado',c.estado);
   set('cnpj',c.cnpj);
-  const proxDisplay = c.prox ? c.prox.split('-').reverse().join('/') : '';
-  set('prox', proxDisplay);
+  const proxDisplay  = c.prox   ? c.prox.split('-').reverse().join('/')   : '';
+  const ultimoDisplay = c.ultimo ? c.ultimo.split('-').reverse().join('/') : '';
+  set('prox',   proxDisplay);
+  set('ultimo', ultimoDisplay);
   set('url-ml',c.urlMl); set('url-az',c.urlAz); set('url-sh',c.urlSh);
   set('url-site',c.urlSite); set('insta',c.insta); set('obs',c.obs);
 }
@@ -928,7 +949,9 @@ function formData() {
     nome: g('nome').trim(), contato: g('contato').trim(), mkt: g('mkt'), status: g('status')||'NOVO',
     zap: formatZap(g('zap').trim()), email: g('email').trim(),
     cidade: g('cidade').trim(), estado: g('estado').trim().toUpperCase(),
-    cnpj: g('cnpj').trim(), prox: dateFromDisplay(g('prox').trim()) || g('prox').trim(),
+    cnpj: formatCnpj(g('cnpj').trim()),
+    prox:   dateFromDisplay(g('prox').trim())   || g('prox').trim(),
+    ultimo: dateFromDisplay(g('ultimo').trim()) || g('ultimo').trim(),
     urlMl: g('url-ml').trim(), urlAz: g('url-az').trim(),
     urlSh: g('url-sh').trim(), urlSite: g('url-site').trim(),
     insta: g('insta').trim(), obs: g('obs').trim(),
@@ -987,6 +1010,7 @@ async function inlineSave(id, field, value) {
   let v = value;
   if (field === 'estado') v = v.toUpperCase();
   if (field === 'zap')    v = formatZap(v);
+  if (field === 'cnpj')   v = formatCnpj(v);
   contacts[idx][field] = v;
   contacts[idx].updatedAt = new Date().toISOString();
   try {
@@ -997,9 +1021,11 @@ async function inlineSave(id, field, value) {
   renderTable(); updateBadge();
 }
 
-function makeInlineText(c, field, val, placeholder) {
+function makeInlineText(c, field, val, placeholder, maskFn) {
   const v = esc(val||'');
+  const inputEvt = maskFn ? `oninput="${maskFn}(this)"` : '';
   return `<input class="inline-input" value="${v}" placeholder="${placeholder||''}"
+    ${inputEvt}
     onblur="inlineSave('${c.id}','${field}',this.value)"
     onkeydown="if(event.key==='Enter')this.blur()"
     onclick="event.stopPropagation()">`;
@@ -1008,19 +1034,21 @@ function makeInlineStatus(c) {
   const opts = Object.entries(STATUS_LABELS).map(([k,l])=>`<option value="${k}"${c.status===k?' selected':''}>${l}</option>`).join('');
   return `<select class="inline-select" onchange="inlineSave('${c.id}','status',this.value)" onclick="event.stopPropagation()">${opts}</select>`;
 }
-function makeInlineDate(c) {
-  const cls = dateClass(c.prox);
-  const display = c.prox ? c.prox.split('-').reverse().join('/') : '';
-  const uid = 'dp_' + c.id.replace(/[^a-z0-9]/gi,'');
+function makeInlineDate(c, field) {
+  field = field || 'prox';
+  const val = c[field] || '';
+  const cls = dateClass(val);
+  const display = val ? val.split('-').reverse().join('/') : '';
+  const uid = 'dp_' + field + '_' + c.id.replace(/[^a-z0-9]/gi,'');
   return `<span style="display:inline-flex;align-items:center;gap:3px;position:relative">
     <input type="text" class="inline-date ${cls}" id="txt_${uid}" value="${display}" placeholder="dd/mm/aaaa" maxlength="10"
       oninput="maskDate(this)"
-      onblur="saveDateInline('${c.id}',this.value)"
+      onblur="saveDateInline('${c.id}','${field}',this.value)"
       onkeydown="if(event.key==='Enter')this.blur()"
       onclick="event.stopPropagation()" style="width:84px;text-align:center">
     <span onclick="event.stopPropagation();document.getElementById('cal_${uid}').showPicker()" style="cursor:pointer;opacity:.45;transition:opacity .12s;line-height:1;font-size:13px" onmouseover="this.style.opacity='.9'" onmouseout="this.style.opacity='.45'" title="Abrir calendário">📅</span>
-    <input type="date" id="cal_${uid}" value="${c.prox||''}"
-      onchange="pickDate('${c.id}','txt_${uid}',this.value)"
+    <input type="date" id="cal_${uid}" value="${val}"
+      onchange="pickDate('${c.id}','${field}','txt_${uid}',this.value)"
       onclick="event.stopPropagation()"
       style="position:absolute;opacity:0;width:0;height:0;pointer-events:none">
   </span>`;
@@ -1146,9 +1174,10 @@ function renderTable() {
       }</td>
       <td style="font-size:11px">${c.cidade ? esc(c.cidade) : '<span style="color:#ccc">—</span>'}</td>
       <td class="c" style="font-size:10px;font-weight:700;letter-spacing:1px">${c.estado||'<span style="color:#ccc">—</span>'}</td>
-      <td>${makeInlineText(c,'cnpj',c.cnpj,'CNPJ')}</td>
+      <td>${makeInlineText(c,'cnpj',c.cnpj,'CNPJ','maskCnpj')}</td>
       <td>${makeInlineStatus(c)}</td>
-      <td class="c">${makeInlineDate(c)}</td>
+      <td class="c">${makeInlineDate(c,'ultimo')}</td>
+      <td class="c">${makeInlineDate(c,'prox')}</td>
       <td class="td-icon"><div class="links-cell">${links}</div></td>
       <td>
         <div class="action-btns">
@@ -1556,14 +1585,16 @@ async function sbUpsertMany(list) {
 }
 
 // ── SEEDS ─────────────────────────────────────────────────
+const TODAY_ISO = new Date().toISOString().slice(0,10);
+
 const SEEDS = [
   { id:'seed_abmidia', nome:'AB.MIDIA', contato:'', mkt:'MELI', zap:'(21) 98133-4739', email:'abmidia@infoabmidia.com.br',
-    cidade:'', estado:'', cnpj:'', status:'NOVO', prox:'',
+    cidade:'', estado:'', cnpj:'', status:'NOVO', prox:'', ultimo:TODAY_ISO,
     urlMl:'https://www.mercadolivre.com.br/loja/abmidia',
     urlAz:'', urlSh:'', urlSite:'https://www.infoabmidia.com.br/', insta:'', obs:'',
     createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
   { id:'seed_rapidopracachorro', nome:'Rápido Pra Cachorro', contato:'Marcus', mkt:'MELI', zap:'(48) 9 8815-7947', email:'',
-    cidade:'Araranguá', estado:'SC', cnpj:'', status:'NOVO', prox:'',
+    cidade:'Araranguá', estado:'SC', cnpj:'', status:'NOVO', prox:'', ultimo:TODAY_ISO,
     urlMl:'https://www.mercadolivre.com.br/loja/rapido-pra-cachorro',
     urlAz:'', urlSh:'', urlSite:'https://www.rapidopracachorro.com.br/', insta:'', obs:'',
     createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
@@ -1794,6 +1825,13 @@ async function init() {
     await sbUpsertMany(missing);
     missing.forEach(s => contacts.push(s));
     renderTable(); updateBadge();
+  }
+  // Patch: leads sem campo ultimo recebem hoje
+  const needsPatch = contacts.filter(c => !c.ultimo);
+  if (needsPatch.length) {
+    needsPatch.forEach(c => { c.ultimo = TODAY_ISO; });
+    await sbUpsertMany(needsPatch);
+    renderTable();
   }
 }
 init();
