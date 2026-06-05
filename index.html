@@ -217,92 +217,108 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
 }
 
 @media (max-width: 640px) {
-  /* Header compacto */
-  .page-header { padding: 16px 16px 14px; flex-direction: row; align-items: center; gap: 10px; }
-  .page-header::after { display: none; }
-  .header-left h2 { font-size: 18px; letter-spacing: 3px; }
-  .header-left h1, .header-left p { display: none; }
-  .header-actions .btn-ghost { display: none; } /* esconde backup/xls no mobile */
-  .header-actions .btn-primary { padding: 8px 14px; font-size: 10px; }
 
-  /* Nav scroll horizontal */
-  .page-nav { padding: 0 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  /* ── HEADER ── */
+  .page-header { padding: 14px 16px; flex-direction: row; align-items: center; }
+  .page-header::after { display: none; }
+  .header-left { flex: 1; }
+  .header-left h2 { font-size: 20px; letter-spacing: 3px; }
+  .header-left h1, .header-left p { display: none; }
+  .header-actions .btn-ghost { display: none; }
+  .header-actions .btn-primary { display: none; }
+
+  /* ── NAV ── */
+  .page-nav { padding: 0 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; white-space: nowrap; }
   .page-nav::-webkit-scrollbar { display: none; }
   .nav-tab { padding: 12px 14px; font-size: 9px; }
 
-  /* Container */
-  .container { padding: 12px 10px 80px; gap: 14px; }
+  /* ── CONTAINER ── */
+  .container { padding: 10px 10px 100px; gap: 12px; }
 
-  /* Toolbar compacta */
-  .toolbar { padding: 10px 12px; gap: 6px; }
-  .search-input { width: 100%; font-size: 14px; padding: 9px 12px; }
-  .filter-select { font-size: 11px; padding: 8px 6px; flex: 1; }
-  .toolbar-count, .save-status { font-size: 9px; }
+  /* ── TOOLBAR ── */
+  .toolbar { padding: 10px 12px; gap: 8px; flex-wrap: nowrap; }
+  .search-input { flex: 1; font-size: 16px; padding: 10px 12px; min-width: 0; width: auto; }
+  .filter-select { display: none; }
+  .toolbar-count { font-size: 9px; white-space: nowrap; }
+  .save-status { display: none; }
+  .btn-filter-mobile { display: inline-flex !important; }
 
-  /* Tabela → cards no mobile */
-  .table-wrap { overflow-x: visible; }
-  .leads-table { display: block; }
-  .leads-table thead { display: none; }
-  .leads-table tbody { display: flex; flex-direction: column; gap: 10px; padding: 10px; }
-  .leads-table tr { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; background: var(--white); border: 1.5px solid var(--gray); border-radius: 4px; padding: 12px; position: relative; }
-  .leads-table tr:hover { background: var(--white); }
-  .leads-table td { padding: 0; border: none; font-size: 12px; display: flex; align-items: center; }
+  /* ── HIDE TABLE ── */
+  .table-wrap { display: none; }
+  .mobile-cards { display: flex !important; flex-direction: column; gap: 10px; padding: 4px 2px 8px; }
 
-  /* Card: célula # escondida */
-  .leads-table td:nth-child(1) { display: none; }
-  /* Nome (contato) + Empresa ocupam linha inteira */
-  .leads-table td:nth-child(2) { grid-column: 1 / -1; font-weight: 700; font-size: 13px; }
-  .leads-table td:nth-child(3) { grid-column: 1 / -1; font-weight: 700; font-size: 13px; }
-  /* Loja badge */
-  .leads-table td:nth-child(4) { }
-  /* Zap */
-  .leads-table td:nth-child(5) { }
-  /* Email */
-  .leads-table td:nth-child(6) { }
-  /* Cidade */
-  .leads-table td:nth-child(7) { font-size: 11px; color: #666; }
-  /* UF */
-  .leads-table td:nth-child(8) { font-size: 11px; font-weight: 700; }
-  /* CNPJ escondido no card */
-  .leads-table td:nth-child(9) { display: none; }
-  /* Status */
-  .leads-table td:nth-child(10) { grid-column: 1 / -1; }
-  /* Próx contato */
-  .leads-table td:nth-child(11) { grid-column: 1 / -1; }
-  /* Links */
-  .leads-table td:nth-child(12) { grid-column: 1 / -1; justify-content: flex-start; gap: 6px; }
-  /* Ações */
-  .leads-table td:nth-child(13) { grid-column: 1 / -1; justify-content: flex-end; }
+  /* ── FAB ── */
+  .m-fab { display: flex !important; }
 
-  /* Inline inputs maiores no mobile */
-  .inline-input { font-size: 13px; padding: 7px 8px; }
-  .inline-select { font-size: 12px; padding: 7px 6px; }
-  .inline-date { font-size: 12px; padding: 7px 6px; }
-
-  /* Botões de ação com area maior */
-  .btn-edit, .btn-del { padding: 8px 14px; font-size: 10px; }
-  .action-btns { gap: 8px; }
-
-  /* Modal fullscreen */
+  /* ── MODAL FULL SCREEN ── */
   .modal-overlay { padding: 0; align-items: flex-end; }
-  .modal { max-width: 100%; max-height: 92vh; border-radius: 8px 8px 0 0; border-bottom: none; }
-  .modal-body { padding: 16px 14px; }
-  .modal-footer { padding: 12px 14px; }
+  .modal { max-width: 100%; max-height: 95vh; border-radius: 16px 16px 0 0; border-bottom: none; border-left: none; border-right: none; }
+  .modal-header { border-radius: 16px 16px 0 0; }
+  .modal-body { padding: 16px 16px; overflow-y: auto; }
+  .modal-footer { padding: 14px 16px 34px; }
+  .form-grid { grid-template-columns: 1fr; gap: 12px; }
+  .form-group input, .form-group select, .form-group textarea { font-size: 16px; padding: 12px; }
 
-  /* Form grid 1 col */
-  .form-grid { grid-template-columns: 1fr; }
-
-  /* Cadência mobile */
-  .cad-header-bar { grid-template-columns: 1fr 1fr; gap: 1px; }
-  .cad-cols { grid-template-columns: 1fr; }
-  .cad-textarea { font-size: 14px; min-height: 160px; }
-  .cad-step-header { flex-wrap: wrap; gap: 6px; }
-  .cad-step-meta { width: 100%; }
-
-  /* Dashboard mobile */
+  /* ── DASHBOARD ── */
+  .dash-charts-row { grid-template-columns: 1fr; }
   .dash-kpi-row { grid-template-columns: 1fr 1fr; gap: 10px; }
   .kpi-number { font-size: 32px; }
+
+  /* ── CADÊNCIA ── */
+  .cad-header-bar { grid-template-columns: 1fr 1fr; }
+  .cad-textarea { font-size: 14px; min-height: 160px; }
+  .cad-step-header { flex-wrap: wrap; gap: 6px; }
 }
+
+/* ── MOBILE CARDS (hidden on desktop) ── */
+.mobile-cards { display: none; }
+.btn-filter-mobile { display: none; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 8px; border: 1.5px solid #ddd; background: var(--white); cursor: pointer; font-size: 16px; flex-shrink: 0; }
+.m-fab { display: none; position: fixed; bottom: 24px; right: 20px; width: 56px; height: 56px; background: var(--black); color: var(--white); border: none; border-radius: 50%; font-size: 26px; cursor: pointer; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(0,0,0,.28); z-index: 400; transition: transform .15s; font-family: var(--font); line-height: 1; }
+.m-fab:active { transform: scale(.92); }
+
+.m-card { background: var(--white); border: 1.5px solid var(--gray); border-radius: 10px; padding: 14px 14px 10px; position: relative; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+.m-card:active { background: #f9f8f5; }
+.m-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 3px; }
+.m-card-name { font-size: 15px; font-weight: 900; letter-spacing: -.2px; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.m-card-contact { font-size: 11px; color: #888; margin-bottom: 6px; }
+.m-divider { height: 1px; background: #f0efe9; margin: 10px 0; }
+.m-card-dates { display: flex; justify-content: space-between; margin-bottom: 10px; }
+.m-date-block { display: flex; flex-direction: column; gap: 2px; }
+.m-date-label { font-size: 8px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #bbb; }
+.m-date-val { font-size: 12px; font-weight: 700; color: #555; }
+.m-date-val.date-vencido { color: var(--red); }
+.m-date-val.date-hoje    { color: var(--yellow); }
+.m-date-val.date-futuro  { color: var(--green); }
+.m-card-bottom { display: flex; align-items: center; gap: 8px; }
+.m-card-icons  { display: flex; align-items: center; gap: 8px; flex: 1; }
+.m-more-btn { width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--gray); background: var(--white); cursor: pointer; font-size: 16px; color: #888; display: inline-flex; align-items: center; justify-content: center; font-family: var(--font); flex-shrink: 0; transition: all .12s; }
+.m-more-btn:active { background: var(--gray); }
+.m-status { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 9px; border-radius: 20px; border: 1.5px solid currentColor; flex-shrink: 0; }
+
+/* Action sheet */
+.m-sheet-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 500; }
+.m-sheet-overlay.open { display: block; }
+.m-sheet { position: fixed; bottom: 0; left: 0; right: 0; background: var(--white); border-radius: 16px 16px 0 0; padding: 0 0 34px; z-index: 501; transform: translateY(100%); transition: transform .25s cubic-bezier(.4,0,.2,1); }
+.m-sheet.open { transform: translateY(0); }
+.m-sheet-handle { width: 36px; height: 4px; background: #ddd; border-radius: 4px; margin: 10px auto 4px; }
+.m-sheet-title { font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: #aaa; padding: 10px 20px 8px; border-bottom: 1px solid #f0efe9; }
+.m-sheet-btn { display: flex; align-items: center; gap: 14px; padding: 16px 20px; font-size: 14px; font-weight: 600; color: var(--black); cursor: pointer; font-family: var(--font); background: none; border: none; width: 100%; text-align: left; }
+.m-sheet-btn:active { background: #f5f5f5; }
+.m-sheet-btn.danger { color: var(--red); }
+.m-sheet-icon { font-size: 18px; width: 24px; text-align: center; }
+
+/* Filter sheet */
+.m-filter-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 500; }
+.m-filter-overlay.open { display: block; }
+.m-filter-sheet { position: fixed; bottom: 0; left: 0; right: 0; background: var(--white); border-radius: 16px 16px 0 0; padding: 0 20px 40px; z-index: 501; transform: translateY(100%); transition: transform .25s cubic-bezier(.4,0,.2,1); }
+.m-filter-sheet.open { transform: translateY(0); }
+.m-filter-handle { width: 36px; height: 4px; background: #ddd; border-radius: 4px; margin: 10px auto 16px; }
+.m-filter-head { font-size: 13px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 14px; }
+.m-filter-label { font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #aaa; margin: 14px 0 8px; }
+.m-filter-opts { display: flex; flex-wrap: wrap; gap: 8px; }
+.m-chip { font-family: var(--font); font-size: 11px; font-weight: 700; letter-spacing: 1px; padding: 8px 14px; border: 1.5px solid #ddd; border-radius: 20px; cursor: pointer; background: var(--white); color: #666; transition: all .12s; }
+.m-chip.active { background: var(--black); color: var(--white); border-color: var(--black); }
+.m-filter-apply { width: 100%; margin-top: 20px; padding: 14px; background: var(--black); color: var(--white); border: none; border-radius: 10px; font-family: var(--font); font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; }
 
 /* ── CADÊNCIA COMERCIAL ───────────────────────────── */
 .cad-header-bar {
@@ -438,6 +454,7 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
         </select>
         <span class="toolbar-count" id="showing-count"></span>
         <span class="save-status" id="save-status"></span>
+        <button class="btn-filter-mobile" onclick="openFilterSheet()" title="Filtros">⚙</button>
       </div>
       <div class="table-wrap">
         <table class="leads-table" id="leads-table">
@@ -466,6 +483,8 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
           <p>Nenhum lead cadastrado</p>
         </div>
       </div>
+      <!-- MOBILE CARDS -->
+      <div class="mobile-cards" id="mobile-cards" style="display:none"></div>
     </div>
   </div>
 </div>
@@ -688,6 +707,37 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
       <button class="btn-save" onclick="importAllUpdate()">Atualizar Todos</button>
     </div>
   </div>
+</div>
+
+<!-- FAB -->
+<button class="m-fab" onclick="openModal()">+</button>
+
+<!-- ACTION SHEET -->
+<div class="m-sheet-overlay" id="m-sheet-overlay" onclick="closeActionSheet()"></div>
+<div class="m-sheet" id="m-sheet">
+  <div class="m-sheet-handle"></div>
+  <div class="m-sheet-title" id="m-sheet-title">Ações</div>
+  <button class="m-sheet-btn" onclick="mSheetEdit()"><span class="m-sheet-icon">✎</span> Editar lead</button>
+  <button class="m-sheet-btn" onclick="mSheetStatus()"><span class="m-sheet-icon">⬤</span> Alterar status</button>
+  <button class="m-sheet-btn danger" onclick="mSheetDelete()"><span class="m-sheet-icon">✕</span> Excluir</button>
+</div>
+
+<!-- STATUS SHEET -->
+<div class="m-sheet-overlay" id="m-status-overlay" onclick="closeStatusSheet()"></div>
+<div class="m-sheet" id="m-status-sheet">
+  <div class="m-sheet-handle"></div>
+  <div class="m-sheet-title">Alterar Status</div>
+  <div id="m-status-opts"></div>
+</div>
+
+<!-- FILTER SHEET -->
+<div class="m-filter-overlay" id="m-filter-overlay" onclick="closeFilterSheet()"></div>
+<div class="m-filter-sheet" id="m-filter-sheet">
+  <div class="m-filter-handle"></div>
+  <div class="m-filter-head">Filtros</div>
+  <div class="m-filter-label">Status</div>
+  <div class="m-filter-opts" id="m-filter-status-opts"></div>
+  <button class="m-filter-apply" onclick="applyFilterSheet()">Aplicar</button>
 </div>
 
 <script>
@@ -1826,7 +1876,144 @@ function cadCopy(taId, btn) {
   });
 }
 
-// ── INIT ──────────────────────────────────────────────────
+// ── MOBILE ────────────────────────────────────────────────
+const isMobile = () => window.innerWidth <= 640;
+let mSheetId = null;
+let mFilterStatus = '';
+
+function renderCards() {
+  const el = document.getElementById('mobile-cards');
+  if (!el) return;
+  const list = getFiltered();
+  const empty = document.getElementById('empty-state');
+  const countEl = document.getElementById('showing-count');
+  countEl.textContent = `${list.length}/${contacts.length}`;
+  if (!list.length) { el.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+
+  el.innerHTML = list.map(c => {
+    const statusCls = STATUS_CLASS[c.status] || 's-novo';
+    const statusLbl = STATUS_LABELS[c.status] || 'Novo';
+    const loc = [c.cidade, c.estado].filter(Boolean).join(' · ') || '—';
+    const ultimoDisp = c.ultimo ? c.ultimo.split('-').reverse().join('/') : '—';
+    const proxDisp   = c.prox   ? c.prox.split('-').reverse().join('/')   : '—';
+    const ultimoCls  = dateClassUltimo(c.ultimo);
+    const proxCls    = dateClass(c.prox);
+    const obs = c.obs ? `<span style="font-size:11px;color:#aaa;font-style:italic;display:block;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.obs.slice(0,60))}</span>` : '';
+
+    const waz = c.zap
+      ? `<a href="https://wa.me/55${fmtPhone(c.zap)}" target="_blank" style="text-decoration:none" title="${esc(c.zap)}">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.116 1.524 5.845L.057 23.737a.5.5 0 0 0 .614.612l5.951-1.462A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.9 0-3.673-.508-5.2-1.393l-.373-.215-3.533.867.902-3.453-.234-.381A9.935 9.935 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
+         </a>` : `<svg viewBox="0 0 24 24" width="26" height="26" fill="#ddd"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.116 1.524 5.845L.057 23.737a.5.5 0 0 0 .614.612l5.951-1.462A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.9 0-3.673-.508-5.2-1.393l-.373-.215-3.533.867.902-3.453-.234-.381A9.935 9.935 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>`;
+
+    const mail = c.email
+      ? `<span onclick="copyEmail('${esc(c.email)}',this)" title="${esc(c.email)}" style="display:inline-flex;cursor:pointer">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none"><rect x="2" y="5" width="20" height="14" rx="2.5" stroke="#25D366" stroke-width="1.6" fill="none"/><path d="M2 8l8.5 5.5a2 2 0 0 0 3 0L22 8" stroke="#25D366" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>
+         </span>`
+      : `<svg viewBox="0 0 24 24" width="24" height="24" fill="none"><rect x="2" y="5" width="20" height="14" rx="2.5" stroke="#ddd" stroke-width="1.6" fill="none"/><path d="M2 8l8.5 5.5a2 2 0 0 0 3 0L22 8" stroke="#ddd" stroke-width="1.6" stroke-linecap="round" fill="none"/></svg>`;
+
+    const links = [
+      c.urlMl   ? `<a href="${esc(c.urlMl)}"   target="_blank" class="icon-link il-ml">ML</a>`   : '',
+      c.urlAz   ? `<a href="${esc(c.urlAz)}"   target="_blank" class="icon-link il-az">AZ</a>`   : '',
+      c.urlSh   ? `<a href="${esc(c.urlSh)}"   target="_blank" class="icon-link il-sh">SH</a>`   : '',
+      c.urlSite ? `<a href="${esc(c.urlSite)}" target="_blank" class="icon-link il-site">SITE</a>` : '',
+      c.insta   ? instaIcon(c.insta, c.id) : '',
+    ].filter(Boolean).join('');
+
+    return `<div class="m-card">
+      <div class="m-card-top">
+        <div style="flex:1;min-width:0">
+          <div class="m-card-name">${esc(c.nome)}</div>
+          <div class="m-card-contact">${c.contato ? esc(c.contato) : ''} ${c.cidade||c.estado ? `· <span style="color:#aaa">${esc(loc)}</span>` : ''}</div>
+          ${obs}
+        </div>
+        <span class="m-status ${statusCls}">${statusLbl}</span>
+      </div>
+      <div class="m-divider"></div>
+      <div class="m-card-dates">
+        <div class="m-date-block">
+          <span class="m-date-label">Último contato</span>
+          <span class="m-date-val ${ultimoCls}">${ultimoDisp}</span>
+        </div>
+        <div class="m-date-block" style="text-align:right">
+          <span class="m-date-label">Próximo contato</span>
+          <span class="m-date-val ${proxCls}">${proxDisp}</span>
+        </div>
+      </div>
+      <div class="m-card-bottom">
+        <div class="m-card-icons">${waz}${mail}${links}</div>
+        <button class="m-more-btn" onclick="openActionSheet('${c.id}')">⋯</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openActionSheet(id) {
+  mSheetId = id;
+  const c = contacts.find(x=>x.id===id);
+  if (!c) return;
+  document.getElementById('m-sheet-title').textContent = c.nome;
+  document.getElementById('m-sheet-overlay').classList.add('open');
+  document.getElementById('m-sheet').classList.add('open');
+}
+function closeActionSheet() {
+  document.getElementById('m-sheet-overlay').classList.remove('open');
+  document.getElementById('m-sheet').classList.remove('open');
+}
+function mSheetEdit() { closeActionSheet(); openModal(mSheetId); }
+function mSheetDelete() { closeActionSheet(); askDelete(mSheetId); }
+function mSheetStatus() {
+  closeActionSheet();
+  const opts = document.getElementById('m-status-opts');
+  opts.innerHTML = Object.entries(STATUS_LABELS).map(([k,l]) => `
+    <button class="m-sheet-btn" onclick="mSetStatus('${k}')">
+      <span class="badge ${STATUS_CLASS[k]}">${l}</span>
+    </button>`).join('');
+  document.getElementById('m-status-overlay').classList.add('open');
+  document.getElementById('m-status-sheet').classList.add('open');
+}
+function closeStatusSheet() {
+  document.getElementById('m-status-overlay').classList.remove('open');
+  document.getElementById('m-status-sheet').classList.remove('open');
+}
+async function mSetStatus(val) {
+  closeStatusSheet();
+  await inlineSave(mSheetId, 'status', val);
+}
+
+// Filter sheet
+function openFilterSheet() {
+  const opts = document.getElementById('m-filter-status-opts');
+  const statuses = [['','Todos'], ...Object.entries(STATUS_LABELS)];
+  opts.innerHTML = statuses.map(([k,l]) =>
+    `<button class="m-chip${mFilterStatus===k?' active':''}" onclick="mToggleFilter('${k}',this)">${l}</button>`
+  ).join('');
+  document.getElementById('m-filter-overlay').classList.add('open');
+  document.getElementById('m-filter-sheet').classList.add('open');
+}
+function closeFilterSheet() {
+  document.getElementById('m-filter-overlay').classList.remove('open');
+  document.getElementById('m-filter-sheet').classList.remove('open');
+}
+function mToggleFilter(val, btn) {
+  document.querySelectorAll('#m-filter-status-opts .m-chip').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  mFilterStatus = val;
+}
+function applyFilterSheet() {
+  // sync with desktop filter
+  const sel = document.getElementById('filter-status');
+  if (sel) sel.value = mFilterStatus;
+  closeFilterSheet();
+  renderTable();
+}
+
+// Patch renderTable to also render cards on mobile
+const _origRenderTable = renderTable.bind({});
+renderTable = function() {
+  _origRenderTable();
+  if (isMobile()) renderCards();
+};
 async function init() {
   await load();
   // Upsert seeds apenas se ainda não existirem no banco
