@@ -1981,7 +1981,7 @@ function renderCards() {
       <div class="m-card-top">
         <div style="flex:1;min-width:0">
           <div class="m-card-name">${esc(c.nome)}</div>
-          <div class="m-card-contact">${c.contato ? esc(c.contato) : ''} ${c.cidade||c.estado ? `· <span style="color:#aaa">${esc(loc)}</span>` : ''}</div>
+          <div class="m-card-contact">${c.contato ? esc(c.contato) : ''} ${c.cidade||c.estado ? `· <span style="color:#aaa">${esc(loc)}</span>` : ''}${c.inseridoPor ? ` · <span style="color:#ccc;font-size:10px">${esc(c.inseridoPor)}</span>` : ''}</div>
           ${obs}
         </div>
         <span class="m-status ${statusCls}">${statusLbl}</span>
