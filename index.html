@@ -517,6 +517,10 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
       </div>
       <div class="section dash-chart-card">
         <div class="section-title"><span>Leads por Vendedor</span></div>
+        <div style="display:flex;gap:0;border-bottom:1px solid var(--gray);overflow-x:auto;scrollbar-width:none">
+          <button class="vend-tab active" id="vt-total" onclick="switchVendTab('total')" style="font-family:var(--font);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:9px 16px;border:none;border-bottom:2px solid var(--black);background:none;cursor:pointer;white-space:nowrap;color:var(--black)">Total</button>
+          <div id="vt-months" style="display:flex;gap:0"></div>
+        </div>
         <div class="funnel-wrap" id="stats-vendedores"></div>
       </div>
     </div>
@@ -1662,24 +1666,53 @@ function renderDash() {
     </div>`;
   }).join('');
 
-  // Vendedores
-  const vendedorMap = {};
-  contacts.forEach(c => {
-    const v = c.inseridoPor || 'Não atribuído';
-    vendedorMap[v] = (vendedorMap[v]||0) + 1;
-  });
-  const vendedores = Object.entries(vendedorMap).sort((a,b) => b[1]-a[1]);
-  const maxV = vendedores.length ? vendedores[0][1] : 1;
-  document.getElementById('stats-vendedores').innerHTML = vendedores.length
-    ? vendedores.map(([v,n]) => `
-        <div class="funnel-row">
-          <div class="funnel-label" style="width:120px">${esc(v)}</div>
-          <div class="funnel-bar-wrap"><div class="funnel-bar" style="width:${Math.round(n/maxV*100)}%;background:#000"></div></div>
-          <div class="funnel-count">${n}</div>
-          <div class="funnel-pct">${pct(n)}%</div>
-        </div>`).join('')
-    : '<p style="padding:16px;font-size:11px;color:#aaa">Sem dados</p>';
+  // Vendedores — abas por mês
+  const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  // Coletar meses com leads
+  const moKeys = [...new Set(contacts.map(c => c.createdAt ? c.createdAt.slice(0,7) : null).filter(Boolean))].sort().reverse();
+  const vtMonths = document.getElementById('vt-months');
+  if (vtMonths) {
+    vtMonths.innerHTML = moKeys.map(k => {
+      const [y,m] = k.split('-');
+      const lbl = months[parseInt(m)-1]+'/'+y.slice(2);
+      return `<button class="vend-tab" id="vt-${k}" onclick="switchVendTab('${k}')"
+        style="font-family:var(--font);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:9px 14px;border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;white-space:nowrap;color:#aaa">${lbl}</button>`;
+    }).join('');
+  }
+  renderVendedores('total');
+}
 
+let _vendTab = 'total';
+function switchVendTab(key) {
+  _vendTab = key;
+  document.querySelectorAll('.vend-tab').forEach(b => {
+    const active = b.id === 'vt-' + key;
+    b.style.borderBottom = active ? '2px solid var(--black)' : '2px solid transparent';
+    b.style.color = active ? 'var(--black)' : '#aaa';
+  });
+  renderVendedores(key);
+}
+
+function renderVendedores(key) {
+  const pct = n => contacts.length ? Math.round(n/contacts.length*100) : 0;
+  const filtered = key === 'total' ? contacts : contacts.filter(c => c.createdAt && c.createdAt.slice(0,7) === key);
+  const map = {};
+  filtered.forEach(c => {
+    const v = c.inseridoPor || 'Não atribuído';
+    map[v] = (map[v]||0) + 1;
+  });
+  const list = Object.entries(map).sort((a,b) => b[1]-a[1]);
+  const maxV = list.length ? list[0][1] : 1;
+  const total = filtered.length;
+  document.getElementById('stats-vendedores').innerHTML = list.length
+    ? list.map(([v,n]) => `
+        <div class="funnel-row">
+          <div class="funnel-label" style="width:130px">${esc(v)}</div>
+          <div class="funnel-bar-wrap"><div class="funnel-bar" style="width:${Math.round(n/maxV*100)}%;background:var(--black)"></div></div>
+          <div class="funnel-count">${n}</div>
+          <div class="funnel-pct">${total ? Math.round(n/total*100) : 0}%</div>
+        </div>`).join('')
+    : '<p style="padding:16px;font-size:11px;color:#aaa;letter-spacing:1px">Sem dados neste período</p>';
 }
 
 // ── BATCH UPSERT ──────────────────────────────────────────
