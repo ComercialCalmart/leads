@@ -270,7 +270,20 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
   .cad-step-header { flex-wrap: wrap; gap: 6px; }
 }
 
-/* ── MOBILE CARDS (hidden on desktop) ── */
+/* ── LOGIN ── */
+.login-screen { display:none; position:fixed; inset:0; background:var(--black); z-index:9999; align-items:center; justify-content:center; flex-direction:column; }
+.login-screen.show { display:flex; }
+.login-box { background:var(--white); border-radius:6px; padding:40px 36px 32px; width:100%; max-width:380px; }
+.login-logo { font-size:11px; font-weight:700; letter-spacing:5px; text-transform:uppercase; color:#aaa; margin-bottom:6px; }
+.login-title { font-size:28px; font-weight:900; letter-spacing:4px; text-transform:uppercase; margin-bottom:4px; }
+.login-sub { font-size:10px; letter-spacing:2px; text-transform:uppercase; color:#bbb; margin-bottom:28px; }
+.login-label { font-size:9px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#888; display:block; margin-bottom:5px; }
+.login-input { font-family:var(--font); font-size:14px; padding:11px 12px; border:2px solid #ddd; border-radius:var(--radius); width:100%; margin-bottom:14px; transition:border-color .12s; }
+.login-input:focus { outline:none; border-color:var(--black); }
+.login-btn { width:100%; font-family:var(--font); font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:13px; background:var(--black); color:var(--white); border:none; border-radius:var(--radius); cursor:pointer; transition:background .12s; margin-top:4px; }
+.login-btn:hover { background:#222; }
+.login-btn:disabled { background:#aaa; cursor:default; }
+.login-error { font-size:12px; color:var(--red); margin-top:10px; min-height:18px; text-align:center; letter-spacing:.5px; }
 .mobile-cards { display: none; }
 .btn-filter-mobile { display: none; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 8px; border: 1.5px solid #ddd; background: var(--white); cursor: pointer; font-size: 16px; flex-shrink: 0; }
 .m-fab { display: none; position: fixed; bottom: 24px; right: 20px; width: 56px; height: 56px; background: var(--black); color: var(--white); border: none; border-radius: 50%; font-size: 26px; cursor: pointer; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(0,0,0,.28); z-index: 400; transition: transform .15s; font-family: var(--font); line-height: 1; }
@@ -414,6 +427,7 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
     <p>Gestão Comercial</p>
   </div>
   <div class="header-actions">
+    <button class="btn btn-ghost" onclick="doLogout()" title="Sair">⎋ Sair</button>
     <button class="btn btn-ghost" onclick="changeUser()" id="user-indicator" style="gap:6px">— Identificar</button>
     <button class="btn btn-ghost" onclick="exportJSON()">↑ Salvar</button>
     <label class="btn btn-ghost" style="cursor:pointer;">↓ Importar <input type="file" accept=".csv,.xls,.xlsx,.txt" onchange="importCSV(event)" style="display:none"></label>
@@ -727,6 +741,22 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
       <button class="btn-cancel" onclick="closeDupModal()">Fechar</button>
       <button class="btn-save" onclick="importAllUpdate()">Atualizar Todos</button>
     </div>
+  </div>
+</div>
+
+<!-- LOGIN SCREEN -->
+<div class="login-screen" id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">Calmart</div>
+    <div class="login-title">Prospecção</div>
+    <div class="login-sub">Acesso restrito</div>
+    <label class="login-label">E-mail</label>
+    <input class="login-input" type="email" id="login-email" placeholder="seu@calmart.com.br" autocomplete="email">
+    <label class="login-label">Senha</label>
+    <input class="login-input" type="password" id="login-senha" placeholder="••••••••••••" autocomplete="current-password"
+      onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" id="login-btn" onclick="doLogin()">Entrar</button>
+    <div class="login-error" id="login-error"></div>
   </div>
 </div>
 
@@ -2144,30 +2174,116 @@ renderTable = function() {
   _origRenderTable();
   if (isMobile()) renderCards();
 };
-async function init() {
-  // Identidade
-  const user = getCurrentUser();
-  const indicator = document.getElementById('user-indicator');
-  if (user) {
-    if (indicator) indicator.textContent = '👤 ' + user;
-  } else {
-    showUserPicker();
+// ── AUTH ──────────────────────────────────────────────────
+const SB_AUTH = SB_URL + '/auth/v1';
+const AUTH_HDR = { 'Content-Type':'application/json', 'apikey': SB_KEY };
+
+let authSession = null;
+
+async function checkSession() {
+  const raw = localStorage.getItem('calmart_session');
+  if (!raw) return null;
+  try {
+    const s = JSON.parse(raw);
+    if (!s.access_token || !s.expires_at) return null;
+    if (Date.now() / 1000 > s.expires_at - 60) {
+      // try refresh
+      const res = await fetch(SB_AUTH + '/token?grant_type=refresh_token', {
+        method: 'POST', headers: AUTH_HDR,
+        body: JSON.stringify({ refresh_token: s.refresh_token })
+      });
+      if (!res.ok) { localStorage.removeItem('calmart_session'); return null; }
+      const data = await res.json();
+      localStorage.setItem('calmart_session', JSON.stringify(data));
+      SB_HDR['Authorization'] = 'Bearer ' + data.access_token;
+      return data;
+    }
+    SB_HDR['Authorization'] = 'Bearer ' + s.access_token;
+    return s;
+  } catch { return null; }
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const senha = document.getElementById('login-senha').value;
+  const btn   = document.getElementById('login-btn');
+  const err   = document.getElementById('login-error');
+  if (!email || !senha) { err.textContent = 'Preencha e-mail e senha.'; return; }
+  btn.disabled = true; btn.textContent = 'Entrando...'; err.textContent = '';
+  try {
+    const res = await fetch(SB_AUTH + '/token?grant_type=password', {
+      method: 'POST', headers: AUTH_HDR,
+      body: JSON.stringify({ email, password: senha })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error_description || data.message || 'Credenciais inválidas.');
+    localStorage.setItem('calmart_session', JSON.stringify(data));
+    SB_HDR['Authorization'] = 'Bearer ' + data.access_token;
+    authSession = data;
+    document.getElementById('login-screen').classList.remove('show');
+    // auto-set user name from email
+    const emailName = email.split('@')[0];
+    const mapped = {
+      'lucas.catarin':'Lucas Catarin','robson':'Robson','comercial':'Comercial',
+      'comercial.sp':'Diego','jrcatarin':'Zé Catarin','ti':'Lucas Alves'
+    };
+    const name = mapped[emailName] || emailName;
+    if (!getCurrentUser()) { setCurrentUser(name); }
+    const indicator = document.getElementById('user-indicator');
+    if (indicator) indicator.textContent = '👤 ' + (getCurrentUser()||name);
+    await afterLogin();
+  } catch(e) {
+    err.textContent = e.message;
+    btn.disabled = false; btn.textContent = 'Entrar';
   }
+}
+
+async function doLogout() {
+  if (!confirm('Deseja sair do sistema?')) return;
+  try {
+    await fetch(SB_AUTH + '/logout', { method:'POST', headers:{ ...AUTH_HDR, 'Authorization': SB_HDR['Authorization']||'' } });
+  } catch {}
+  localStorage.removeItem('calmart_session');
+  authSession = null;
+  SB_HDR['Authorization'] = 'Bearer ' + SB_KEY;
+  contacts = [];
+  renderTable(); updateBadge();
+  document.getElementById('login-screen').classList.add('show');
+  document.getElementById('login-email').value = '';
+  document.getElementById('login-senha').value = '';
+  document.getElementById('login-error').textContent = '';
+  document.getElementById('login-btn').disabled = false;
+  document.getElementById('login-btn').textContent = 'Entrar';
+}
+
+async function afterLogin() {
   await load();
-  // Upsert seeds apenas se ainda não existirem no banco
   const missing = SEEDS.filter(s => !contacts.find(c=>c.id===s.id));
   if (missing.length) {
     await sbUpsertMany(missing);
     missing.forEach(s => contacts.push(s));
     renderTable(); updateBadge();
   }
-  // Patch: leads sem campo ultimo recebem hoje
   const needsPatch = contacts.filter(c => !c.ultimo);
   if (needsPatch.length) {
     needsPatch.forEach(c => { c.ultimo = TODAY_ISO; });
     await sbUpsertMany(needsPatch);
     renderTable();
   }
+}
+
+async function init() {
+  const session = await checkSession();
+  if (!session) {
+    document.getElementById('login-screen').classList.add('show');
+    return;
+  }
+  authSession = session;
+  const user = getCurrentUser();
+  const indicator = document.getElementById('user-indicator');
+  if (user) { if (indicator) indicator.textContent = '👤 ' + user; }
+  else { showUserPicker(); }
+  await afterLogin();
 }
 init();
 
