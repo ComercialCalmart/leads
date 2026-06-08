@@ -1023,9 +1023,8 @@ function fillForm(c) {
   set('zap',c.zap); set('email',c.email); set('cidade',c.cidade); set('estado',c.estado);
   set('cnpj',c.cnpj);
   set('inserido-por', c.inseridoPor||'');
-  const ultimoDisplay = c.ultimo ? c.ultimo.split('-').reverse().join('/') : '';
-  set('prox',   proxDisplay);
-  set('ultimo', ultimoDisplay);
+  set('prox',   c.prox   ? c.prox.split('-').reverse().join('/')   : '');
+  set('ultimo', c.ultimo ? c.ultimo.split('-').reverse().join('/') : '');
   set('url-ml',c.urlMl); set('url-az',c.urlAz); set('url-sh',c.urlSh);
   set('url-site',c.urlSite); set('insta',c.insta); set('obs',c.obs);
 }
