@@ -411,19 +411,19 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
   <div class="header-left">
     <h1>Calmart</h1>
     <h2>Prospecção</h2>
-    <p>Sellers &amp; Marketplace</p>
+    <p>Gestão Comercial</p>
   </div>
   <div class="header-actions">
     <button class="btn btn-ghost" onclick="changeUser()" id="user-indicator" style="gap:6px">— Identificar</button>
-    <button class="btn btn-ghost" onclick="exportJSON()">↑ Backup</button>
-    <label class="btn btn-ghost" style="cursor:pointer;">↓ XLS <input type="file" accept=".csv,.xls,.xlsx,.txt" onchange="importCSV(event)" style="display:none"></label>
-    <button class="btn btn-primary" onclick="openModal()">+ Novo Lead</button>
+    <button class="btn btn-ghost" onclick="exportJSON()">↑ Salvar Planilha</button>
+    <label class="btn btn-ghost" style="cursor:pointer;">↓ Importar Planilha <input type="file" accept=".csv,.xls,.xlsx,.txt" onchange="importCSV(event)" style="display:none"></label>
+    <button class="btn btn-primary" onclick="openModal()">+ Novo Contato</button>
   </div>
 </header>
 
 <nav class="page-nav">
-  <button class="nav-tab active" onclick="showPage('leads',this)">Leads</button>
-  <button class="nav-tab" onclick="showPage('dash',this)">Dashboard</button>
+  <button class="nav-tab active" onclick="showPage('leads',this)">Contatos</button>
+  <button class="nav-tab" onclick="showPage('dash',this)">Painel</button>
   <button class="nav-tab" onclick="showPage('cadencia',this)">Cadência Comercial</button>
 </nav>
 
@@ -432,18 +432,18 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
   <div class="container">
     <div class="section">
       <div class="section-title">
-        <span>Lista de Leads</span>
+        <span>Lista de Contatos</span>
         <span class="tag" id="total-badge">0</span>
       </div>
       <div class="toolbar">
-        <input type="text" class="search-input" id="search-input" placeholder="Buscar empresa, zap, email, cidade, CNPJ..." oninput="renderTable()">
+        <input type="text" class="search-input" id="search-input" placeholder="Buscar empresa, zap, email, cidade...de, CNPJ..." oninput="renderTable()">
         <select class="filter-select" id="filter-status" onchange="renderTable()">
           <option value="">Todos os status</option>
           <option value="NOVO">Novo</option>
-          <option value="TENT1">Tentativa 1</option>
-          <option value="TENT2">Tentativa 2</option>
-          <option value="TENT3">Tentativa 3</option>
-          <option value="NEGOC">Negociando</option>
+          <option value="TENT1">1ª Tentativa</option>
+          <option value="TENT2">2ª Tentativa</option>
+          <option value="TENT3">3ª Tentativa</option>
+          <option value="NEGOC">Em negociação</option>
           <option value="FECHADO">Fechado</option>
           <option value="PERDIDO">Perdido</option>
         </select>
@@ -451,7 +451,7 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
           <option value="">Próx. contato</option>
           <option value="vencido">Vencidos</option>
           <option value="hoje">Hoje</option>
-          <option value="7dias">Próx. 7 dias</option>
+          <option value="7dias">Próximos 7 dias</option>
         </select>
         <span class="toolbar-count" id="showing-count"></span>
         <span class="save-status" id="save-status"></span>
@@ -461,19 +461,19 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
         <table class="leads-table" id="leads-table">
           <thead>
             <tr>
-              <th style="width:48px" class="c sortable" data-sort="createdAt" onclick="sortTable('createdAt')">Inserido <span class="sort-arrow">↕</span></th>
+              <th style="width:48px" class="c sortable" data-sort="createdAt" onclick="sortTable('createdAt')">Cadastro <span class="sort-arrow">↕</span></th>
               <th style="width:20px">#</th>
-              <th style="width:72px" class="sortable" data-sort="contato" onclick="sortTable('contato')">Nome <span class="sort-arrow">↕</span></th>
+              <th style="width:72px" class="sortable" data-sort="contato" onclick="sortTable('contato')">Contato <span class="sort-arrow">↕</span></th>
               <th style="width:140px" class="sortable" data-sort="nome" onclick="sortTable('nome')">Empresa <span class="sort-arrow">↕</span></th>
               <th style="width:36px" class="c">Zap</th>
-              <th style="width:30px" class="c">Mail</th>
+              <th style="width:30px" class="c">Email</th>
               <th style="width:90px" class="sortable" data-sort="cidade" onclick="sortTable('cidade')">Cidade <span class="sort-arrow">↕</span></th>
               <th style="width:30px" class="c sortable" data-sort="estado" onclick="sortTable('estado')">UF <span class="sort-arrow">↕</span></th>
               <th style="width:120px">CNPJ</th>
               <th style="width:108px" class="sortable" data-sort="status" onclick="sortTable('status')">Status <span class="sort-arrow">↕</span></th>
-              <th style="width:74px" class="c sortable" data-sort="ultimo" onclick="sortTable('ultimo')">Últ. <span class="sort-arrow">↕</span></th>
-              <th style="width:74px" class="c sortable" data-sort="prox" onclick="sortTable('prox')">Próx. <span class="sort-arrow">↕</span></th>
-              <th style="width:120px" class="c">Links</th>
+              <th style="width:74px" class="c sortable" data-sort="ultimo" onclick="sortTable('ultimo')">Últ. Contato <span class="sort-arrow">↕</span></th>
+              <th style="width:74px" class="c sortable" data-sort="prox" onclick="sortTable('prox')">Próx. Contato <span class="sort-arrow">↕</span></th>
+              <th style="width:120px" class="c">Canais</th>
               <th style="width:52px"></th>
             </tr>
           </thead>
@@ -481,7 +481,7 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
         </table>
         <div id="empty-state" class="empty-state" style="display:none">
           <div style="font-size:28px">📋</div>
-          <p>Nenhum lead cadastrado</p>
+          <p>Nenhum contato cadastrado</p>
         </div>
       </div>
       <!-- MOBILE CARDS -->
@@ -500,11 +500,11 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
     <!-- Gráficos lado a lado -->
     <div class="dash-charts-row">
       <div class="section dash-chart-card">
-        <div class="section-title"><span>Leads Cadastrados / Mês</span></div>
+        <div class="section-title"><span>Contatos por Mês</span></div>
         <div id="chart-leads" style="padding:24px 20px 20px"></div>
       </div>
       <div class="section dash-chart-card">
-        <div class="section-title"><span>Fechamentos / Mês</span></div>
+        <div class="section-title"><span>Fechamentos por Mês</span></div>
         <div id="chart-fechados" style="padding:24px 20px 20px"></div>
       </div>
     </div>
@@ -516,7 +516,7 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
         <div class="funnel-wrap" id="stats-funnel"></div>
       </div>
       <div class="section dash-chart-card">
-        <div class="section-title"><span>Leads por Vendedor</span></div>
+        <div class="section-title"><span>Contatos por Vendedor</span></div>
         <div style="display:flex;gap:0;border-bottom:1px solid var(--gray);flex-wrap:wrap">
           <button class="vend-tab active" id="vt-total" onclick="switchVendTab('total')" style="font-family:var(--font);font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:9px 16px;border:none;border-bottom:2px solid var(--black);background:none;cursor:pointer;white-space:nowrap;color:var(--black)">Total</button>
           <div id="vt-months" style="display:flex;gap:0"></div>
@@ -577,7 +577,7 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
 <div class="modal-overlay" id="modal-overlay">
   <div class="modal">
     <div class="modal-header">
-      <h3 id="modal-title">Novo Lead</h3>
+      <h3 id="modal-title">Novo Contato</h3>
       <button class="modal-close" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-body">
@@ -592,7 +592,7 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
           <input type="text" id="f-contato" placeholder="Ex: Marcus, João...">
         </div>
         <div class="form-group">
-          <label>Marketplace Principal</label>
+          <label>Principal Marketplace</label>
           <select id="f-mkt">
             <option value="">—</option>
             <option value="MELI">Mercado Livre</option>
@@ -605,10 +605,10 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
           <label>Status</label>
           <select id="f-status">
             <option value="NOVO">Novo</option>
-            <option value="TENT1">Tentativa 1</option>
-            <option value="TENT2">Tentativa 2</option>
-            <option value="TENT3">Tentativa 3</option>
-            <option value="NEGOC">Negociando</option>
+            <option value="TENT1">1ª Tentativa</option>
+            <option value="TENT2">2ª Tentativa</option>
+            <option value="TENT3">3ª Tentativa</option>
+            <option value="NEGOC">Em negociação</option>
             <option value="FECHADO">Fechado</option>
             <option value="PERDIDO">Perdido</option>
           </select>
@@ -654,7 +654,7 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
           <option value="Outro">Outro</option>
         </select>
 
-        <div class="divider">Links</div>
+        <div class="divider">Canais</div>
         <div class="form-group full">
           <label>Mercado Livre URL</label>
           <input type="url" id="f-url-ml" placeholder="https://mercadolivre.com.br/loja/...">
@@ -693,8 +693,8 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
 <!-- CONFIRM DELETE -->
 <div class="confirm-overlay" id="confirm-overlay">
   <div class="confirm-box">
-    <h4>Excluir Lead</h4>
-    <p>Essa ação não pode ser desfeita.</p>
+    <h4>Excluir Contato</h4>
+    <p>Esta ação não pode ser desfeita.</p>
     <div class="confirm-btns">
       <button class="btn-cancel" style="padding:8px 18px" onclick="closeConfirm()">Cancelar</button>
       <button class="btn-save" style="background:var(--red);border-color:var(--red);padding:8px 18px" onclick="confirmDelete()">Excluir</button>
@@ -719,7 +719,7 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
 <div class="modal-overlay" id="dup-overlay">
   <div class="modal" style="max-width:540px">
     <div class="modal-header">
-      <h3>Duplicados Detectados</h3>
+      <h3>Contatos Repetidos</h3>
       <button class="modal-close" onclick="closeDupModal()">✕</button>
     </div>
     <div class="modal-body" id="dup-body"></div>
@@ -737,7 +737,7 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
       <h3>Quem está usando?</h3>
     </div>
     <div class="modal-body" style="padding:16px">
-      <p style="font-size:12px;color:#888;margin-bottom:16px;letter-spacing:.5px">Selecione seu nome. Será lembrado neste dispositivo.</p>
+      <p style="font-size:12px;color:#888;margin-bottom:16px;letter-spacing:.5px">Selecione seu nome. Será lembrado neste aparelho.</p>
       <div style="display:flex;flex-direction:column;gap:8px" id="user-picker-btns"></div>
     </div>
   </div>
@@ -751,7 +751,7 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
 <div class="m-sheet" id="m-sheet">
   <div class="m-sheet-handle"></div>
   <div class="m-sheet-title" id="m-sheet-title">Ações</div>
-  <button class="m-sheet-btn" onclick="mSheetEdit()"><span class="m-sheet-icon">✎</span> Editar lead</button>
+  <button class="m-sheet-btn" onclick="mSheetEdit()"><span class="m-sheet-icon">✎</span> Editar contato</button>
   <button class="m-sheet-btn" onclick="mSheetStatus()"><span class="m-sheet-icon">⬤</span> Alterar status</button>
   <button class="m-sheet-btn danger" onclick="mSheetDelete()"><span class="m-sheet-icon">✕</span> Excluir</button>
 </div>
@@ -850,7 +850,7 @@ let pendingDups = [];
 let pendingNew = [];
 
 // ── STATUS ─────────────────────────────────────────────────
-const STATUS_LABELS = { NOVO:'Novo', TENT1:'Tentativa 1', TENT2:'Tentativa 2', TENT3:'Tentativa 3', NEGOC:'Negociando', FECHADO:'Fechado', PERDIDO:'Perdido' };
+const STATUS_LABELS = { NOVO:'Novo', TENT1:'1ª Tentativa', TENT2:'2ª Tentativa', TENT3:'3ª Tentativa', NEGOC:'Em negociação', FECHADO:'Fechado', PERDIDO:'Perdido' };
 const STATUS_CLASS  = { NOVO:'s-novo', TENT1:'s-tent1', TENT2:'s-tent2', TENT3:'s-tent3', NEGOC:'s-negoc', FECHADO:'s-fechado', PERDIDO:'s-perdido' };
 const MKT_LABELS = { MELI:'Mercado Livre', AMAZON:'Amazon', SHOPPEE:'Shopee', OUTRO:'Outro' };
 
@@ -1033,7 +1033,7 @@ function showPage(id, btn) {
 // ── MODAL ─────────────────────────────────────────────────
 function openModal(id) {
   editingId = id || null;
-  document.getElementById('modal-title').textContent = id ? 'Editar Lead' : 'Novo Lead';
+  document.getElementById('modal-title').textContent = id ? 'Editar Contato' : 'Novo Contato';
   clearForm();
   if (id) { const c = contacts.find(x=>x.id===id); if(c) fillForm(c); }
   document.getElementById('modal-overlay').classList.add('open');
@@ -1443,7 +1443,7 @@ function importCSV(e) {
   const r = new FileReader();
   r.onload = async ev => {
     const parsed = parseCSV(ev.target.result);
-    if (!parsed.length) { alert('Nenhum lead válido encontrado no CSV.'); return; }
+    if (!parsed.length) { alert('Nenhum contato válido encontrado na planilha.'); return; }
     const dups = [], news = [];
     parsed.forEach(c => {
       const dup = findDuplicate(c);
@@ -1458,7 +1458,7 @@ function importCSV(e) {
       await sbUpsertMany(news);
       contacts.unshift(...news);
       renderTable(); updateBadge();
-      alert(`${news.length} lead(s) importado(s).`);
+      alert(`${news.length} contato(s) importado(s).`);
     }
   };
   r.readAsText(f,'utf-8');
@@ -1469,11 +1469,11 @@ function importCSV(e) {
 function showDupModal() {
   const body = document.getElementById('dup-body');
   body.innerHTML = `
-    <p style="font-size:11px;color:#666;margin-bottom:14px">${pendingNew.length} novo(s) + ${pendingDups.length} duplicado(s) encontrado(s):</p>
+    <p style="font-size:11px;color:#666;margin-bottom:14px">${pendingNew.length} novo(s) + ${pendingDups.length} repetido(s) encontrado(s):</p>
     ${pendingDups.map((d,i)=>`
       <div class="dup-item">
         <h5>${esc(d.incoming.nome||d.incoming.zap||'Lead')}</h5>
-        <div style="font-size:11px;color:#666">Conflito com: <strong>${esc(d.existing.nome)}</strong> ${d.existing.zap?'· '+d.existing.zap:''}</div>
+        <div style="font-size:11px;color:#666">Igual ao contato: <strong>${esc(d.existing.nome)}</strong> ${d.existing.zap?'· '+d.existing.zap:''}</div>
         <div class="dup-btns">
           <button class="dup-btn primary" onclick="resolveDup(${i},'update')">Atualizar existente</button>
           <button class="dup-btn" onclick="resolveDup(${i},'skip')">Ignorar</button>
@@ -1637,9 +1637,9 @@ function renderDash() {
 
   document.getElementById('dash-kpis').innerHTML = `
     <div class="kpi-card kpi-dark">
-      <div class="kpi-eyebrow">Pipeline Total</div>
+      <div class="kpi-eyebrow">Total de Contatos</div>
       <div class="kpi-number">${total}</div>
-      <div class="kpi-delta" style="color:rgba(255,255,255,.3)">leads ativos</div>
+      <div class="kpi-delta" style="color:rgba(255,255,255,.3)">contatos ativos</div>
     </div>
     <div class="kpi-card">
       <div class="kpi-eyebrow">Novos este mês</div>
@@ -1657,14 +1657,14 @@ function renderDash() {
       ${delta(fechThisMo, fechPrevMo)}
     </div>
     <div class="kpi-card">
-      <div class="kpi-eyebrow">Negociando</div>
+      <div class="kpi-eyebrow">Em negociação</div>
       <div class="kpi-number yellow">${count('NEGOC')}</div>
-      <div class="kpi-delta">${pct(count('NEGOC'))}% do pipeline</div>
+      <div class="kpi-delta">${pct(count('NEGOC'))}% do total</div>
     </div>
     <div class="kpi-card">
-      <div class="kpi-eyebrow">Follow-ups Vencidos</div>
+      <div class="kpi-eyebrow">Retornos Atrasados</div>
       <div class="kpi-number red">${vencidos}</div>
-      <div class="kpi-delta ${vencidos>0?'down':''}">aguardando ação</div>
+      <div class="kpi-delta ${vencidos>0?'down':''}">precisam de atenção</div>
     </div>
   `;
 
