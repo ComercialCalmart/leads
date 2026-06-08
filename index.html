@@ -414,6 +414,7 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
     <p>Sellers &amp; Marketplace</p>
   </div>
   <div class="header-actions">
+    <button class="btn btn-ghost" onclick="changeUser()" id="user-indicator" style="gap:6px">— Identificar</button>
     <button class="btn btn-ghost" onclick="exportJSON()">↑ Backup</button>
     <label class="btn btn-ghost" style="cursor:pointer;">↓ XLS <input type="file" accept=".csv,.xls,.xlsx,.txt" onchange="importCSV(event)" style="display:none"></label>
     <button class="btn btn-primary" onclick="openModal()">+ Novo Lead</button>
@@ -637,9 +638,11 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
         <select id="f-inserido-por" style="display:none">
           <option value="">—</option>
           <option value="Diego">Diego</option>
+          <option value="Lucas Alves">Lucas Alves</option>
+          <option value="Lucas Catarin">Lucas Catarin</option>
           <option value="Matheus">Matheus</option>
-          <option value="Lucas">Lucas</option>
-          <option value="Catarin">Catarin</option>
+          <option value="Robson">Robson</option>
+          <option value="Zé Catarin">Zé Catarin</option>
           <option value="Outro">Outro</option>
         </select>
 
@@ -715,6 +718,19 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
     <div class="modal-footer">
       <button class="btn-cancel" onclick="closeDupModal()">Fechar</button>
       <button class="btn-save" onclick="importAllUpdate()">Atualizar Todos</button>
+    </div>
+  </div>
+</div>
+
+<!-- USER PICKER -->
+<div class="modal-overlay" id="user-picker-overlay">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-header">
+      <h3>Quem está usando?</h3>
+    </div>
+    <div class="modal-body" style="padding:16px">
+      <p style="font-size:12px;color:#888;margin-bottom:16px;letter-spacing:.5px">Selecione seu nome. Será lembrado neste dispositivo.</p>
+      <div style="display:flex;flex-direction:column;gap:8px" id="user-picker-btns"></div>
     </div>
   </div>
 </div>
@@ -1046,6 +1062,7 @@ async function saveContact() {
       }
     } else {
       data.id = genId(); data.createdAt = data.updatedAt = new Date().toISOString();
+      if (!data.inseridoPor) data.inseridoPor = getCurrentUser();
       contacts.unshift(data); await dbUpsert(data);
     }
     const ts = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
@@ -1886,7 +1903,37 @@ function cadCopy(taId, btn) {
   });
 }
 
-// ── MOBILE ────────────────────────────────────────────────
+// ── IDENTIDADE DO USUÁRIO ─────────────────────────────────
+const USERS = ['Diego','Lucas Alves','Lucas Catarin','Matheus','Robson','Zé Catarin','Outro'];
+
+function getCurrentUser() {
+  return localStorage.getItem('calmart_user') || '';
+}
+function setCurrentUser(name) {
+  localStorage.setItem('calmart_user', name);
+}
+
+function showUserPicker() {
+  const container = document.getElementById('user-picker-btns');
+  if (container && !container.children.length) {
+    container.innerHTML = USERS.map(n =>
+      `<button onclick="selectUser('${n}')"
+        style="font-family:var(--font);font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:14px;border:2px solid var(--black);background:var(--white);cursor:pointer;border-radius:var(--radius);transition:all .12s;text-align:left"
+        onmouseover="this.style.background='var(--black)';this.style.color='var(--white)'"
+        onmouseout="this.style.background='var(--white)';this.style.color='var(--black)'">${n}</button>`
+    ).join('');
+  }
+  document.getElementById('user-picker-overlay').classList.add('open');
+}
+function selectUser(name) {
+  setCurrentUser(name);
+  document.getElementById('user-picker-overlay').classList.remove('open');
+  const indicator = document.getElementById('user-indicator');
+  if (indicator) indicator.textContent = '👤 ' + name;
+}
+function changeUser() {
+  showUserPicker();
+}
 const isMobile = () => window.innerWidth <= 640;
 let mSheetId = null;
 let mFilterStatus = '';
@@ -2025,6 +2072,14 @@ renderTable = function() {
   if (isMobile()) renderCards();
 };
 async function init() {
+  // Identidade
+  const user = getCurrentUser();
+  const indicator = document.getElementById('user-indicator');
+  if (user) {
+    if (indicator) indicator.textContent = '👤 ' + user;
+  } else {
+    showUserPicker();
+  }
   await load();
   // Upsert seeds apenas se ainda não existirem no banco
   const missing = SEEDS.filter(s => !contacts.find(c=>c.id===s.id));
