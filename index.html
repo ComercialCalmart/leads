@@ -1543,24 +1543,18 @@ function buildMonthlyData(dateField, filterFn) {
     if (!k) return;
     map[k] = (map[k]||0) + 1;
   });
-  // sort keys
-  const keys = Object.keys(map).sort();
-  // fill gaps for last 12 months
-  if (keys.length) {
-    const last = keys[keys.length-1];
-    const [ly, lm] = last.split('-').map(Number);
-    const all = [];
-    for (let i = 11; i >= 0; i--) {
-      let mm = lm - i; let yy = ly;
-      while (mm <= 0) { mm += 12; yy--; }
-      const k = `${yy}-${String(mm).padStart(2,'0')}`;
-      all.push(k);
-    }
-    const result = {};
-    all.forEach(k => result[k] = map[k]||0);
-    return result;
+
+  // Mostrar Jan até mês atual do ano corrente
+  const now = new Date();
+  const curYear = now.getFullYear();
+  const curMonth = now.getMonth() + 1; // 1-12
+  const all = [];
+  for (let m = 1; m <= curMonth; m++) {
+    all.push(`${curYear}-${String(m).padStart(2,'0')}`);
   }
-  return map;
+  const result = {};
+  all.forEach(k => result[k] = map[k]||0);
+  return result;
 }
 
 function renderBarChart(containerId, data, color) {
@@ -1580,7 +1574,7 @@ function renderBarChart(containerId, data, color) {
   const PAD_L = 8;
   const PAD_R = 8;
   const H     = 130;
-  const PAD_B = 36;
+  const PAD_B = 24;
   const PAD_T = 20;
   const chartH = H - PAD_B - PAD_T;
   const W = PAD_L + N * COL + PAD_R;
@@ -1605,7 +1599,6 @@ function renderBarChart(containerId, data, color) {
       <rect class="chart-bar" x="${x}" y="${y}" width="${BAR_W}" height="${barH}" fill="${fillColor}" rx="2"/>
       ${v>0 ? `<text class="chart-value" x="${x+BAR_W/2}" y="${y-5}" text-anchor="middle" fill="${isLast?color:'#999'}">${v}</text>` : ''}
       <text class="chart-month" x="${x+BAR_W/2}" y="${H-PAD_B+14}" text-anchor="middle">${moLabel}</text>
-      <text class="chart-month" x="${x+BAR_W/2}" y="${H-PAD_B+24}" text-anchor="middle" style="font-size:8px">${yr.slice(2)}</text>
     `;
   }).join('');
 
