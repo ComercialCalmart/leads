@@ -59,7 +59,7 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
 
 /* TABLE */
 .table-wrap { overflow-x: auto; max-width: 100%; }
-.leads-table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+.leads-table { width: 100%; border-collapse: collapse; font-size: 11.5px; table-layout: fixed; }
 .leads-table th { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 9px 8px; text-align: center; border-bottom: 2px solid var(--black); background: #fafafa; white-space: nowrap; }
 .leads-table td { padding: 7px 8px; border-bottom: 1px solid var(--gray); vertical-align: middle; }
 .leads-table tr:last-child td { border-bottom: none; }
@@ -67,10 +67,10 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
 .leads-table th.c, .leads-table td.c { text-align: center; }
 
 /* INLINE EDIT */
-.inline-input { font-family: var(--font); font-size: 11.5px; padding: 3px 6px; border: 1.5px solid var(--black); border-radius: 2px; background: var(--white); color: var(--black); width: 100%; min-width: 80px; }
+.inline-input { font-family: var(--font); font-size: 11.5px; padding: 3px 6px; border: 1.5px solid var(--black); border-radius: 2px; background: var(--white); color: var(--black); width: 100%; min-width: 0; }
 .inline-input:focus { outline: none; }
-.inline-select { font-family: var(--font); font-size: 11px; padding: 3px 5px; border: 1.5px solid var(--black); border-radius: 2px; background: var(--white); cursor: pointer; width: 100%; min-width: 120px; }
-.inline-date { font-family: var(--font); font-size: 11px; padding: 3px 5px; border: 1.5px solid var(--black); border-radius: 2px; background: var(--white); }
+.inline-select { font-family: var(--font); font-size: 11px; padding: 3px 5px; border: 1.5px solid var(--black); border-radius: 2px; background: var(--white); cursor: pointer; width: 100%; min-width: 0; min-width: 120px; }
+.inline-date { font-family: var(--font); font-size: 11px; padding: 3px 5px; border: 1.5px solid var(--black); border-radius: 2px; background: var(--white); width: 84px; min-width: 0; }
 .editable-cell { cursor: text; }
 .editable-cell:hover { background: #f0f0ec; }
 
@@ -461,20 +461,20 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
         <table class="leads-table" id="leads-table">
           <thead>
             <tr>
-              <th style="width:74px" class="c sortable" data-sort="createdAt" onclick="sortTable('createdAt')">Inserido <span class="sort-arrow">↕</span></th>
-              <th style="width:24px">#</th>
-              <th style="width:80px" class="sortable" data-sort="contato" onclick="sortTable('contato')">Nome <span class="sort-arrow">↕</span></th>
-              <th style="min-width:130px" class="sortable" data-sort="nome" onclick="sortTable('nome')">Empresa <span class="sort-arrow">↕</span></th>
-              <th style="min-width:110px">WhatsApp</th>
-              <th style="min-width:130px">Email</th>
-              <th style="width:80px" class="sortable" data-sort="cidade" onclick="sortTable('cidade')">Cidade <span class="sort-arrow">↕</span></th>
-              <th style="width:34px" class="c sortable" data-sort="estado" onclick="sortTable('estado')">UF <span class="sort-arrow">↕</span></th>
-              <th style="min-width:90px">CNPJ</th>
-              <th style="width:130px" class="sortable" data-sort="status" onclick="sortTable('status')">Status <span class="sort-arrow">↕</span></th>
-              <th style="width:88px" class="c sortable" data-sort="ultimo" onclick="sortTable('ultimo')">Últ. Contato <span class="sort-arrow">↕</span></th>
-              <th style="width:88px" class="c sortable" data-sort="prox" onclick="sortTable('prox')">Próx. Contato <span class="sort-arrow">↕</span></th>
-              <th style="width:100px" class="c">Links</th>
-              <th style="width:68px"></th>
+              <th style="width:70px" class="c sortable" data-sort="createdAt" onclick="sortTable('createdAt')">Inserido <span class="sort-arrow">↕</span></th>
+              <th style="width:20px">#</th>
+              <th style="width:72px" class="sortable" data-sort="contato" onclick="sortTable('contato')">Nome <span class="sort-arrow">↕</span></th>
+              <th style="width:140px" class="sortable" data-sort="nome" onclick="sortTable('nome')">Empresa <span class="sort-arrow">↕</span></th>
+              <th style="width:36px" class="c">Zap</th>
+              <th style="width:30px" class="c">Mail</th>
+              <th style="width:90px" class="sortable" data-sort="cidade" onclick="sortTable('cidade')">Cidade <span class="sort-arrow">↕</span></th>
+              <th style="width:30px" class="c sortable" data-sort="estado" onclick="sortTable('estado')">UF <span class="sort-arrow">↕</span></th>
+              <th style="width:120px">CNPJ</th>
+              <th style="width:120px" class="sortable" data-sort="status" onclick="sortTable('status')">Status <span class="sort-arrow">↕</span></th>
+              <th style="width:100px" class="c sortable" data-sort="ultimo" onclick="sortTable('ultimo')">Últ. <span class="sort-arrow">↕</span></th>
+              <th style="width:100px" class="c sortable" data-sort="prox" onclick="sortTable('prox')">Próx. <span class="sort-arrow">↕</span></th>
+              <th style="width:120px" class="c">Links</th>
+              <th style="width:56px"></th>
             </tr>
           </thead>
           <tbody id="table-body"></tbody>
