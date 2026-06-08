@@ -633,6 +633,16 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
           <input type="text" id="f-prox" placeholder="dd/mm/aaaa" maxlength="10" oninput="maskDate(this)">
         </div>
 
+        <!-- Campo interno: não exibido visualmente, mas salvo no banco -->
+        <select id="f-inserido-por" style="display:none">
+          <option value="">—</option>
+          <option value="Diego">Diego</option>
+          <option value="Matheus">Matheus</option>
+          <option value="Lucas">Lucas</option>
+          <option value="Catarin">Catarin</option>
+          <option value="Outro">Outro</option>
+        </select>
+
         <div class="divider">Links</div>
         <div class="form-group full">
           <label>Mercado Livre URL</label>
@@ -793,7 +803,7 @@ function fromRow(r) {
     cidade:r.cidade||'', estado:r.estado||'', cnpj:r.cnpj||'', prox:r.prox||'',
     urlMl:r.url_ml||'', urlAz:r.url_az||'', urlSh:r.url_sh||'',
     urlSite:r.url_site||'', insta:r.insta||'', obs:r.obs||'',
-    ultimo:r.ultimo||'',
+    ultimo:r.ultimo||'', inseridoPor:r.inserido_por||'',
     createdAt:r.created_at||'', updatedAt:r.updated_at||'' };
 }
 function toRow(c) {
@@ -802,7 +812,7 @@ function toRow(c) {
     cidade:c.cidade, estado:c.estado, cnpj:c.cnpj, prox:c.prox||null,
     url_ml:c.urlMl, url_az:c.urlAz, url_sh:c.urlSh,
     url_site:c.urlSite, insta:c.insta, obs:c.obs,
-    ultimo:c.ultimo||null,
+    ultimo:c.ultimo||null, inserido_por:c.inseridoPor||null,
     created_at:c.createdAt||new Date().toISOString(),
     updated_at:new Date().toISOString() };
 }
@@ -982,7 +992,7 @@ function openModal(id) {
 }
 function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); editingId=null; }
 
-const FORM_FIELDS = ['nome','contato','mkt','status','zap','email','cidade','estado','cnpj','prox','ultimo','url-ml','url-az','url-sh','url-site','insta','obs'];
+const FORM_FIELDS = ['nome','contato','mkt','status','zap','email','cidade','estado','cnpj','prox','ultimo','inserido-por','url-ml','url-az','url-sh','url-site','insta','obs'];
 function clearForm() {
   FORM_FIELDS.forEach(k => {
     const el = document.getElementById('f-'+k);
@@ -996,7 +1006,7 @@ function fillForm(c) {
   set('nome',c.nome); set('contato',c.contato); set('mkt',c.mkt); set('status',c.status||'NOVO');
   set('zap',c.zap); set('email',c.email); set('cidade',c.cidade); set('estado',c.estado);
   set('cnpj',c.cnpj);
-  const proxDisplay  = c.prox   ? c.prox.split('-').reverse().join('/')   : '';
+  set('inserido-por', c.inseridoPor||'');
   const ultimoDisplay = c.ultimo ? c.ultimo.split('-').reverse().join('/') : '';
   set('prox',   proxDisplay);
   set('ultimo', ultimoDisplay);
@@ -1009,7 +1019,7 @@ function formData() {
     nome: g('nome').trim(), contato: g('contato').trim(), mkt: g('mkt'), status: g('status')||'NOVO',
     zap: formatZap(g('zap').trim()), email: g('email').trim(),
     cidade: g('cidade').trim(), estado: g('estado').trim().toUpperCase(),
-    cnpj: formatCnpj(g('cnpj').trim()),
+    inseridoPor: g('inserido-por'),
     prox:   dateFromDisplay(g('prox').trim())   || g('prox').trim(),
     ultimo: dateFromDisplay(g('ultimo').trim()) || g('ultimo').trim(),
     urlMl: g('url-ml').trim(), urlAz: g('url-az').trim(),
