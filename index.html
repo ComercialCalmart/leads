@@ -450,7 +450,7 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
         <span class="tag" id="total-badge">0</span>
       </div>
       <div class="toolbar">
-        <input type="text" class="search-input" id="search-input" placeholder="Buscar empresa, zap, email, cidade...de, CNPJ..." oninput="renderTable()">
+        <input type="text" class="search-input" id="search-input" placeholder="Buscar empresa, zap, email, cidade..." oninput="renderTable()" autocomplete="off" name="search">
         <select class="filter-select" id="filter-status" onchange="renderTable()">
           <option value="">Todos os status</option>
           <option value="NOVO">Novo</option>
@@ -2217,20 +2217,20 @@ async function doLogin() {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error_description || data.message || 'Credenciais inválidas.');
-    localStorage.setItem('calmart_session', JSON.stringify(data));
-    SB_HDR['Authorization'] = 'Bearer ' + data.access_token;
-    authSession = data;
-    document.getElementById('login-screen').classList.remove('show');
-    // auto-set user name from email
-    const emailName = email.split('@')[0];
+    const emailName = email.split('@')[0].toLowerCase();
     const mapped = {
-      'lucas.catarin':'Lucas Catarin','robson':'Robson','comercial':'Comercial',
-      'comercial.sp':'Diego','jrcatarin':'Zé Catarin','ti':'Lucas Alves'
+      'comercial':    'Matheus',
+      'ti':           'Lucas Alves',
+      'lucas.catarin':'Lucas Catarin',
+      'jrcatarin':    'Zé Catarin',
+      'robson':       'Robson',
+      'comercial.sp': 'Diego'
     };
     const name = mapped[emailName] || emailName;
-    if (!getCurrentUser()) { setCurrentUser(name); }
+    setCurrentUser(name);
     const indicator = document.getElementById('user-indicator');
-    if (indicator) indicator.textContent = '👤 ' + (getCurrentUser()||name);
+    if (indicator) indicator.textContent = '👤 ' + name;
+    document.getElementById('login-screen').classList.remove('show');
     await afterLogin();
   } catch(e) {
     err.textContent = e.message;
@@ -2279,10 +2279,21 @@ async function init() {
     return;
   }
   authSession = session;
-  const user = getCurrentUser();
+  // Restaurar nome a partir do email da sessão
+  const sessionEmail = session.user?.email || '';
+  const sessionKey = sessionEmail.split('@')[0].toLowerCase();
+  const nameMap = {
+    'comercial':    'Matheus',
+    'ti':           'Lucas Alves',
+    'lucas.catarin':'Lucas Catarin',
+    'jrcatarin':    'Zé Catarin',
+    'robson':       'Robson',
+    'comercial.sp': 'Diego'
+  };
+  const restoredName = nameMap[sessionKey] || getCurrentUser() || sessionKey;
+  setCurrentUser(restoredName);
   const indicator = document.getElementById('user-indicator');
-  if (user) { if (indicator) indicator.textContent = '👤 ' + user; }
-  else { showUserPicker(); }
+  if (indicator) indicator.textContent = '👤 ' + restoredName;
   await afterLogin();
 }
 init();
