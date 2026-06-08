@@ -450,7 +450,7 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
         <span class="tag" id="total-badge">0</span>
       </div>
       <div class="toolbar">
-        <input type="text" class="search-input" id="search-input" placeholder="Buscar empresa, zap, email, cidade..." oninput="renderTable()" autocomplete="off" name="search">
+        <input type="search" class="search-input" id="search-input" placeholder="Buscar empresa, zap, email, cidade..." oninput="renderTable()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
         <select class="filter-select" id="filter-status" onchange="renderTable()">
           <option value="">Todos os status</option>
           <option value="NOVO">Novo</option>
@@ -750,12 +750,14 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
     <div class="login-logo">Calmart</div>
     <div class="login-title">Prospecção</div>
     <div class="login-sub">Acesso restrito</div>
+    <form autocomplete="on" onsubmit="return false">
     <label class="login-label">E-mail</label>
-    <input class="login-input" type="email" id="login-email" placeholder="seu@calmart.com.br" autocomplete="email">
+    <input class="login-input" type="email" id="login-email" placeholder="seu@calmart.com.br" autocomplete="username">
     <label class="login-label">Senha</label>
     <input class="login-input" type="password" id="login-senha" placeholder="••••••••••••" autocomplete="current-password"
       onkeydown="if(event.key==='Enter')doLogin()">
-    <button class="login-btn" id="login-btn" onclick="doLogin()">Entrar</button>
+    <button class="login-btn" id="login-btn" onclick="doLogin()" type="button">Entrar</button>
+    </form>
     <div class="login-error" id="login-error"></div>
   </div>
 </div>
