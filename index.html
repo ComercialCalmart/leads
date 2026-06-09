@@ -996,7 +996,20 @@ const SB_HDR = { 'Content-Type': 'application/json', 'apikey': SB_KEY, 'Authoriz
 
 async function sbFetch(path, opts={}) {
   const res = await fetch(SB_URL + '/rest/v1/' + path, { headers: SB_HDR, ...opts });
-  if (!res.ok) { const e = await res.text(); throw new Error(e); }
+  if (!res.ok) {
+    const e = await res.text();
+    // Sessão expirada/inválida → volta para o login em vez de fingir que está offline
+    if (res.status === 401 || /JWT|jwt expired|invalid token/i.test(e)) {
+      localStorage.removeItem('calmart_session');
+      SB_HDR['Authorization'] = 'Bearer ' + SB_KEY;
+      const ls = document.getElementById('login-screen');
+      if (ls && !ls.classList.contains('show')) {
+        ls.classList.add('show');
+        showToast('Sessão expirada. Entre novamente.', 'err', 6000);
+      }
+    }
+    throw new Error(`[${res.status}] ${e.slice(0,200)}`);
+  }
   const ct = res.headers.get('content-type') || '';
   const cl = res.headers.get('content-length');
   if (res.status === 204 || cl === '0' || !ct.includes('json')) return null;
@@ -1013,6 +1026,7 @@ function setStatus(msg, ok=true) {
 async function load(silent=false) {
   if (!silent) setStatus('Carregando...');
   let attempts = 0;
+  let lastErr = '';
   while (attempts < 3) {
     try {
       const rows = await sbFetch('leads?order=created_at.desc&limit=2000');
@@ -1022,13 +1036,15 @@ async function load(silent=false) {
       setStatus(`Atualizado ${ts} · ${contacts.length} leads`);
       return;
     } catch(e) {
+      lastErr = e.message || String(e);
+      console.error('[CALMART] Falha ao carregar leads (tentativa '+(attempts+1)+'):', e);
       attempts++;
       if (attempts < 3) {
         await new Promise(r => setTimeout(r, 1500 * attempts));
       } else {
-        // falha silenciosa — mantém dados locais, avisa discretamente
         const ts = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-        setStatus(`Sem conexão ${ts} — dados locais`, true);
+        setStatus(`Erro ao carregar ${ts}`, false);
+        showToast('Erro ao carregar: ' + lastErr.slice(0,120), 'err', 8000);
       }
     }
   }
@@ -1072,12 +1088,30 @@ const MKT_LABELS = { MELI:'Mercado Livre', AMAZON:'Amazon', SHOPPEE:'Shopee', OU
 
 // ── DATA ──────────────────────────────────────────────────
 
+// Se a coluna motivo_perda ainda não existe no banco, salva sem ela
+let _hasMotivoCol = true;
+function stripMotivo(row) { const r = {...row}; delete r.motivo_perda; return r; }
+
 async function dbUpsert(c) {
-  await sbFetch('leads?on_conflict=id', {
-    method: 'POST',
-    headers: { ...SB_HDR, 'Prefer': 'resolution=merge-duplicates' },
-    body: JSON.stringify(toRow(c))
-  });
+  let row = toRow(c);
+  if (!_hasMotivoCol) row = stripMotivo(row);
+  try {
+    await sbFetch('leads?on_conflict=id', {
+      method: 'POST',
+      headers: { ...SB_HDR, 'Prefer': 'resolution=merge-duplicates' },
+      body: JSON.stringify(row)
+    });
+  } catch(e) {
+    if (/motivo_perda/i.test(e.message)) {
+      _hasMotivoCol = false;
+      showToast('Aviso: rode o SQL do motivo_perda no Supabase.', 'err', 7000);
+      await sbFetch('leads?on_conflict=id', {
+        method: 'POST',
+        headers: { ...SB_HDR, 'Prefer': 'resolution=merge-duplicates' },
+        body: JSON.stringify(stripMotivo(row))
+      });
+    } else { throw e; }
+  }
 }
 async function dbDelete(id) {
   await sbFetch('leads?id=eq.'+encodeURIComponent(id), { method: 'DELETE' });
@@ -1999,11 +2033,25 @@ function renderVendedores(key) {
 // ── BATCH UPSERT ──────────────────────────────────────────
 async function sbUpsertMany(list) {
   if (!list.length) return;
-  await sbFetch('leads?on_conflict=id', {
-    method: 'POST',
-    headers: { ...SB_HDR, 'Prefer': 'resolution=merge-duplicates' },
-    body: JSON.stringify(list.map(toRow))
-  });
+  let rows = list.map(toRow);
+  if (!_hasMotivoCol) rows = rows.map(stripMotivo);
+  try {
+    await sbFetch('leads?on_conflict=id', {
+      method: 'POST',
+      headers: { ...SB_HDR, 'Prefer': 'resolution=merge-duplicates' },
+      body: JSON.stringify(rows)
+    });
+  } catch(e) {
+    if (/motivo_perda/i.test(e.message)) {
+      _hasMotivoCol = false;
+      showToast('Aviso: rode o SQL do motivo_perda no Supabase.', 'err', 7000);
+      await sbFetch('leads?on_conflict=id', {
+        method: 'POST',
+        headers: { ...SB_HDR, 'Prefer': 'resolution=merge-duplicates' },
+        body: JSON.stringify(rows.map(stripMotivo))
+      });
+    } else { throw e; }
+  }
 }
 
 // ── SEEDS ─────────────────────────────────────────────────
