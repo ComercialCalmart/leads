@@ -895,7 +895,11 @@ tr.row-hoje:hover td { background: #fef3c7 !important; }
     <label class="login-label">Senha</label>
     <input class="login-input" type="password" id="login-senha" placeholder="••••••••••••" autocomplete="current-password"
       onkeydown="if(event.key==='Enter')doLogin()">
-    <button class="login-btn" id="login-btn" onclick="doLogin()" type="button">Entrar</button>
+    <label style="display:flex;align-items:center;gap:8px;font-size:11px;color:#888;letter-spacing:1px;text-transform:uppercase;cursor:pointer;margin-bottom:14px">
+    <input type="checkbox" id="remember-me" checked style="width:15px;height:15px;accent-color:var(--black);cursor:pointer">
+    Ficar conectado
+  </label>
+  <button class="login-btn" id="login-btn" onclick="doLogin()" type="button">Entrar</button>
     </form>
     <div class="login-error" id="login-error"></div>
   </div>
@@ -3057,34 +3061,71 @@ const AUTH_HDR = { 'Content-Type':'application/json', 'apikey': SB_KEY };
 
 let authSession = null;
 
+let _refreshTimer = null;
+
+function scheduleTokenRefresh(session) {
+  if (_refreshTimer) clearTimeout(_refreshTimer);
+  if (!session?.expires_in) return;
+  // Refresh 2 minutos antes de expirar
+  const msUntilRefresh = Math.max((session.expires_in - 120) * 1000, 30000);
+  _refreshTimer = setTimeout(async () => {
+    try {
+      const stored = localStorage.getItem('calmart_session') || sessionStorage.getItem('calmart_session_temp');
+      if (!stored) return;
+      const s = JSON.parse(stored);
+      const res = await fetch(SB_AUTH + '/token?grant_type=refresh_token', {
+        method: 'POST', headers: AUTH_HDR,
+        body: JSON.stringify({ refresh_token: s.refresh_token })
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      // Salva no mesmo lugar que estava
+      if (localStorage.getItem('calmart_session')) {
+        localStorage.setItem('calmart_session', JSON.stringify(data));
+      } else {
+        sessionStorage.setItem('calmart_session_temp', JSON.stringify(data));
+      }
+      SB_HDR['Authorization'] = 'Bearer ' + data.access_token;
+      authSession = data;
+      scheduleTokenRefresh(data);
+    } catch(e) { console.warn('[CALMART] Falha ao renovar token:', e); }
+  }, msUntilRefresh);
+}
+
 async function checkSession() {
-  const raw = localStorage.getItem('calmart_session');
+  const raw = localStorage.getItem('calmart_session') || sessionStorage.getItem('calmart_session_temp');
   if (!raw) return null;
   try {
     const s = JSON.parse(raw);
     if (!s.access_token || !s.expires_at) return null;
     if (Date.now() / 1000 > s.expires_at - 60) {
-      // try refresh
       const res = await fetch(SB_AUTH + '/token?grant_type=refresh_token', {
         method: 'POST', headers: AUTH_HDR,
         body: JSON.stringify({ refresh_token: s.refresh_token })
       });
-      if (!res.ok) { localStorage.removeItem('calmart_session'); return null; }
+      if (!res.ok) { localStorage.removeItem('calmart_session'); sessionStorage.removeItem('calmart_session_temp'); return null; }
       const data = await res.json();
-      localStorage.setItem('calmart_session', JSON.stringify(data));
+      if (localStorage.getItem('calmart_session')) {
+        localStorage.setItem('calmart_session', JSON.stringify(data));
+      } else {
+        sessionStorage.setItem('calmart_session_temp', JSON.stringify(data));
+      }
       SB_HDR['Authorization'] = 'Bearer ' + data.access_token;
+      scheduleTokenRefresh(data);
       return data;
     }
     SB_HDR['Authorization'] = 'Bearer ' + s.access_token;
+    scheduleTokenRefresh(s);
     return s;
   } catch { return null; }
 }
 
 async function doLogin() {
-  const email = document.getElementById('login-email').value.trim();
-  const senha = document.getElementById('login-senha').value;
-  const btn   = document.getElementById('login-btn');
-  const err   = document.getElementById('login-error');
+  const email    = document.getElementById('login-email').value.trim();
+  const senha    = document.getElementById('login-senha').value;
+  const remember = document.getElementById('remember-me')?.checked !== false;
+  const btn      = document.getElementById('login-btn');
+  const err      = document.getElementById('login-error');
   if (!email || !senha) { err.textContent = 'Preencha e-mail e senha.'; return; }
   btn.disabled = true; btn.textContent = 'Entrando...'; err.textContent = '';
   try {
@@ -3105,9 +3146,15 @@ async function doLogin() {
     };
     const name = mapped[emailName] || emailName;
     setCurrentUser(name);
-    localStorage.setItem('calmart_session', JSON.stringify(data));
+    if (remember) {
+      localStorage.setItem('calmart_session', JSON.stringify(data));
+    } else {
+      sessionStorage.setItem('calmart_session_temp', JSON.stringify(data));
+      localStorage.removeItem('calmart_session');
+    }
     SB_HDR['Authorization'] = 'Bearer ' + data.access_token;
     authSession = data;
+    scheduleTokenRefresh(data);
     const indicator = document.getElementById('user-indicator');
     if (indicator) indicator.textContent = '👤 ' + name;
     document.getElementById('login-screen').classList.remove('show');
@@ -3124,7 +3171,9 @@ async function doLogout() {
   try {
     await fetch(SB_AUTH + '/logout', { method:'POST', headers:{ ...AUTH_HDR, 'Authorization': SB_HDR['Authorization']||'' } });
   } catch {}
+  if (_refreshTimer) { clearTimeout(_refreshTimer); _refreshTimer = null; }
   localStorage.removeItem('calmart_session');
+  sessionStorage.removeItem('calmart_session_temp');
   authSession = null;
   SB_HDR['Authorization'] = 'Bearer ' + SB_KEY;
   contacts = [];
