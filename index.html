@@ -3109,12 +3109,6 @@ async function doLogout() {
 async function afterLogin() {
   await loadMyProfile();
   await load();
-  const missing = SEEDS.filter(s => !contacts.find(c=>c.id===s.id));
-  if (missing.length) {
-    await sbUpsertMany(missing);
-    missing.forEach(s => contacts.push(s));
-    renderTable(); updateBadge();
-  }
   const needsPatch = contacts.filter(c => !c.ultimo);
   if (needsPatch.length) {
     needsPatch.forEach(c => { c.ultimo = TODAY_ISO; });
