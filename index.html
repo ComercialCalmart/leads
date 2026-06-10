@@ -344,6 +344,16 @@ tr.row-hoje td:first-child { border-left: 3px solid var(--yellow); }
 tr.row-vencido:hover td { background: #fee2e2 !important; }
 tr.row-hoje:hover td { background: #fef3c7 !important; }
 
+/* ── HISTÓRICO DO LEAD ───────────────────────────────────── */
+#history-list > div:last-child { border-bottom: none; }
+#history-list > div:hover { background: #FAFBFC; }
+
+/* ── SKELETON LOADING ────────────────────────────────────── */
+@keyframes skeleton-pulse { 0%,100% { opacity:.45; } 50% { opacity:.9; } }
+.skeleton-row { display:flex; gap:14px; padding:13px 16px; border-bottom:1px solid var(--gray); align-items:center; }
+.sk { background:#E8EAEE; border-radius:5px; height:13px; animation:skeleton-pulse 1.4s ease-in-out infinite; }
+.sk-sm { width:36px; } .sk-md { width:90px; } .sk-lg { width:170px; } .sk-pill { width:72px; height:20px; border-radius:12px; }
+
 /* ── QUICK ACTIONS ───────────────────────────────────────── */
 .btn-qa { font-size:13px; cursor:pointer; border:none; background:transparent; border-radius:5px; padding:3px 5px; transition:background .12s; line-height:1; }
 .btn-qa:hover { background:#F0F1F4; }
@@ -413,6 +423,8 @@ tr:hover .action-btns { opacity:.3; }
 .m-date-val.date-futuro  { color: var(--green); }
 .m-card-bottom { display: flex; align-items: center; gap: 8px; }
 .m-card-icons  { display: flex; align-items: center; gap: 8px; flex: 1; }
+.m-qa-btn { width:40px; height:40px; border-radius:10px; border:1.5px solid var(--border); background:var(--white); font-size:16px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; transition:all .12s; }
+.m-qa-btn:active { background:#F0F1F4; transform:scale(.94); }
 .m-more-btn { width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--gray); background: var(--white); cursor: pointer; font-size: 16px; color: #888; display: inline-flex; align-items: center; justify-content: center; font-family: var(--font); flex-shrink: 0; transition: all .12s; }
 .m-more-btn:active { background: var(--gray); }
 .m-status { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 9px; border-radius: 20px; border: 1.5px solid currentColor; flex-shrink: 0; }
@@ -758,7 +770,8 @@ tr:hover .action-btns { opacity:.3; }
         <div class="divider">Identificação</div>
         <div class="form-group full">
           <label>Empresa / Loja *</label>
-          <input type="text" id="f-nome" placeholder="Nome da loja ou empresa">
+          <input type="text" id="f-nome" placeholder="Nome da loja ou empresa" oninput="checkDupLive()">
+          <div id="dup-warning" style="display:none;margin-top:6px;font-size:11px;color:#b45309;background:#fffbeb;border:1.5px solid #fcd34d;border-radius:6px;padding:7px 10px;line-height:1.4"></div>
         </div>
         <div class="form-group full">
           <label>Nome do Contato</label>
@@ -788,7 +801,7 @@ tr:hover .action-btns { opacity:.3; }
         </div>
         <div class="form-group">
           <label>WhatsApp</label>
-          <input type="text" id="f-zap" placeholder="(11) 9 9999-9999">
+          <input type="text" id="f-zap" placeholder="(11) 9 9999-9999" oninput="checkDupLive()">
         </div>
         <div class="form-group">
           <label>Email</label>
@@ -854,6 +867,12 @@ tr:hover .action-btns { opacity:.3; }
           <label>Observações</label>
           <textarea id="f-obs" placeholder="Notas, contexto, histórico..."></textarea>
         </div>
+      </div>
+
+      <!-- HISTÓRICO -->
+      <div id="history-section" style="display:none;margin-top:4px">
+        <div class="divider" style="margin:0 0 0">Histórico</div>
+        <div id="history-list" style="padding:4px 0 8px"></div>
       </div>
     </div>
     <div class="modal-footer">
@@ -926,17 +945,7 @@ tr:hover .action-btns { opacity:.3; }
 </div>
 
 <!-- USER PICKER -->
-<div class="modal-overlay" id="user-picker-overlay">
-  <div class="modal" style="max-width:360px">
-    <div class="modal-header">
-      <h3>Quem está usando?</h3>
-    </div>
-    <div class="modal-body" style="padding:16px">
-      <p style="font-size:12px;color:#888;margin-bottom:16px;letter-spacing:.5px">Selecione seu nome. Será lembrado neste aparelho.</p>
-      <div style="display:flex;flex-direction:column;gap:8px" id="user-picker-btns"></div>
-    </div>
-  </div>
-</div>
+
 
 <!-- TOAST -->
 <div id="toast-container"></div>
@@ -949,6 +958,8 @@ tr:hover .action-btns { opacity:.3; }
 <div class="m-sheet" id="m-sheet">
   <div class="m-sheet-handle"></div>
   <div class="m-sheet-title" id="m-sheet-title">Ações</div>
+  <button class="m-sheet-btn" onclick="mSheetRegister()"><span class="m-sheet-icon">✓</span> Registrar contato hoje</button>
+  <button class="m-sheet-btn" onclick="mSheetReagendar()"><span class="m-sheet-icon">📅</span> Reagendar próximo</button>
   <button class="m-sheet-btn" onclick="mSheetEdit()"><span class="m-sheet-icon">✎</span> Editar contato</button>
   <button class="m-sheet-btn" onclick="mSheetStatus()"><span class="m-sheet-icon">⬤</span> Alterar status</button>
   <button class="m-sheet-btn danger" onclick="mSheetDelete()"><span class="m-sheet-icon">✕</span> Excluir</button>
@@ -973,6 +984,20 @@ tr:hover .action-btns { opacity:.3; }
   <button class="m-sheet-btn" onclick="setMotivo('Momento errado')"><span class="m-sheet-icon">⏳</span> Momento errado</button>
   <button class="m-sheet-btn" onclick="setMotivo('Outro')"><span class="m-sheet-icon">✎</span> Outro</button>
   <button class="m-sheet-btn" onclick="skipMotivo()" style="color:#aaa"><span class="m-sheet-icon">→</span> Pular</button>
+</div>
+
+<!-- REAGENDAR SHEET -->
+<div class="m-sheet-overlay" id="reag-overlay" onclick="closeReagendar()"></div>
+<div class="m-sheet" id="reag-sheet" style="z-index:502">
+  <div class="m-sheet-handle"></div>
+  <div class="m-sheet-title" id="reag-title">Reagendar</div>
+  <button class="m-sheet-btn" onclick="reagendarPara(1)"><span class="m-sheet-icon">☀️</span> Amanhã</button>
+  <button class="m-sheet-btn" onclick="reagendarPara(3)"><span class="m-sheet-icon">📆</span> Em 3 dias</button>
+  <button class="m-sheet-btn" onclick="reagendarPara(7)"><span class="m-sheet-icon">🗓</span> Em 1 semana</button>
+  <div style="display:flex;gap:10px;align-items:center;padding:14px 20px;border-top:1px solid var(--border)">
+    <input type="date" id="reag-date" style="flex:1;font-family:var(--font);font-size:14px;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px">
+    <button onclick="reagendarData()" style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:11px 18px;background:var(--black);color:var(--white);border:none;border-radius:8px;cursor:pointer">OK</button>
+  </div>
 </div>
 
 <!-- FILTER SHEET -->
@@ -1029,8 +1054,23 @@ function setStatus(msg, ok=true) {
   if (el) { el.textContent = msg; el.style.color = ok ? '#aaa' : '#e87a00'; }
 }
 
+function showSkeleton() {
+  const tbody = document.getElementById('table-body');
+  const empty = document.getElementById('empty-state');
+  if (empty) empty.style.display = 'none';
+  if (!tbody || contacts.length) return; // só mostra se a lista está vazia
+  tbody.innerHTML = Array.from({length:6}, (_,i) => `
+    <tr><td colspan="13" style="padding:0">
+      <div class="skeleton-row" style="animation-delay:${i*0.08}s">
+        <span class="sk sk-sm"></span><span class="sk sk-lg"></span><span class="sk sk-md"></span>
+        <span class="sk sk-pill"></span><span class="sk sk-sm"></span><span class="sk sk-sm"></span>
+        <span class="sk sk-md"></span>
+      </div>
+    </td></tr>`).join('');
+}
+
 async function load(silent=false) {
-  if (!silent) setStatus('Carregando...');
+  if (!silent) { setStatus('Carregando...'); showSkeleton(); }
   let attempts = 0;
   let lastErr = '';
   while (attempts < 3) {
@@ -1066,6 +1106,7 @@ function fromRow(r) {
     ultimo:r.ultimo||'', inseridoPor:r.inserido_por||'',
     ownerId:r.owner_id||'',
     motivoPerda:r.motivo_perda||'',
+    history: (() => { try { return JSON.parse(r.history||'[]'); } catch { return []; } })(),
     createdAt:r.created_at||'', updatedAt:r.updated_at||'' };
 }
 function toRow(c) {
@@ -1077,6 +1118,7 @@ function toRow(c) {
     ultimo:c.ultimo||null, inserido_por:c.inseridoPor||null,
     owner_id:c.ownerId||null,
     motivo_perda:c.motivoPerda||null,
+    history: JSON.stringify(c.history||[]),
     created_at:c.createdAt||new Date().toISOString(),
     updated_at:new Date().toISOString() };
 }
@@ -1295,10 +1337,38 @@ function openModal(id) {
   editingId = id || null;
   document.getElementById('modal-title').textContent = id ? 'Editar Contato' : 'Novo Contato';
   clearForm();
-  if (id) { const c = contacts.find(x=>x.id===id); if(c) fillForm(c); }
+  const histSection = document.getElementById('history-section');
+  const histList    = document.getElementById('history-list');
+  if (id) {
+    const c = contacts.find(x=>x.id===id);
+    if (c) {
+      fillForm(c);
+      // render history
+      if (histSection && histList) {
+        const hist = c.history || [];
+        if (hist.length) {
+          histList.innerHTML = hist.map(e => `
+            <div style="display:flex;gap:10px;padding:9px 18px;border-bottom:1px solid var(--border);align-items:flex-start">
+              <span style="font-size:10px;color:#aaa;white-space:nowrap;min-width:110px;padding-top:1px">${fmtHistoryDate(e.ts)}</span>
+              <span style="font-size:11px;font-weight:700;color:${e.tipo==='status'?'var(--black)':e.tipo==='criado'?'var(--green)':e.tipo==='contato'?'#1d4ed8':e.tipo==='reagendado'?'#7c3aed':e.tipo==='restaurado'?'var(--green)':'#555'};white-space:nowrap;min-width:80px;letter-spacing:.3px">${{criado:'Criado',editado:'Editado',status:'Status',contato:'Contato',reagendado:'Agendado',restaurado:'Restaurado',excluido:'Excluído'}[e.tipo]||e.tipo}</span>
+              <span style="font-size:11px;color:#555;line-height:1.4">${esc(e.desc)}</span>
+              <span style="font-size:10px;color:#ccc;margin-left:auto;white-space:nowrap">${esc(e.user||'')}</span>
+            </div>`).join('');
+          histSection.style.display = '';
+        } else {
+          histList.innerHTML = '<p style="padding:16px 18px;font-size:11px;color:#bbb;letter-spacing:1px">Nenhum evento registrado.</p>';
+          histSection.style.display = '';
+        }
+      }
+    }
+  } else {
+    if (histSection) histSection.style.display = 'none';
+  }
   document.getElementById('modal-overlay').classList.add('open');
 }
-function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); editingId=null; }
+function closeModal() {
+  const dw = document.getElementById('dup-warning');
+  if (dw) dw.style.display = 'none'; document.getElementById('modal-overlay').classList.remove('open'); editingId=null; }
 
 const FORM_FIELDS = ['nome','contato','mkt','status','zap','email','cidade','estado','cnpj','prox','ultimo','inserido-por','url-ml','url-az','url-sh','url-site','insta','obs'];
 function clearForm() {
@@ -1347,7 +1417,13 @@ async function saveContact() {
       if (idx>-1) {
         if (!canEdit(contacts[idx])) { showToast('Sem permissão para editar este lead.','err'); closeModal(); return; }
         becamePerdido = data.status === 'PERDIDO' && contacts[idx].status !== 'PERDIDO' && !contacts[idx].motivoPerda;
+        const prevStatus = contacts[idx].status;
         contacts[idx] = {...contacts[idx], ...data};
+        if (prevStatus !== data.status) {
+          addHistory(contacts[idx], 'status', `Status alterado de ${STATUS_LABELS[prevStatus]||prevStatus} para ${STATUS_LABELS[data.status]||data.status}`);
+        } else {
+          addHistory(contacts[idx], 'editado', 'Lead editado');
+        }
         savedId = editingId;
         await dbUpsert(contacts[idx]);
       } else {
@@ -1361,6 +1437,8 @@ async function saveContact() {
       data.id = genId(); data.createdAt = data.updatedAt = new Date().toISOString();
       if (!data.inseridoPor) data.inseridoPor = getCurrentUser();
       if (!data.ownerId && myProfile) data.ownerId = myProfile.id;
+      data.history = [];
+      addHistory(data, 'criado', `Lead criado por ${myProfile?.nome||getCurrentUser()}`);
       becamePerdido = data.status === 'PERDIDO';
       contacts.unshift(data); await dbUpsert(data);
       savedId = data.id;
@@ -1376,20 +1454,78 @@ async function saveContact() {
   }
 }
 
-// ── DELETE ────────────────────────────────────────────────
-function askDelete(id) { deletingId=id; document.getElementById('confirm-overlay').classList.add('open'); }
-function closeConfirm() { deletingId=null; document.getElementById('confirm-overlay').classList.remove('open'); }
-async function confirmDelete() {
-  setStatus('Excluindo...');
-  try {
-    await dbDelete(deletingId);
-    contacts = contacts.filter(x=>x.id!==deletingId);
-    const ts = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-    setStatus(`Salvo ${ts}`);
-    closeConfirm();
-    await load(true);
-  } catch(e) { setStatus('Erro ao excluir: '+e.message, false); }
+// ── DELETE COM DESFAZER ───────────────────────────────────
+// Padrão Gmail: remove da tela na hora, janela de 6s para desfazer,
+// só apaga do banco quando a janela fecha sem desfazer.
+let _pendingDelete = null; // { lead, timer }
+
+function askDelete(id) {
+  const c = contacts.find(x=>x.id===id);
+  if (!c) return;
+  if (!canDelete(c)) { showToast('Sem permissão para excluir este lead.','err'); return; }
+
+  // Se já tinha um delete pendente, efetiva ele antes
+  if (_pendingDelete) { _commitDelete(); }
+
+  // Remove da tela imediatamente (otimista)
+  contacts = contacts.filter(x=>x.id!==id);
+  renderTable(); updateBadge();
+
+  _pendingDelete = {
+    lead: c,
+    timer: setTimeout(_commitDelete, 6000)
+  };
+
+  // Toast com Desfazer
+  const container = document.getElementById('toast-container');
+  if (container) {
+    const t = document.createElement('div');
+    t.className = 'toast toast-err';
+    t.style.pointerEvents = 'auto';
+    t.id = 'toast-delete';
+    t.innerHTML = `${esc(c.nome)} excluído <span onclick="undoDelete()" style="margin-left:12px;text-decoration:underline;cursor:pointer;font-weight:900">Desfazer</span>`;
+    container.appendChild(t);
+    requestAnimationFrame(() => { requestAnimationFrame(() => t.classList.add('show')); });
+    setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 6000);
+  }
 }
+
+async function _commitDelete() {
+  if (!_pendingDelete) return;
+  const { lead, timer } = _pendingDelete;
+  clearTimeout(timer);
+  _pendingDelete = null;
+  // Não há como salvar o histórico pois o lead será deletado — comportamento esperado
+  try {
+    await dbDelete(lead.id);
+  } catch(e) {
+    // Falhou no banco — devolve para a lista
+    contacts.unshift(lead);
+    renderTable(); updateBadge();
+    showToast('Erro ao excluir: '+e.message, 'err');
+  }
+}
+
+async function undoDelete() {
+  if (!_pendingDelete) return;
+  clearTimeout(_pendingDelete.timer);
+  const restored = _pendingDelete.lead;
+  if (!restored.history) restored.history = [];
+  addHistory(restored, 'restaurado', 'Exclusão desfeita');
+  contacts.unshift(restored);
+  _pendingDelete = null;
+  document.getElementById('toast-delete')?.remove();
+  try { await dbUpsert(restored); } catch(e) {}
+  renderTable(); updateBadge();
+  showToast('Exclusão desfeita.', 'info');
+}
+
+// Efetiva delete pendente se o usuário fechar/recarregar a página
+window.addEventListener('beforeunload', () => { if (_pendingDelete) _commitDelete(); });
+
+// Mantidas por compatibilidade (modal de confirmação não é mais usado)
+function closeConfirm() { document.getElementById('confirm-overlay')?.classList.remove('open'); }
+async function confirmDelete() { closeConfirm(); }
 
 // ── INLINE EDIT ───────────────────────────────────────────
 async function inlineSave(id, field, value) {
@@ -1401,8 +1537,15 @@ async function inlineSave(id, field, value) {
   if (field === 'zap')    v = formatZap(v);
   if (field === 'cnpj')   v = formatCnpj(v);
   const wasPerdido = contacts[idx].status === 'PERDIDO';
+  const prevValInline = contacts[idx][field];
   contacts[idx][field] = v;
   contacts[idx].updatedAt = new Date().toISOString();
+  if (field === 'status' && prevValInline !== v) {
+    addHistory(contacts[idx], 'status', `Status alterado de ${STATUS_LABELS[prevValInline]||prevValInline} para ${STATUS_LABELS[v]||v}`);
+  } else if (field === 'prox' && prevValInline !== v) {
+    const d = v ? v.slice(8,10)+'/'+v.slice(5,7)+'/'+v.slice(0,4) : '—';
+    addHistory(contacts[idx], 'reagendado', `Próximo contato reagendado para ${d}`);
+  }
   try {
     await dbUpsert(contacts[idx]);
     const ts = new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
@@ -1619,7 +1762,7 @@ function renderTable() {
         <div class="quick-actions">
           ${c.zap ? `<a href="https://wa.me/55${fmtPhone(c.zap)}" target="_blank" class="btn-qa btn-qa-zap" title="WhatsApp">💬</a>` : '<span class="btn-qa" style="opacity:.2" title="Sem Zap">💬</span>'}
           <button class="btn-qa btn-qa-reg" onclick="quickRegister('${c.id}')" title="Registrar contato">✓</button>
-          <button class="btn-qa btn-qa-age" onclick="quickReagendarRow('${c.id}')" title="Reagendar">📅</button>
+          <button class="btn-qa btn-qa-age" onclick="openReagendar('${c.id}')" title="Reagendar">📅</button>
         </div>
       </td>
     </tr>`;
@@ -1635,24 +1778,7 @@ function updateBadge() {
 }
 
 // ── EXPORT / IMPORT JSON ─────────────────────────────────
-function exportJSON() {
-  const headers = ['ID','Nome','Empresa','Marketplace','WhatsApp','Email','Cidade','UF','CNPJ','Status','Próx. Contato','ML URL','Amazon URL','Shopee URL','Site Oficial','Instagram','Observações','Criado em','Atualizado em'];
-  const rows = contacts.map(c => [
-    c.id, c.contato||'', c.nome||'', c.mkt||'', c.zap||'', c.email||'',
-    c.cidade||'', c.estado||'', c.cnpj||'', c.status||'', c.prox||'',
-    c.urlMl||'', c.urlAz||'', c.urlSh||'', c.urlSite||'', c.insta||'', c.obs||'',
-    c.createdAt||'', c.updatedAt||''
-  ]);
-  const table = [headers, ...rows].map(r =>
-    r.map(v => `<td>${String(v).replace(/</g,'&lt;')}</td>`).join('')
-  ).map(r => `<tr>${r}</tr>`).join('');
-  const xls = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8"></head><body><table>${table}</table></body></html>`;
-  const blob = new Blob([xls], {type:'application/vnd.ms-excel;charset=utf-8'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `calmart_leads_${new Date().toISOString().slice(0,10)}.xls`;
-  a.click();
-}
+/* exportJSON antiga removida — versão com filtros está abaixo */
 // (importJSON removido — função destrutiva sem uso. Importação oficial: importCSV.)
 
 // ── CSV IMPORT ────────────────────────────────────────────
@@ -1728,6 +1854,30 @@ function normalizeMkt(v) {
   if (vl.includes('shope')||vl.includes('sh')) return 'SHOPPEE';
   if (vl) return 'OUTRO';
   return '';
+}
+
+let _dupTimer = null;
+function checkDupLive() {
+  clearTimeout(_dupTimer);
+  _dupTimer = setTimeout(() => {
+    const warn = document.getElementById('dup-warning');
+    if (!warn) return;
+    const nome = document.getElementById('f-nome')?.value?.trim() || '';
+    const zap  = document.getElementById('f-zap')?.value?.trim() || '';
+    if (nome.length < 3 && zap.length < 8) { warn.style.display = 'none'; return; }
+    const dup = contacts.find(e => {
+      if (editingId && e.id === editingId) return false; // não compara consigo mesmo
+      const nomeMatch = nome.length >= 3 && (e.nome||'').toLowerCase() === nome.toLowerCase();
+      const zapMatch  = zap.length >= 8 && fmtPhone(zap) === fmtPhone(e.zap||'') && fmtPhone(zap).length > 7;
+      return nomeMatch || zapMatch;
+    });
+    if (dup) {
+      warn.innerHTML = `⚠ <strong>Já existe:</strong> ${esc(dup.nome)}${dup.inseridoPor ? ' · ' + esc(dup.inseridoPor) : ''} · ${STATUS_LABELS[dup.status]||dup.status}`;
+      warn.style.display = 'block';
+    } else {
+      warn.style.display = 'none';
+    }
+  }, 350);
 }
 
 function findDuplicate(c) {
@@ -2089,21 +2239,8 @@ async function sbUpsertMany(list) {
   }
 }
 
-// ── SEEDS ─────────────────────────────────────────────────
-const TODAY_ISO = new Date().toISOString().slice(0,10);
+// (SEEDS removidos — produção usa apenas o banco)
 
-const SEEDS = [
-  { id:'seed_abmidia', nome:'AB.MIDIA', contato:'', mkt:'MELI', zap:'(21) 98133-4739', email:'abmidia@infoabmidia.com.br',
-    cidade:'', estado:'', cnpj:'', status:'NOVO', prox:'', ultimo:TODAY_ISO,
-    urlMl:'https://www.mercadolivre.com.br/loja/abmidia',
-    urlAz:'', urlSh:'', urlSite:'https://www.infoabmidia.com.br/', insta:'', obs:'',
-    createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-  { id:'seed_rapidopracachorro', nome:'Rápido Pra Cachorro', contato:'Marcus', mkt:'MELI', zap:'(48) 9 8815-7947', email:'',
-    cidade:'Araranguá', estado:'SC', cnpj:'', status:'NOVO', prox:'', ultimo:TODAY_ISO,
-    urlMl:'https://www.mercadolivre.com.br/loja/rapido-pra-cachorro',
-    urlAz:'', urlSh:'', urlSite:'https://www.rapidopracachorro.com.br/', insta:'', obs:'',
-    createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
-];
 
 // ── CADÊNCIA COMERCIAL ────────────────────────────────────
 const VENDEDORES = ['diego', 'matheus'];
@@ -2331,6 +2468,26 @@ function setCurrentUser(name) {
   localStorage.setItem('calmart_user', name);
 }
 
+// ── HISTÓRICO ────────────────────────────────────────────────
+function addHistory(lead, tipo, descricao) {
+  if (!lead.history) lead.history = [];
+  const user = myProfile?.nome || getCurrentUser() || '—';
+  lead.history.unshift({
+    ts:   new Date().toISOString(),
+    user,
+    tipo,
+    desc: descricao
+  });
+  // limita a 200 eventos
+  if (lead.history.length > 200) lead.history = lead.history.slice(0,200);
+}
+
+function fmtHistoryDate(iso) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('pt-BR') + ' ' +
+         d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+}
+
 // ── RBAC ───────────────────────────────────────────────────
 let myProfile = null; // { id, email, nome, role }
 
@@ -2362,31 +2519,6 @@ function canEdit(lead) {
 function canDelete(lead) {
   return canEdit(lead);
 }
-
-function showUserPicker() {
-  const container = document.getElementById('user-picker-btns');
-  if (container && !container.children.length) {
-    container.innerHTML = USERS.map(n =>
-      `<button onclick="selectUser('${n}')"
-        style="font-family:var(--font);font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:14px;border:2px solid var(--black);background:var(--white);cursor:pointer;border-radius:var(--radius);transition:all .12s;text-align:left"
-        onmouseover="this.style.background='var(--black)';this.style.color='var(--white)'"
-        onmouseout="this.style.background='var(--white)';this.style.color='var(--black)'">${n}</button>`
-    ).join('');
-  }
-  document.getElementById('user-picker-overlay').classList.add('open');
-}
-function selectUser(name) {
-  setCurrentUser(name);
-  document.getElementById('user-picker-overlay').classList.remove('open');
-  const indicator = document.getElementById('user-indicator');
-  if (indicator) indicator.textContent = '👤 ' + name;
-}
-function changeUser() {
-  showUserPicker();
-}
-const isMobile = () => window.innerWidth <= 640;
-let mSheetId = null;
-let mFilterStatus = '';
 
 function renderCards() {
   const el = document.getElementById('mobile-cards');
@@ -2449,7 +2581,11 @@ function renderCards() {
       </div>
       <div class="m-card-bottom">
         <div class="m-card-icons">${waz}${mail}${links}</div>
-        <button class="m-more-btn" onclick="openActionSheet('${c.id}')">⋯</button>
+        <div style="display:flex;gap:6px;align-items:center">
+          <button class="m-qa-btn" onclick="quickRegister('${c.id}')" title="Registrar contato">✓</button>
+          <button class="m-qa-btn" onclick="openReagendar('${c.id}')" title="Reagendar">📅</button>
+          <button class="m-more-btn" onclick="openActionSheet('${c.id}')">⋯</button>
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -2468,6 +2604,8 @@ function closeActionSheet() {
   document.getElementById('m-sheet').classList.remove('open');
 }
 function mSheetEdit() { closeActionSheet(); openModal(mSheetId); }
+function mSheetRegister() { closeActionSheet(); quickRegister(mSheetId); }
+function mSheetReagendar() { closeActionSheet(); openReagendar(mSheetId); }
 function mSheetDelete() { closeActionSheet(); askDelete(mSheetId); }
 function mSheetStatus() {
   closeActionSheet();
@@ -2761,16 +2899,7 @@ function renderMotivos() {
     </div>`).join('');
 }
 
-// 6. Ciclo médio de venda (dias do cadastro ao fechamento)
-function cicloMedio() {
-  const fechados = contacts.filter(c => c.status==='FECHADO' && c.createdAt && c.updatedAt);
-  if (!fechados.length) return null;
-  const soma = fechados.reduce((acc,c) => {
-    const d1 = new Date(c.createdAt), d2 = new Date(c.updatedAt);
-    return acc + Math.max(0, Math.round((d2-d1)/86400000));
-  }, 0);
-  return Math.round(soma / fechados.length);
-}
+
 
 // ── TOAST SYSTEM ──────────────────────────────────────────
 let _toastTimer = null;
@@ -2867,17 +2996,7 @@ function renderKanban() {
 }
 
 // ── OVERDUE BADGE ─────────────────────────────────────────
-function updateOverdueBadge() {
-  const today = new Date(); today.setHours(0,0,0,0);
-  const n = contacts.filter(c =>
-    c.prox && new Date(c.prox+'T00:00:00') < today &&
-    c.status !== 'FECHADO' && c.status !== 'PERDIDO'
-  ).length;
-  const badge = document.getElementById('overdue-badge');
-  if (!badge) return;
-  if (n > 0) { badge.textContent = n > 99 ? '99+' : n; badge.classList.add('show'); }
-  else { badge.classList.remove('show'); }
-}
+function updateOverdueBadge() { /* badge removido da nav a pedido do usuário */ }
 
 
 // ── AÇÕES RÁPIDAS DE LINHA ────────────────────────────────
@@ -2889,9 +3008,9 @@ async function quickRegister(id) {
   const todayIso = new Date().toISOString().slice(0,10);
   contacts[idx].ultimo = todayIso;
   contacts[idx].updatedAt = new Date().toISOString();
-  // Sugerir próximo contato +3 dias
   const p3 = new Date(); p3.setDate(p3.getDate()+3);
   contacts[idx].prox = p3.toISOString().slice(0,10);
+  addHistory(contacts[idx], 'contato', 'Contato registrado');
   try {
     await dbUpsert(contacts[idx]);
     showToast(`Contato registrado · próx. ${contacts[idx].prox.slice(8,10)}/${contacts[idx].prox.slice(5,7)}`, 'ok');
@@ -2899,19 +3018,50 @@ async function quickRegister(id) {
   } catch(e) { showToast('Erro: '+e.message,'err'); }
 }
 
-async function quickReagendarRow(id) {
+// ── REAGENDAR (sheet com atalhos) ─────────────────────────
+let _reagendarId = null;
+
+function openReagendar(id) {
   const c = contacts.find(x=>x.id===id);
   if (!c) return;
   if (!canEdit(c)) { showToast('Sem permissão para editar este lead.','err'); return; }
-  // pede nova data via prompt minimalista (modal seria overkill para uma data)
-  const nova = prompt('Nova data de próximo contato (AAAA-MM-DD):', c.prox || new Date().toISOString().slice(0,10));
-  if (!nova || !/^\d{4}-\d{2}-\d{2}$/.test(nova)) return;
+  _reagendarId = id;
+  document.getElementById('reag-title').textContent = `Reagendar · ${c.nome}`;
+  const dateInput = document.getElementById('reag-date');
+  if (dateInput) dateInput.value = c.prox || new Date().toISOString().slice(0,10);
+  document.getElementById('reag-overlay').classList.add('open');
+  document.getElementById('reag-sheet').classList.add('open');
+}
+
+function closeReagendar() {
+  document.getElementById('reag-overlay').classList.remove('open');
+  document.getElementById('reag-sheet').classList.remove('open');
+  _reagendarId = null;
+}
+
+async function reagendarPara(dias) {
+  if (!_reagendarId) return;
+  const d = new Date(); d.setDate(d.getDate() + dias);
+  await _saveReagendamento(d.toISOString().slice(0,10));
+}
+
+async function reagendarData() {
+  const val = document.getElementById('reag-date')?.value;
+  if (!val) { showToast('Escolha uma data.','err'); return; }
+  await _saveReagendamento(val);
+}
+
+async function _saveReagendamento(novaData) {
+  const id = _reagendarId;
+  closeReagendar();
   const idx = contacts.findIndex(x=>x.id===id);
-  contacts[idx].prox = nova;
+  if (idx < 0) return;
+  contacts[idx].prox = novaData;
   contacts[idx].updatedAt = new Date().toISOString();
+  addHistory(contacts[idx], 'reagendado', `Próximo contato reagendado para ${novaData.slice(8,10)}/${novaData.slice(5,7)}/${novaData.slice(0,4)}`);
   try {
     await dbUpsert(contacts[idx]);
-    showToast(`Reagendado para ${nova.slice(8,10)}/${nova.slice(5,7)}`, 'ok');
+    showToast(`Reagendado para ${novaData.slice(8,10)}/${novaData.slice(5,7)}`, 'ok');
     renderTable(); updateBadge();
   } catch(e) { showToast('Erro: '+e.message,'err'); }
 }
@@ -2932,15 +3082,17 @@ async function quickAdvance(id) {
   // snapshot para desfazer
   _undoSnapshot = { id, status: contacts[idx].status, ultimo: contacts[idx].ultimo, prox: contacts[idx].prox };
 
+  const prevStatusAdv = contacts[idx].status;
   contacts[idx].status = nextStatus;
   contacts[idx].ultimo = todayIso;
   if (nextStatus === 'FECHADO') {
-    contacts[idx].prox = ''; // lead fechado não precisa de próximo contato
+    contacts[idx].prox = '';
   } else {
     const prox3 = new Date(); prox3.setDate(prox3.getDate()+3);
     contacts[idx].prox = prox3.toISOString().slice(0,10);
   }
   contacts[idx].updatedAt = new Date().toISOString();
+  addHistory(contacts[idx], 'status', `Status alterado de ${STATUS_LABELS[prevStatusAdv]||prevStatusAdv} para ${STATUS_LABELS[nextStatus]||nextStatus}`);
   try {
     await dbUpsert(contacts[idx]);
     showUndoToast(`${c.nome} → ${STATUS_LABELS[nextStatus]}`);
