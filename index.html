@@ -279,7 +279,14 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
   .kpi-number { font-size: 32px; }
 
   /* ── CADÊNCIA ── */
-  .cad-header-bar { grid-template-columns: 1fr 1fr; }
+  /* ── CADÊNCIA LAYOUT ─────────────────────────────────────── */
+.cad-top { display:flex; flex-direction:column; border-bottom:1px solid var(--border); }
+.cad-vendor-tabs { display:flex; border-bottom:1px solid var(--border); background:#FBFBFC; }
+.cad-vendor-btn { font-family:var(--font); font-size:10px; font-weight:700; letter-spacing:2.5px; text-transform:uppercase; cursor:pointer; padding:13px 28px; border:none; background:transparent; color:#aaa; transition:all .15s; border-bottom:3px solid transparent; margin-bottom:-1px; }
+.cad-vendor-btn:hover { color:var(--black); background:var(--body-bg); }
+.cad-vendor-btn.active { background:var(--white); color:var(--black); border-bottom:3px solid var(--black); }
+
+.cad-header-bar { grid-template-columns: 1fr 1fr; }
   .cad-textarea { font-size: 14px; min-height: 160px; }
   .cad-step-header { flex-wrap: wrap; gap: 6px; }
 
@@ -437,6 +444,13 @@ tr:hover .action-btns { opacity:.3; }
 .m-filter-apply { width: 100%; margin-top: 20px; padding: 14px; background: var(--black); color: var(--white); border: none; border-radius: 10px; font-family: var(--font); font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; }
 
 /* ── CADÊNCIA COMERCIAL ───────────────────────────── */
+/* ── CADÊNCIA LAYOUT ─────────────────────────────────────── */
+.cad-top { display:flex; flex-direction:column; border-bottom:1px solid var(--border); }
+.cad-vendor-tabs { display:flex; border-bottom:1px solid var(--border); background:#FBFBFC; }
+.cad-vendor-btn { font-family:var(--font); font-size:10px; font-weight:700; letter-spacing:2.5px; text-transform:uppercase; cursor:pointer; padding:13px 28px; border:none; background:transparent; color:#aaa; transition:all .15s; border-bottom:3px solid transparent; margin-bottom:-1px; }
+.cad-vendor-btn:hover { color:var(--black); background:var(--body-bg); }
+.cad-vendor-btn.active { background:var(--white); color:var(--black); border-bottom:3px solid var(--black); }
+
 .cad-header-bar {
   background: var(--white); border: 2px solid var(--black); border-radius: var(--radius);
   padding: 20px 24px; display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap: 0;
@@ -447,15 +461,16 @@ tr:hover .action-btns { opacity:.3; }
   transition: background .12s;
 }
 .cad-phase:last-child { border-right: none; }
+.cad-phase { border-right: 1px solid var(--border); }
 .cad-phase-num { font-size: 8px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: #bbb; margin-bottom: 4px; }
 .cad-phase-name { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--black); margin-bottom: 2px; }
 .cad-phase-meta { font-size: 10px; color: #aaa; }
-.cad-phase.active-phase { background: var(--black); border-radius: 2px; }
+.cad-phase.active-phase { background: var(--black); }
 .cad-phase.active-phase .cad-phase-num { color: rgba(255,255,255,.3); }
 .cad-phase.active-phase .cad-phase-name { color: var(--white); }
 .cad-phase.active-phase .cad-phase-meta { color: rgba(255,255,255,.4); }
 
-.cad-grid { display: flex; flex-direction: column; gap: 0; border: 2px solid var(--black); border-radius: 0 0 var(--radius) var(--radius); overflow: hidden; }
+.cad-grid { display: flex; flex-direction: column; gap: 0; overflow: hidden; }
 .cad-step { border-bottom: 1px solid var(--gray); overflow: hidden; }
 .cad-step:last-child { border-bottom: none; }
 .cad-step-header {
@@ -513,11 +528,11 @@ tr:hover .action-btns { opacity:.3; }
 .leads-table th.sort-asc .sort-arrow,
 .leads-table th.sort-desc .sort-arrow { opacity: 1; color: var(--black); }
 .cad-phase.active-phase:hover { background: var(--black); }
-.cad-vendor-bar { display: flex; gap: 0; border: 2px solid var(--black); border-radius: var(--radius); overflow: hidden; width: fit-content; }
-.cad-vendor-btn { font-family: var(--font); font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; padding: 10px 28px; border: none; background: var(--white); color: #aaa; transition: all .15s; border-right: 1px solid var(--gray); }
-.cad-vendor-btn:last-child { border-right: none; }
-.cad-vendor-btn:hover { background: var(--body-bg); color: var(--black); }
-.cad-vendor-btn.active { background: var(--black); color: var(--white); }
+.cad-vendor-bar { display:none; }
+.cad-vendor-btn-old { display:none; }
+.cad-vendor-btn-old:last-child { border-right: none; }
+.cad-vendor-btn:hover { color: var(--black); background: var(--body-bg); }
+.cad-vendor-btn.active { background: transparent; color: var(--black); border-bottom: 3px solid var(--black); }
 
 </style>
 </head>
@@ -687,45 +702,47 @@ tr:hover .action-btns { opacity:.3; }
 
 <!-- CADÊNCIA COMERCIAL PAGE -->
 <div id="page-cadencia" class="page">
-  <div class="container" style="max-width:1400px">
+  <div class="container" style="max-width:1100px">
 
-    <!-- Mapa visual das fases -->
-    <div class="cad-header-bar">
-      <div class="cad-phase active-phase" onclick="cadJumpPhase(1)" style="cursor:pointer">
-        <div class="cad-phase-num">Fase 1</div>
-        <div class="cad-phase-name">Abertura</div>
-        <div class="cad-phase-meta">Dia 1 · Zap</div>
+    <div class="section">
+      <!-- Header unificado: vendedores + fases numa só faixa -->
+      <div class="cad-top">
+        <div class="cad-vendor-tabs">
+          <button class="cad-vendor-btn active" id="vbtn-diego" onclick="cadSelectVendedor('diego')">Diego</button>
+          <button class="cad-vendor-btn" id="vbtn-matheus" onclick="cadSelectVendedor('matheus')">Matheus</button>
+        </div>
+        <div class="cad-header-bar" id="cad-phase-bar">
+          <div class="cad-phase active-phase" onclick="cadJumpPhase(1)" style="cursor:pointer">
+            <div class="cad-phase-num">Fase 1</div>
+            <div class="cad-phase-name">Abertura</div>
+            <div class="cad-phase-meta">Dia 1 · Zap</div>
+          </div>
+          <div class="cad-phase" onclick="cadJumpPhase(2)" style="cursor:pointer">
+            <div class="cad-phase-num">Fase 2</div>
+            <div class="cad-phase-name">Reforço</div>
+            <div class="cad-phase-meta">Dia 4 · Zap</div>
+          </div>
+          <div class="cad-phase" onclick="cadJumpPhase(3)" style="cursor:pointer">
+            <div class="cad-phase-num">Fase 3</div>
+            <div class="cad-phase-name">Virada</div>
+            <div class="cad-phase-meta">Dia 9 · Zap</div>
+          </div>
+          <div class="cad-phase" onclick="cadJumpPhase(4)" style="cursor:pointer">
+            <div class="cad-phase-num">Fase 4</div>
+            <div class="cad-phase-name">Apresentação</div>
+            <div class="cad-phase-meta">Sob demanda</div>
+          </div>
+          <div class="cad-phase" onclick="cadJumpPhase(5)" style="cursor:pointer">
+            <div class="cad-phase-num">Fase 5</div>
+            <div class="cad-phase-name">Proposta</div>
+            <div class="cad-phase-meta">Sob demanda</div>
+          </div>
+        </div>
       </div>
-      <div class="cad-phase" onclick="cadJumpPhase(2)" style="cursor:pointer">
-        <div class="cad-phase-num">Fase 2</div>
-        <div class="cad-phase-name">Reforço</div>
-        <div class="cad-phase-meta">Dia 4 · Zap</div>
-      </div>
-      <div class="cad-phase" onclick="cadJumpPhase(3)" style="cursor:pointer">
-        <div class="cad-phase-num">Fase 3</div>
-        <div class="cad-phase-name">Virada</div>
-        <div class="cad-phase-meta">Dia 9 · Zap</div>
-      </div>
-      <div class="cad-phase" onclick="cadJumpPhase(4)" style="cursor:pointer">
-        <div class="cad-phase-num">Fase 4</div>
-        <div class="cad-phase-name">Apresentação</div>
-        <div class="cad-phase-meta">Sob demanda</div>
-      </div>
-      <div class="cad-phase" onclick="cadJumpPhase(5)" style="cursor:pointer">
-        <div class="cad-phase-num">Fase 5</div>
-        <div class="cad-phase-name">Proposta</div>
-        <div class="cad-phase-meta">Sob demanda</div>
-      </div>
+
+      <!-- Conteúdo das fases -->
+      <div class="cad-grid" id="cad-grid-active"></div>
     </div>
-
-    <!-- Seletor de vendedor -->
-    <div class="cad-vendor-bar">
-      <button class="cad-vendor-btn active" id="vbtn-diego" onclick="cadSelectVendedor('diego')">Diego</button>
-      <button class="cad-vendor-btn" id="vbtn-matheus" onclick="cadSelectVendedor('matheus')">Matheus</button>
-    </div>
-
-    <!-- Grid único, troca de acordo com o vendedor selecionado -->
-    <div class="cad-grid" id="cad-grid-active"></div>
 
   </div>
 </div>
@@ -2589,7 +2606,7 @@ function goToVencidos() {
   const navBtn = document.getElementById('nav-leads');
   showPage('leads', navBtn);
   renderTable();
-  updateClearBtn();
+  setTimeout(updateClearBtn, 0);
 }
 
 // ── PAINEL DIRETOR ────────────────────────────────────────
