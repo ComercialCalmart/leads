@@ -329,6 +329,20 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
 
 .conv-arrow { font-size:14px; color:#ccc; width:20px; text-align:center; flex-shrink:0; }
 
+/* ── URGÊNCIA DE LINHA ───────────────────────────────────── */
+tr.row-vencido td { background: #fff5f5 !important; border-left: none; }
+tr.row-vencido td:first-child { border-left: 3px solid var(--red); }
+tr.row-hoje td { background: #fffbeb !important; }
+tr.row-hoje td:first-child { border-left: 3px solid var(--yellow); }
+tr.row-vencido:hover td { background: #fee2e2 !important; }
+tr.row-hoje:hover td { background: #fef3c7 !important; }
+
+/* ── QUICK ACTIONS ───────────────────────────────────────── */
+.btn-qa { font-size:14px; cursor:pointer; border:none; background:transparent; border-radius:6px; padding:3px 6px; transition:background .12s; line-height:1; }
+.btn-qa:hover { background:#F0F1F4; }
+.btn-qa-zap { text-decoration:none; display:inline-flex; align-items:center; }
+.action-btns { display:flex; gap:3px; align-items:center; flex-wrap:nowrap; }
+
 /* ── CHIP SÓ MEUS ────────────────────────────────────────── */
 .chip-meus { font-family:var(--font); font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; padding:6px 12px; border:1.5px solid #ddd; border-radius:20px; cursor:pointer; background:var(--white); color:#888; transition:all .12s; white-space:nowrap; }
 .chip-meus:hover { border-color:var(--black); color:var(--black); }
@@ -359,28 +373,6 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
 .kanban-arquivo-btn { font-family:var(--font); font-size:9px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; padding:8px 14px; border:1.5px dashed #ccc; border-radius:6px; background:var(--white); color:#888; cursor:pointer; transition:all .12s; white-space:nowrap; display:flex; align-items:center; gap:8px; }
 .kanban-arquivo-btn:hover { border-color:var(--black); color:var(--black); }
 
-/* ── MEU DIA ─────────────────────────────────────────────── */
-.meudia-section { margin-bottom:20px; }
-.meudia-section-title { font-size:9px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:#aaa; margin-bottom:8px; padding-bottom:6px; border-bottom:1px solid var(--gray); display:flex; align-items:center; justify-content:space-between; }
-.meudia-card { background:var(--white); border:1px solid var(--border); border-radius:10px; padding:12px 14px; display:flex; align-items:center; gap:12px; margin-bottom:7px; cursor:pointer; box-shadow:0 1px 2px rgba(15,17,21,.03); transition:border-color .18s, box-shadow .18s, transform .18s; }
-.meudia-card:hover { border-color:var(--accent); box-shadow:var(--shadow-hover); transform:translateY(-1px); }
-.meudia-card.overdue { border-left:3px solid var(--red); }
-.meudia-card.hoje    { border-left:3px solid var(--yellow); }
-.meudia-card.futuro  { border-left:3px solid #86efac; }
-.meudia-card-left { flex:1; min-width:0; }
-.meudia-card-name { font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.meudia-card-sub  { font-size:11px; color:#888; margin-top:2px; }
-.meudia-card-right { display:flex; flex-direction:column; align-items:flex-end; gap:4px; flex-shrink:0; }
-.meudia-date-lbl { font-size:8px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#bbb; }
-.meudia-date-val { font-size:12px; font-weight:900; }
-.meudia-date-val.date-vencido { color:var(--red); }
-.meudia-date-val.date-hoje    { color:var(--yellow); }
-.meudia-date-val.date-futuro  { color:var(--green); }
-.meudia-quick { display:flex; gap:6px; margin-top:8px; }
-.meudia-btn { font-family:var(--font); font-size:9px; font-weight:700; letter-spacing:1px; text-transform:uppercase; cursor:pointer; border-radius:3px; padding:5px 10px; border:1.5px solid #ddd; background:var(--white); color:#555; transition:all .12s; }
-.meudia-btn:hover { border-color:var(--black); color:var(--black); }
-.meudia-btn.primary { background:var(--black); color:var(--white); border-color:var(--black); }
-.meudia-empty { text-align:center; padding:32px 20px; color:#ccc; font-size:11px; letter-spacing:2px; text-transform:uppercase; }
 
 /* ── OVERDUE BADGE ───────────────────────────────────────── */
 .nav-tab-wrap { position:relative; display:inline-block; }
@@ -532,6 +524,7 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
   <div class="header-actions">
     <button class="btn btn-ghost" onclick="doLogout()" title="Sair">⎋ Sair</button>
     <button class="btn btn-ghost" onclick="changeUser()" id="user-indicator" style="gap:6px">— Identificar</button>
+    <span id="role-badge" style="display:none;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);padding:4px 10px;border:1px solid rgba(99,189,219,.4);border-radius:20px;white-space:nowrap"></span>
     <button class="btn btn-ghost" onclick="exportJSON()">↑ Salvar</button>
     <label class="btn btn-ghost" style="cursor:pointer;">↓ Importar <input type="file" accept=".csv,.xls,.xlsx,.txt" onchange="importCSV(event)" style="display:none"></label>
     <button class="btn btn-primary" onclick="openModal()">+ Novo Contato</button>
@@ -539,32 +532,19 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
 </header>
 
 <nav class="page-nav">
-  <button class="nav-tab active" id="nav-meudia" onclick="showPage('meudia',this)">Meu Dia</button>
   <span class="nav-tab-wrap">
-    <button class="nav-tab" id="nav-leads" onclick="showPage('leads',this)">Contatos</button>
+    <button class="nav-tab active" id="nav-leads" onclick="showPage('leads',this)">Contatos</button>
     <span class="overdue-badge" id="overdue-badge"></span>
   </span>
   <button class="nav-tab" onclick="showPage('dash',this)">Painel</button>
   <button class="nav-tab" onclick="showPage('cadencia',this)">Cadência Comercial</button>
 </nav>
 
-<!-- MEU DIA PAGE -->
-<div id="page-meudia" class="page active">
-  <div class="container" style="max-width:900px">
-    <div class="section">
-      <div class="section-title">
-        <span id="meudia-greeting">Meu Dia</span>
-        <span class="tag" id="meudia-tag">—</span>
-      </div>
-      <div style="padding:20px" id="meudia-body">
-        <div class="meudia-empty">Carregando...</div>
-      </div>
-    </div>
   </div>
 </div>
 
 <!-- LEADS PAGE -->
-<div id="page-leads" class="page">
+<div id="page-leads" class="page active">
   <div class="container">
     <div class="section">
       <div class="section-title">
@@ -1058,6 +1038,7 @@ function fromRow(r) {
     urlMl:r.url_ml||'', urlAz:r.url_az||'', urlSh:r.url_sh||'',
     urlSite:r.url_site||'', insta:r.insta||'', obs:r.obs||'',
     ultimo:r.ultimo||'', inseridoPor:r.inserido_por||'',
+    ownerId:r.owner_id||'',
     motivoPerda:r.motivo_perda||'',
     createdAt:r.created_at||'', updatedAt:r.updated_at||'' };
 }
@@ -1068,6 +1049,7 @@ function toRow(c) {
     url_ml:c.urlMl, url_az:c.urlAz, url_sh:c.urlSh,
     url_site:c.urlSite, insta:c.insta, obs:c.obs,
     ultimo:c.ultimo||null, inserido_por:c.inseridoPor||null,
+    owner_id:c.ownerId||null,
     motivo_perda:c.motivoPerda||null,
     created_at:c.createdAt||new Date().toISOString(),
     updated_at:new Date().toISOString() };
@@ -1279,7 +1261,6 @@ function showPage(id, btn) {
   if (btn) btn.classList.add('active');
   if (id==='dash') renderDash();
   if (id==='cadencia') renderCadencia();
-  if (id==='meudia') renderMeuDia();
   if (id==='leads' && currentView==='kanban') renderKanban();
 }
 
@@ -1338,6 +1319,7 @@ async function saveContact() {
     if (editingId) {
       const idx = contacts.findIndex(x=>x.id===editingId);
       if (idx>-1) {
+        if (!canEdit(contacts[idx])) { showToast('Sem permissão para editar este lead.','err'); closeModal(); return; }
         becamePerdido = data.status === 'PERDIDO' && contacts[idx].status !== 'PERDIDO' && !contacts[idx].motivoPerda;
         contacts[idx] = {...contacts[idx], ...data};
         savedId = editingId;
@@ -1352,6 +1334,7 @@ async function saveContact() {
     } else {
       data.id = genId(); data.createdAt = data.updatedAt = new Date().toISOString();
       if (!data.inseridoPor) data.inseridoPor = getCurrentUser();
+      if (!data.ownerId && myProfile) data.ownerId = myProfile.id;
       becamePerdido = data.status === 'PERDIDO';
       contacts.unshift(data); await dbUpsert(data);
       savedId = data.id;
@@ -1386,6 +1369,7 @@ async function confirmDelete() {
 async function inlineSave(id, field, value) {
   const idx = contacts.findIndex(x=>x.id===id);
   if (idx<0) return;
+  if (!canEdit(contacts[idx])) { showToast('Sem permissão para editar este lead.','err'); renderTable(); return; }
   let v = value;
   if (field === 'estado') v = v.toUpperCase();
   if (field === 'zap')    v = formatZap(v);
@@ -1510,6 +1494,24 @@ function getFiltered() {
       if (va > vb) return  1 * dir;
       return 0;
     });
+  } else {
+    // Ordenação padrão por urgência: vencidos → hoje → futuros → sem data → fechados/perdidos
+    const todayMs = new Date().setHours(0,0,0,0);
+    const urgency = c => {
+      const closed = c.status === 'FECHADO' || c.status === 'PERDIDO';
+      if (closed) return 4;
+      if (!c.prox) return 3;
+      const dt = new Date(c.prox + 'T00:00:00').getTime();
+      if (dt < todayMs) return 0;          // vencido
+      if (dt === todayMs) return 1;        // hoje
+      return 2;                            // futuro
+    };
+    list.sort((a, b) => {
+      const ua = urgency(a), ub = urgency(b);
+      if (ua !== ub) return ua - ub;
+      // dentro do mesmo grupo, mais antigo primeiro
+      return (a.prox||'9').localeCompare(b.prox||'9');
+    });
   }
   return list;
 }
@@ -1530,7 +1532,16 @@ function renderTable() {
   countEl.textContent = `${list.length}/${contacts.length}`;
 
   // Use fragment for performance
+  const todayMs2 = new Date().setHours(0,0,0,0);
   const rows = list.map((c,i) => {
+    const proxDt = c.prox ? new Date(c.prox + 'T00:00:00').getTime() : null;
+    const urgCls = (() => {
+      if (c.status === 'FECHADO' || c.status === 'PERDIDO') return '';
+      if (!proxDt) return '';
+      if (proxDt < todayMs2) return 'row-vencido';
+      if (proxDt === todayMs2) return 'row-hoje';
+      return '';
+    })();
     const obsIcon = c.obs
       ? `<span class="icon-link il-obs" onclick="showObs('${c.id}')" title="${esc(c.obs.slice(0,80))}">●</span>`
       : '';
@@ -1542,7 +1553,7 @@ function renderTable() {
       instaIcon(c.insta, c.id),
     ].join(' ');
 
-    return `<tr>
+    return `<tr class="${urgCls}">
       <td class="c" style="font-size:10px;color:#aaa;white-space:nowrap">${c.createdAt ? c.createdAt.slice(8,10)+'/'+c.createdAt.slice(5,7) : '—'}</td>
       <td style="color:#aaa;font-size:10px">${i+1}</td>
       <td style="font-size:11px;color:#555;white-space:nowrap">${c.contato ? esc(c.contato) : '<span style="color:#ccc">—</span>'}</td>
@@ -1576,8 +1587,11 @@ function renderTable() {
       <td class="td-icon"><div class="links-cell">${links}</div></td>
       <td>
         <div class="action-btns">
-          <button class="btn-edit" onclick="openModal('${c.id}')">✎</button>
-          <button class="btn-del"  onclick="askDelete('${c.id}')">✕</button>
+          ${c.zap ? `<a href="https://wa.me/55${fmtPhone(c.zap)}" target="_blank" class="btn-qa btn-qa-zap" title="WhatsApp">💬</a>` : ''}
+          <button class="btn-qa btn-qa-reg" onclick="quickRegister('${c.id}')" title="Registrar contato">✓</button>
+          <button class="btn-qa btn-qa-age" onclick="quickReagendarRow('${c.id}')" title="Reagendar">📅</button>
+          ${canEdit(c) ? `<button class="btn-edit" onclick="openModal('${c.id}')">✎</button>` : `<button class="btn-edit" style="opacity:.3;cursor:default" title="Sem permissão">✎</button>`}
+          ${canDelete(c) ? `<button class="btn-del" onclick="askDelete('${c.id}')">✕</button>` : ''}
         </div>
       </td>
     </tr>`;
@@ -1589,9 +1603,7 @@ function renderTable() {
 function updateBadge() {
   document.getElementById('total-badge').textContent = contacts.length;
   updateOverdueBadge();
-  // Refresh Meu Dia only if it's the active page
-  const meudia = document.getElementById('page-meudia');
-  if (meudia && meudia.classList.contains('active')) renderMeuDia();
+
 }
 
 // ── EXPORT / IMPORT JSON ─────────────────────────────────
@@ -2296,6 +2308,38 @@ function setCurrentUser(name) {
   localStorage.setItem('calmart_user', name);
 }
 
+// ── RBAC ───────────────────────────────────────────────────
+let myProfile = null; // { id, email, nome, role }
+
+async function loadMyProfile() {
+  try {
+    const res = await fetch(SB_URL + '/rest/v1/rpc/get_my_profile', {
+      method: 'POST',
+      headers: { ...SB_HDR, 'Content-Type': 'application/json' },
+      body: JSON.stringify({})
+    });
+    if (res.ok) {
+      const text = await res.text();
+      myProfile = text ? JSON.parse(text) : null;
+    }
+  } catch(e) { myProfile = null; }
+}
+
+function isDirector() {
+  return myProfile?.role === 'director';
+}
+
+function canEdit(lead) {
+  if (!myProfile) return true; // se ainda não carregou, permite otimisticamente
+  if (isDirector()) return true;
+  // analyst: só edita os próprios
+  return lead.ownerId === myProfile.id || lead.inseridoPor === myProfile.nome;
+}
+
+function canDelete(lead) {
+  return canEdit(lead);
+}
+
 function showUserPicker() {
   const container = document.getElementById('user-picker-btns');
   if (container && !container.children.length) {
@@ -2779,86 +2823,41 @@ function updateOverdueBadge() {
   else { badge.classList.remove('show'); }
 }
 
-// ── MEU DIA ───────────────────────────────────────────────
-function renderMeuDia() {
-  const body = document.getElementById('meudia-body');
-  const tag  = document.getElementById('meudia-tag');
-  const greeting = document.getElementById('meudia-greeting');
-  if (!body) return;
 
-  const user = getCurrentUser();
-  const today = new Date(); today.setHours(0,0,0,0);
-  const in7   = new Date(today); in7.setDate(in7.getDate()+7);
+// ── AÇÕES RÁPIDAS DE LINHA ────────────────────────────────
+async function quickRegister(id) {
+  const c = contacts.find(x=>x.id===id);
+  if (!c) return;
+  if (!canEdit(c)) { showToast('Sem permissão para editar este lead.','err'); return; }
+  const idx = contacts.findIndex(x=>x.id===id);
+  const todayIso = new Date().toISOString().slice(0,10);
+  contacts[idx].ultimo = todayIso;
+  contacts[idx].updatedAt = new Date().toISOString();
+  // Sugerir próximo contato +3 dias
+  const p3 = new Date(); p3.setDate(p3.getDate()+3);
+  contacts[idx].prox = p3.toISOString().slice(0,10);
+  try {
+    await dbUpsert(contacts[idx]);
+    showToast(`Contato registrado · próx. ${contacts[idx].prox.slice(8,10)}/${contacts[idx].prox.slice(5,7)}`, 'ok');
+    renderTable(); updateBadge();
+  } catch(e) { showToast('Erro: '+e.message,'err'); }
+}
 
-  if (greeting) greeting.textContent = user ? `Meu Dia — ${user}` : 'Meu Dia';
-
-  // Filter by current user's leads, exclude FECHADO/PERDIDO
-  const mine = contacts.filter(c =>
-    (!user || c.inseridoPor === user) &&
-    c.status !== 'FECHADO' && c.status !== 'PERDIDO'
-  );
-
-  const overdue = mine.filter(c => c.prox && new Date(c.prox+'T00:00:00') < today)
-    .sort((a,b) => a.prox.localeCompare(b.prox));
-  const today_list = mine.filter(c => c.prox && new Date(c.prox+'T00:00:00').getTime() === today.getTime());
-  const upcoming   = mine.filter(c => {
-    if (!c.prox) return false;
-    const dt = new Date(c.prox+'T00:00:00');
-    return dt > today && dt <= in7;
-  }).sort((a,b) => a.prox.localeCompare(b.prox));
-
-  const total = overdue.length + today_list.length + upcoming.length;
-  if (tag) tag.textContent = total > 0 ? `${total} ações` : '✓ em dia';
-
-  if (!contacts.length) { body.innerHTML = '<div class="meudia-empty">Carregando...</div>'; return; }
-
-  function cardHtml(c, urgencyClass) {
-    const proxDisp = c.prox ? c.prox.slice(8,10)+'/'+c.prox.slice(5,7) : '—';
-    const proxCls  = dateClass(c.prox);
-    const loc = [c.cidade, c.estado].filter(Boolean).join(' · ') || '';
-    const wazHref = c.zap ? `https://wa.me/55${fmtPhone(c.zap)}` : null;
-    return `<div class="meudia-card ${urgencyClass}">
-      <div class="meudia-card-left">
-        <div class="meudia-card-name">${esc(c.nome)}</div>
-        <div class="meudia-card-sub">${[c.contato ? esc(c.contato) : null, loc, STATUS_LABELS[c.status]].filter(Boolean).join(' · ')}</div>
-        <div class="meudia-quick">
-          ${wazHref ? `<a href="${wazHref}" target="_blank" class="meudia-btn primary" onclick="event.stopPropagation()">💬 Zap</a>` : ''}
-          <button class="meudia-btn" onclick="event.stopPropagation();openModal('${c.id}')">✎ Editar</button>
-          <button class="meudia-btn" onclick="event.stopPropagation();quickAdvance('${c.id}')">→ Avançar</button>
-        </div>
-      </div>
-      <div class="meudia-card-right">
-        <span class="meudia-date-lbl">Próx. contato</span>
-        <span class="meudia-date-val ${proxCls}">${proxDisp}</span>
-      </div>
-    </div>`;
-  }
-
-  let html = '';
-
-  if (overdue.length) {
-    html += `<div class="meudia-section">
-      <div class="meudia-section-title"><span>🔴 Atrasados</span><span style="color:var(--red);font-weight:900">${overdue.length}</span></div>
-      ${overdue.map(c => cardHtml(c, 'overdue')).join('')}
-    </div>`;
-  }
-  if (today_list.length) {
-    html += `<div class="meudia-section">
-      <div class="meudia-section-title"><span>🟡 Para hoje</span><span style="color:var(--yellow);font-weight:900">${today_list.length}</span></div>
-      ${today_list.map(c => cardHtml(c, 'hoje')).join('')}
-    </div>`;
-  }
-  if (upcoming.length) {
-    html += `<div class="meudia-section">
-      <div class="meudia-section-title"><span>🟢 Próximos 7 dias</span><span style="color:var(--green);font-weight:900">${upcoming.length}</span></div>
-      ${upcoming.map(c => cardHtml(c, 'futuro')).join('')}
-    </div>`;
-  }
-  if (!html) {
-    html = `<div class="meudia-empty">✓ Nenhuma ação pendente. Bom trabalho!</div>`;
-  }
-
-  body.innerHTML = html;
+async function quickReagendarRow(id) {
+  const c = contacts.find(x=>x.id===id);
+  if (!c) return;
+  if (!canEdit(c)) { showToast('Sem permissão para editar este lead.','err'); return; }
+  // pede nova data via prompt minimalista (modal seria overkill para uma data)
+  const nova = prompt('Nova data de próximo contato (AAAA-MM-DD):', c.prox || new Date().toISOString().slice(0,10));
+  if (!nova || !/^\d{4}-\d{2}-\d{2}$/.test(nova)) return;
+  const idx = contacts.findIndex(x=>x.id===id);
+  contacts[idx].prox = nova;
+  contacts[idx].updatedAt = new Date().toISOString();
+  try {
+    await dbUpsert(contacts[idx]);
+    showToast(`Reagendado para ${nova.slice(8,10)}/${nova.slice(5,7)}`, 'ok');
+    renderTable(); updateBadge();
+  } catch(e) { showToast('Erro: '+e.message,'err'); }
 }
 
 // Quick advance status
@@ -3017,6 +3016,8 @@ function stopPolling() {
 
 
 
+// Patch renderTable: cards no mobile + funil
+const _origRenderTable = renderTable.bind({});
 renderTable = function() {
   _origRenderTable();
   if (isMobile() && currentView !== 'kanban') renderCards();
@@ -3106,6 +3107,7 @@ async function doLogout() {
 }
 
 async function afterLogin() {
+  await loadMyProfile();
   await load();
   const missing = SEEDS.filter(s => !contacts.find(c=>c.id===s.id));
   if (missing.length) {
@@ -3120,7 +3122,7 @@ async function afterLogin() {
     renderTable();
   }
   startPolling();
-  renderMeuDia();
+  renderTable();
 }
 
 async function init() {
@@ -3146,6 +3148,14 @@ async function init() {
   const indicator = document.getElementById('user-indicator');
   if (indicator) indicator.textContent = '👤 ' + restoredName;
   await afterLogin();
+  // Show role badge in header after profile loads
+  if (myProfile) {
+    const roleBadge = document.getElementById('role-badge');
+    if (roleBadge) {
+      roleBadge.textContent = myProfile.role === 'director' ? '⬡ Diretor' : '⬡ Analista';
+      roleBadge.style.display = 'inline';
+    }
+  }
 }
 init();
 
