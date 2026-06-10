@@ -1955,15 +1955,10 @@ function renderDash() {
       <div class="kpi-number yellow">${count('NEGOC')}</div>
       <div class="kpi-delta">${pct(count('NEGOC'))}% do total</div>
     </div>
-    <div class="kpi-card">
+    <div class="kpi-card" style="cursor:pointer" onclick="goToVencidos()" title="Ver contatos atrasados">
       <div class="kpi-eyebrow">Retornos Atrasados</div>
       <div class="kpi-number red">${vencidos}</div>
-      <div class="kpi-delta ${vencidos>0?'down':''}">precisam de atenção</div>
-    </div>
-    <div class="kpi-card">
-      <div class="kpi-eyebrow">Ciclo Médio</div>
-      <div class="kpi-number">${cicloMedio() !== null ? cicloMedio() : '—'}</div>
-      <div class="kpi-delta">dias até fechar</div>
+      <div class="kpi-delta ${vencidos>0?'down':''}">precisam de atenção ↗</div>
     </div>
   `;
 
@@ -2550,6 +2545,14 @@ function animateKpis() {
     };
     requestAnimationFrame(step);
   });
+}
+
+function goToVencidos() {
+  const sel = document.getElementById('filter-prox');
+  if (sel) sel.value = 'vencido';
+  const navBtn = document.getElementById('nav-leads');
+  showPage('leads', navBtn);
+  renderTable();
 }
 
 // ── PAINEL DIRETOR ────────────────────────────────────────
