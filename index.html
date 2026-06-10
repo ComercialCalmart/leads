@@ -343,6 +343,9 @@ tr.row-hoje:hover td { background: #fef3c7 !important; }
 .btn-qa-zap { text-decoration:none; display:inline-flex; align-items:center; }
 .action-btns { display:flex; gap:3px; align-items:center; flex-wrap:nowrap; }
 
+.btn-clear-filters { font-family:var(--font); font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; padding:6px 12px; border:1.5px solid #fca5a5; border-radius:20px; cursor:pointer; background:#fff1f2; color:var(--red); transition:all .12s; white-space:nowrap; }
+.btn-clear-filters:hover { background:var(--red); color:var(--white); border-color:var(--red); }
+
 /* ── CHIP SÓ MEUS ────────────────────────────────────────── */
 .chip-meus { font-family:var(--font); font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; padding:6px 12px; border:1.5px solid #ddd; border-radius:20px; cursor:pointer; background:var(--white); color:#888; transition:all .12s; white-space:nowrap; }
 .chip-meus:hover { border-color:var(--black); color:var(--black); }
@@ -550,8 +553,8 @@ tr.row-hoje:hover td { background: #fef3c7 !important; }
         <span class="tag" id="total-badge">0</span>
       </div>
       <div class="toolbar">
-        <input type="search" class="search-input" id="search-input" placeholder="Buscar empresa, zap, email, cidade..." oninput="renderTable()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-        <select class="filter-select" id="filter-status" onchange="renderTable()">
+        <input type="search" class="search-input" id="search-input" placeholder="Buscar empresa, zap, email, cidade..." oninput="renderTable();updateClearBtn()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <select class="filter-select" id="filter-status" onchange="renderTable();updateClearBtn()">
           <option value="">Todos os status</option>
           <option value="NOVO">Novo</option>
           <option value="TENT1">1ª Tentativa</option>
@@ -561,7 +564,7 @@ tr.row-hoje:hover td { background: #fef3c7 !important; }
           <option value="FECHADO">Fechado</option>
           <option value="PERDIDO">Perdido</option>
         </select>
-        <select class="filter-select" id="filter-prox" onchange="renderTable()">
+        <select class="filter-select" id="filter-prox" onchange="renderTable();updateClearBtn()">
           <option value="">Próx. contato</option>
           <option value="vencido">Vencidos</option>
           <option value="hoje">Hoje</option>
@@ -569,6 +572,7 @@ tr.row-hoje:hover td { background: #fef3c7 !important; }
         </select>
         <span class="toolbar-count" id="showing-count"></span>
         <span class="save-status" id="save-status"></span>
+        <button class="btn-clear-filters" id="btn-clear-filters" onclick="clearFilters()" title="Limpar filtros" style="display:none">✕ Limpar</button>
         <button class="chip-meus" id="chip-meus" onclick="toggleMeus()" title="Mostrar só os meus leads">👤 Só meus</button>
         <div class="view-toggle" style="margin-left:auto">
           <button class="view-btn active" id="vbtn-list" onclick="setView('list')">☰ Lista</button>
@@ -1454,6 +1458,7 @@ let filterMeus = false;
 function toggleMeus() {
   filterMeus = !filterMeus;
   document.getElementById('chip-meus')?.classList.toggle('active', filterMeus);
+  updateClearBtn();
   const chipM = document.getElementById('m-chip-meus');
   if (chipM) chipM.classList.toggle('active', filterMeus);
   renderTable();
@@ -2547,11 +2552,34 @@ function animateKpis() {
   });
 }
 
+function clearFilters() {
+  const ss = document.getElementById('search-input');
+  const fs = document.getElementById('filter-status');
+  const fp = document.getElementById('filter-prox');
+  if (ss) ss.value = '';
+  if (fs) fs.value = '';
+  if (fp) fp.value = '';
+  filterMeus = false;
+  document.getElementById('chip-meus')?.classList.remove('active');
+  updateClearBtn();
+  renderTable();
+}
+
+function updateClearBtn() {
+  const q  = document.getElementById('search-input')?.value || '';
+  const fs = document.getElementById('filter-status')?.value || '';
+  const fp = document.getElementById('filter-prox')?.value || '';
+  const active = q || fs || fp || filterMeus;
+  const btn = document.getElementById('btn-clear-filters');
+  if (btn) btn.style.display = active ? '' : 'none';
+}
+
 function goToVencidos() {
   const sel = document.getElementById('filter-prox');
   if (sel) sel.value = 'vencido';
   const navBtn = document.getElementById('nav-leads');
   showPage('leads', navBtn);
+  updateClearBtn();
   renderTable();
 }
 
