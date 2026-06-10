@@ -524,7 +524,6 @@ tr.row-hoje:hover td { background: #fef3c7 !important; }
   <div class="header-actions">
     <button class="btn btn-ghost" onclick="doLogout()" title="Sair">⎋ Sair</button>
     <button class="btn btn-ghost" id="user-indicator" style="gap:6px;cursor:default;opacity:.7">—</button>
-    <span id="role-badge" style="display:none;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);padding:4px 10px;border:1px solid rgba(99,189,219,.4);border-radius:20px;white-space:nowrap"></span>
     <button class="btn btn-ghost" onclick="exportJSON()">↑ Salvar</button>
     <label class="btn btn-ghost" style="cursor:pointer;">↓ Importar <input type="file" accept=".csv,.xls,.xlsx,.txt" onchange="importCSV(event)" style="display:none"></label>
     <button class="btn btn-primary" onclick="openModal()">+ Novo Contato</button>
@@ -534,7 +533,6 @@ tr.row-hoje:hover td { background: #fef3c7 !important; }
 <nav class="page-nav">
   <span class="nav-tab-wrap">
     <button class="nav-tab active" id="nav-leads" onclick="showPage('leads',this)">Contatos</button>
-    <span class="overdue-badge" id="overdue-badge"></span>
   </span>
   <button class="nav-tab" onclick="showPage('dash',this)">Painel</button>
   <button class="nav-tab" onclick="showPage('cadencia',this)">Cadência Comercial</button>
