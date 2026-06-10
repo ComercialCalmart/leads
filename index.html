@@ -3412,16 +3412,24 @@ async function doLogout() {
 
 async function afterLogin() {
   await loadMyProfile();
+  // Garantir filtros limpos ao entrar
+  filterMeus = false;
+  const ss = document.getElementById('search-input');
+  const fs = document.getElementById('filter-status');
+  const fp = document.getElementById('filter-prox');
+  if (ss) ss.value = '';
+  if (fs) fs.value = '';
+  if (fp) fp.value = '';
+  const btn = document.getElementById('btn-clear-filters');
+  if (btn) btn.style.setProperty('display','none','important');
   await load();
   const needsPatch = contacts.filter(c => !c.ultimo);
   if (needsPatch.length) {
     needsPatch.forEach(c => { c.ultimo = TODAY_ISO; });
     await sbUpsertMany(needsPatch);
-    renderTable();
   }
   startPolling();
   setView('list');
-  renderTable();
 }
 
 async function init() {
