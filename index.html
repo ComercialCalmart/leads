@@ -523,7 +523,7 @@ tr.row-hoje:hover td { background: #fef3c7 !important; }
   </div>
   <div class="header-actions">
     <button class="btn btn-ghost" onclick="doLogout()" title="Sair">⎋ Sair</button>
-    <button class="btn btn-ghost" onclick="changeUser()" id="user-indicator" style="gap:6px">— Identificar</button>
+    <button class="btn btn-ghost" id="user-indicator" style="gap:6px;cursor:default;opacity:.7">—</button>
     <span id="role-badge" style="display:none;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);padding:4px 10px;border:1px solid rgba(99,189,219,.4);border-radius:20px;white-space:nowrap"></span>
     <button class="btn btn-ghost" onclick="exportJSON()">↑ Salvar</button>
     <label class="btn btn-ghost" style="cursor:pointer;">↓ Importar <input type="file" accept=".csv,.xls,.xlsx,.txt" onchange="importCSV(event)" style="display:none"></label>
@@ -3077,6 +3077,9 @@ async function doLogin() {
     };
     const name = mapped[emailName] || emailName;
     setCurrentUser(name);
+    localStorage.setItem('calmart_session', JSON.stringify(data));
+    SB_HDR['Authorization'] = 'Bearer ' + data.access_token;
+    authSession = data;
     const indicator = document.getElementById('user-indicator');
     if (indicator) indicator.textContent = '👤 ' + name;
     document.getElementById('login-screen').classList.remove('show');
