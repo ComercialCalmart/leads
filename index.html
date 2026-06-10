@@ -1139,12 +1139,20 @@ const MKT_LABELS = { MELI:'Mercado Livre', AMAZON:'Amazon', SHOPPEE:'Shopee', OU
 // ── DATA ──────────────────────────────────────────────────
 
 // Se a coluna motivo_perda ainda não existe no banco, salva sem ela
-let _hasMotivoCol = true;
-function stripMotivo(row) { const r = {...row}; delete r.motivo_perda; return r; }
+let _hasMotivoCol  = true;
+let _hasHistoryCol = true;
+
+function stripMotivo(row)  { const r = {...row}; delete r.motivo_perda; return r; }
+function stripHistory(row) { const r = {...row}; delete r.history; return r; }
+function stripUnknown(row) {
+  let r = row;
+  if (!_hasMotivoCol)  r = stripMotivo(r);
+  if (!_hasHistoryCol) r = stripHistory(r);
+  return r;
+}
 
 async function dbUpsert(c) {
-  let row = toRow(c);
-  if (!_hasMotivoCol) row = stripMotivo(row);
+  let row = stripUnknown(toRow(c));
   try {
     await sbFetch('leads?on_conflict=id', {
       method: 'POST',
@@ -1158,7 +1166,15 @@ async function dbUpsert(c) {
       await sbFetch('leads?on_conflict=id', {
         method: 'POST',
         headers: { ...SB_HDR, 'Prefer': 'resolution=merge-duplicates' },
-        body: JSON.stringify(stripMotivo(row))
+        body: JSON.stringify(stripUnknown(toRow(c)))
+      });
+    } else if (/history/i.test(e.message)) {
+      _hasHistoryCol = false;
+      showToast('Aviso: rode o SQL da coluna history no Supabase.', 'err', 7000);
+      await sbFetch('leads?on_conflict=id', {
+        method: 'POST',
+        headers: { ...SB_HDR, 'Prefer': 'resolution=merge-duplicates' },
+        body: JSON.stringify(stripUnknown(toRow(c)))
       });
     } else { throw e; }
   }
@@ -1166,6 +1182,9 @@ async function dbUpsert(c) {
 async function dbDelete(id) {
   await sbFetch('leads?id=eq.'+encodeURIComponent(id), { method: 'DELETE' });
 }
+
+// ── UTILS ─────────────────────────────────────────────────
+function isMobile() { return window.innerWidth <= 640; }
 
 function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 
@@ -2218,8 +2237,7 @@ function renderVendedores(key) {
 // ── BATCH UPSERT ──────────────────────────────────────────
 async function sbUpsertMany(list) {
   if (!list.length) return;
-  let rows = list.map(toRow);
-  if (!_hasMotivoCol) rows = rows.map(stripMotivo);
+  let rows = list.map(c => stripUnknown(toRow(c)));
   try {
     await sbFetch('leads?on_conflict=id', {
       method: 'POST',
@@ -2227,13 +2245,14 @@ async function sbUpsertMany(list) {
       body: JSON.stringify(rows)
     });
   } catch(e) {
-    if (/motivo_perda/i.test(e.message)) {
-      _hasMotivoCol = false;
-      showToast('Aviso: rode o SQL do motivo_perda no Supabase.', 'err', 7000);
+    if (/motivo_perda|history/i.test(e.message)) {
+      if (/motivo_perda/i.test(e.message)) _hasMotivoCol = false;
+      if (/history/i.test(e.message))       _hasHistoryCol = false;
+      showToast('Aviso: atualize o banco via SQL.', 'err', 7000);
       await sbFetch('leads?on_conflict=id', {
         method: 'POST',
         headers: { ...SB_HDR, 'Prefer': 'resolution=merge-duplicates' },
-        body: JSON.stringify(rows.map(stripMotivo))
+        body: JSON.stringify(list.map(c => stripUnknown(toRow(c))))
       });
     } else { throw e; }
   }
@@ -3398,14 +3417,7 @@ async function init() {
   const indicator = document.getElementById('user-indicator');
   if (indicator) indicator.textContent = '👤 ' + restoredName;
   await afterLogin();
-  // Show role badge in header after profile loads
-  if (myProfile) {
-    const roleBadge = document.getElementById('role-badge');
-    if (roleBadge) {
-      roleBadge.textContent = myProfile.role === 'director' ? '⬡ Diretor' : '⬡ Analista';
-      roleBadge.style.display = 'inline';
-    }
-  }
+
 }
 init();
 
