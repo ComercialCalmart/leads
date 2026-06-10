@@ -638,7 +638,7 @@ tr:hover .action-btns { opacity:.3; }
         </div>
       </div>
       <!-- MOBILE CARDS -->
-      <div class="mobile-cards" id="mobile-cards" style="display:none"></div>
+      <div class="mobile-cards" id="mobile-cards"></div>
       <!-- KANBAN BOARD -->
       <div id="kanban-board" style="display:none"></div>
     </div>
@@ -2549,6 +2549,28 @@ function renderCards() {
   if (!list.length) { el.innerHTML = ''; empty.style.display = 'block'; return; }
   empty.style.display = 'none';
 
+  // Delegate all card interactions — reliable on iOS Safari
+  el.onclick = e => {
+    const qa   = e.target.closest('.m-qa-btn');
+    const more = e.target.closest('.m-more-btn');
+    const waz  = e.target.closest('a[href*="wa.me"]');
+    if (waz) return; // let link handle itself
+    if (qa) {
+      e.stopPropagation();
+      const card = qa.closest('[data-id]');
+      if (!card) return;
+      const id = card.dataset.id;
+      if (qa.dataset.action === 'register') quickRegister(id);
+      if (qa.dataset.action === 'reagendar') openReagendar(id);
+      return;
+    }
+    if (more) {
+      e.stopPropagation();
+      const card = more.closest('[data-id]');
+      if (card) openActionSheet(card.dataset.id);
+      return;
+    }
+  };
   el.innerHTML = list.map(c => {
     const statusCls = STATUS_CLASS[c.status] || 's-novo';
     const statusLbl = STATUS_LABELS[c.status] || 'Novo';
@@ -2578,7 +2600,7 @@ function renderCards() {
       c.insta   ? instaIcon(c.insta, c.id) : '',
     ].filter(Boolean).join('');
 
-    return `<div class="m-card">
+    return `<div class="m-card" data-id="${c.id}">
       <div class="m-card-top">
         <div style="flex:1;min-width:0">
           <div class="m-card-name">${esc(c.nome)}</div>
@@ -2601,9 +2623,9 @@ function renderCards() {
       <div class="m-card-bottom">
         <div class="m-card-icons">${waz}${mail}${links}</div>
         <div style="display:flex;gap:6px;align-items:center">
-          <button class="m-qa-btn" onclick="quickRegister('${c.id}')" title="Registrar contato">✓</button>
-          <button class="m-qa-btn" onclick="openReagendar('${c.id}')" title="Reagendar">📅</button>
-          <button class="m-more-btn" onclick="openActionSheet('${c.id}')">⋯</button>
+          <button class="m-qa-btn" data-action="register" title="Registrar contato">✓</button>
+          <button class="m-qa-btn" data-action="reagendar" title="Reagendar">📅</button>
+          <button class="m-more-btn">⋯</button>
         </div>
       </div>
     </div>`;
@@ -2984,6 +3006,13 @@ function renderKanban() {
   const list = getFiltered();
   const nArquivo = list.filter(c => c.status==='FECHADO'||c.status==='PERDIDO').length;
 
+  // delegate clicks — works reliably on iOS Safari
+  board.onclick = e => {
+    const card = e.target.closest('.kanban-card[data-id]');
+    if (card) openModal(card.dataset.id);
+    const btn = e.target.closest('.kanban-arquivo-btn');
+    if (btn) toggleKanbanArquivo();
+  };
   board.innerHTML = `<div class="kanban-board">${statusOrder.map(s => {
     const cards = list.filter(c=>c.status===s);
     const cardsHtml = cards.length
@@ -2991,7 +3020,7 @@ function renderKanban() {
           const proxDisp = c.prox ? c.prox.slice(8,10)+'/'+c.prox.slice(5,7) : null;
           const proxCls  = dateClass(c.prox);
           const loc = [c.cidade, c.estado].filter(Boolean).join('/');
-          return `<div class="kanban-card" onclick="openModal('${c.id}')">
+          return `<div class="kanban-card" data-id="${c.id}">
             <div class="kanban-card-name" title="${esc(c.nome)}">${esc(c.nome)}</div>
             <div class="kanban-card-meta">${c.contato ? esc(c.contato)+' · ' : ''}${loc||'—'}</div>
             ${proxDisp ? `<div class="kanban-card-date ${proxCls}">⏰ ${proxDisp}</div>` : ''}
@@ -3007,7 +3036,7 @@ function renderKanban() {
     </div>`;
   }).join('')}
   <div class="kanban-col" style="width:auto;flex-shrink:0">
-    <button onclick="toggleKanbanArquivo()" class="kanban-arquivo-btn">
+    <button class="kanban-arquivo-btn">
       ${kanbanShowArquivo ? '◂ Ocultar' : '▸ Fechados/Perdidos'} <span style="font-weight:900">${nArquivo}</span>
     </button>
   </div>
@@ -3391,6 +3420,7 @@ async function afterLogin() {
     renderTable();
   }
   startPolling();
+  setView('list');
   renderTable();
 }
 
