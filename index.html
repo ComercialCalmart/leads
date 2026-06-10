@@ -592,7 +592,6 @@ tr.row-hoje:hover td { background: #fef3c7 !important; }
               <th style="width:30px" class="c">Email</th>
               <th style="width:90px" class="sortable" data-sort="cidade" onclick="sortTable('cidade')">Cidade <span class="sort-arrow">↕</span></th>
               <th style="width:30px" class="c sortable" data-sort="estado" onclick="sortTable('estado')">UF <span class="sort-arrow">↕</span></th>
-              <th style="width:120px">CNPJ</th>
               <th style="width:108px" class="sortable" data-sort="status" onclick="sortTable('status')">Status <span class="sort-arrow">↕</span></th>
               <th style="width:74px" class="c sortable" data-sort="ultimo" onclick="sortTable('ultimo')">Últ. Contato <span class="sort-arrow">↕</span></th>
               <th style="width:74px" class="c sortable" data-sort="prox" onclick="sortTable('prox')">Próx. Contato <span class="sort-arrow">↕</span></th>
@@ -2582,8 +2581,8 @@ function goToVencidos() {
   if (sel) sel.value = 'vencido';
   const navBtn = document.getElementById('nav-leads');
   showPage('leads', navBtn);
-  updateClearBtn();
   renderTable();
+  updateClearBtn();
 }
 
 // ── PAINEL DIRETOR ────────────────────────────────────────
