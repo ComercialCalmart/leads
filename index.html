@@ -43,6 +43,7 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
 .nav-tab:first-child { border-left: none; }
 .nav-tab:hover { opacity: 1; background: var(--body-bg); }
 .nav-tab.active { opacity: 1; border-bottom: 3px solid var(--accent); margin-bottom: -1px; }
+.dev-tab-right { margin-left: auto; }
 
 /* CONTAINER */
 .container { max-width: 1400px; margin: 0 auto; padding: 24px 20px 80px; display: flex; flex-direction: column; gap: 20px; }
@@ -648,7 +649,7 @@ tr:hover .action-btns { opacity:.3; }
   </span>
   <button class="nav-tab" onclick="showPage('dash',this)">Painel</button>
   <button class="nav-tab" onclick="showPage('cadencia',this)">Cadência Comercial</button>
-  <button class="nav-tab" onclick="showPage('devolutiva',this)">Devolutiva</button>
+  <button class="nav-tab dev-tab-right" onclick="showPage('devolutiva',this)">Ativos</button>
 </nav>
 
   </div>
