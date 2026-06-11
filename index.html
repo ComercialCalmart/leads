@@ -545,6 +545,84 @@ tr:hover .action-btns { opacity:.3; }
 .cad-vendor-btn:hover { color: var(--black); background: var(--body-bg); }
 .cad-vendor-btn.active { background: transparent; color: var(--black); border-bottom: 3px solid var(--black); }
 
+
+/* ── DEVOLUTIVA ──────────────────────────────────────────────────── */
+.dev-wrap {
+  --dev-ink: #1a1a1a; --dev-ink-soft: #555; --dev-ink-muted: #999;
+  --dev-bg: #f5f4f0; --dev-surface: #fff; --dev-border: #e0ddd6;
+  --dev-accent: #1a56db; --dev-accent-light: #e8eefb;
+  --dev-warn: #b45309; --dev-warn-light: #fef3e2;
+  --dev-ok: #166534; --dev-ok-light: #dcfce7;
+  --dev-tag-bg: #eeecea; --dev-tag-border: #d4d0c8;
+  --dev-red: #dc2626; --dev-red-light: #fef2f2;
+  --dev-radius: 6px; --dev-radius-lg: 10px;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 14px; line-height: 1.5; color: var(--dev-ink);
+  background: var(--dev-bg); min-height: 100%;
+}
+.dev-wrap * { box-sizing: border-box; }
+.dev-header {
+  background: var(--dev-ink); color: #fff;
+  padding: 20px 32px; display: flex; align-items: center;
+  justify-content: space-between; gap: 16px; margin: -24px -20px 28px;
+}
+.dev-header-logo { font-size: 11px; font-weight: 700; letter-spacing: .12em; opacity: .5; text-transform: uppercase; }
+.dev-header-title { font-size: 16px; font-weight: 600; margin-top: 2px; }
+.dev-header-sub { font-size: 12px; opacity: .5; }
+.dev-header-meta { font-size: 12px; opacity: .4; text-align: right; }
+.dev-section-label { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--dev-ink-muted); margin-bottom: 12px; }
+.dev-gargalos-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 12px; }
+.dev-gargalo-card { background: var(--dev-surface); border: 1px solid var(--dev-border); border-radius: var(--dev-radius-lg); padding: 16px 18px; }
+.dev-gargalo-num { font-size: 28px; font-weight: 800; color: var(--dev-border); line-height: 1; margin-bottom: 8px; }
+.dev-gargalo-name { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+.dev-gargalo-desc { font-size: 12px; color: var(--dev-ink-soft); }
+.dev-gargalo-count { margin-top: 10px; font-size: 11px; color: var(--dev-accent); font-weight: 600; }
+.dev-solucoes-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 28px; }
+.dev-solucao-card { background: var(--dev-accent-light); border: 1px solid #c3d4f5; border-radius: var(--dev-radius-lg); padding: 14px 16px; min-height: 90px; }
+.dev-solucao-card.vazio { background: var(--dev-bg); border: 1px dashed var(--dev-border); }
+.dev-solucao-label { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--dev-accent); margin-bottom: 6px; }
+.dev-solucao-card.vazio .dev-solucao-label { color: var(--dev-ink-muted); }
+.dev-solucao-text { font-size: 12px; color: var(--dev-ink); line-height: 1.5; }
+.dev-solucao-card.vazio .dev-solucao-text { color: var(--dev-ink-muted); font-style: italic; }
+.dev-solucao-bullets { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; }
+.dev-solucao-bullets li { font-size: 12px; color: var(--dev-ink); line-height: 1.4; padding-left: 14px; position: relative; }
+.dev-solucao-bullets li::before { content: '→'; position: absolute; left: 0; color: var(--dev-accent); font-size: 11px; }
+.dev-clientes-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 16px; }
+.dev-cliente-card { background: var(--dev-surface); border: 1px solid var(--dev-border); border-radius: var(--dev-radius-lg); overflow: hidden; }
+.dev-cliente-card.inativo { opacity: .6; }
+.dev-cliente-card.aguardando { border-style: dashed; }
+.dev-card-header { padding: 14px 18px 12px; border-bottom: 1px solid var(--dev-border); display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.dev-card-name { font-size: 15px; font-weight: 700; }
+.dev-card-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+.dev-badge { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 20px; letter-spacing: .04em; text-transform: uppercase; }
+.dev-badge-ativo { background: var(--dev-ok-light); color: var(--dev-ok); }
+.dev-badge-inativo { background: var(--dev-red-light); color: var(--dev-red); }
+.dev-badge-aguardando { background: var(--dev-warn-light); color: var(--dev-warn); }
+.dev-badge-ecomm { background: var(--dev-accent-light); color: var(--dev-accent); }
+.dev-status-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+.dev-dot-ativo { background: #16a34a; }
+.dev-dot-inativo { background: var(--dev-red); }
+.dev-dot-aguardando { background: var(--dev-warn); }
+.dev-card-body { padding: 14px 18px; display: flex; flex-direction: column; gap: 14px; }
+.dev-field-label { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--dev-ink-muted); margin-bottom: 6px; }
+.dev-produtos-wrap { display: flex; flex-wrap: wrap; gap: 5px; }
+.dev-prod-tag { font-size: 11px; padding: 3px 9px; border-radius: 4px; border: 1px solid var(--dev-tag-border); background: var(--dev-tag-bg); color: var(--dev-ink-soft); }
+.dev-prod-tag.ativo { background: var(--dev-ink); color: #fff; border-color: var(--dev-ink); }
+.dev-chip { font-size: 11px; padding: 3px 9px; border-radius: 4px; border: 1px solid var(--dev-border); background: var(--dev-surface); color: var(--dev-ink-soft); }
+.dev-chip.sel { background: var(--dev-warn-light); color: var(--dev-warn); border-color: #fbbf24; font-weight: 600; }
+.dev-problema-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
+.dev-relato { font-size: 12px; color: var(--dev-ink-soft); background: var(--dev-bg); border: 1px solid var(--dev-border); border-radius: var(--dev-radius); padding: 8px 10px; line-height: 1.6; white-space: pre-wrap; }
+.dev-acoes-list { display: flex; flex-direction: column; gap: 6px; }
+.dev-acao-item { display: flex; align-items: flex-start; gap: 8px; padding: 8px 10px; background: var(--dev-bg); border: 1px solid var(--dev-border); border-radius: var(--dev-radius); font-size: 12px; color: var(--dev-ink-soft); }
+.dev-acao-item.done { opacity: .5; text-decoration: line-through; }
+.dev-divider { height: 1px; background: var(--dev-border); margin: 2px 0; }
+.dev-empty { color: var(--dev-ink-muted); font-size: 12px; font-style: italic; }
+@media (max-width: 640px) {
+  .dev-gargalos-grid { grid-template-columns: 1fr 1fr; }
+  .dev-solucoes-grid  { grid-template-columns: 1fr 1fr; }
+  .dev-clientes-grid  { grid-template-columns: 1fr; }
+  .dev-header { margin: -16px -12px 20px; padding: 16px; }
+}
 </style>
 </head>
 <body>
@@ -570,6 +648,7 @@ tr:hover .action-btns { opacity:.3; }
   </span>
   <button class="nav-tab" onclick="showPage('dash',this)">Painel</button>
   <button class="nav-tab" onclick="showPage('cadencia',this)">Cadência Comercial</button>
+  <button class="nav-tab" onclick="showPage('devolutiva',this)">Devolutiva</button>
 </nav>
 
   </div>
@@ -750,6 +829,30 @@ tr:hover .action-btns { opacity:.3; }
   </div>
 </div>
 
+
+<!-- DEVOLUTIVA PAGE -->
+<div id="page-devolutiva" class="page">
+  <div class="container" style="max-width:1100px">
+    <div class="dev-wrap">
+      <div class="dev-header">
+        <div>
+          <div class="dev-header-logo">YOLOPET · Calmart</div>
+          <div class="dev-header-title">Devolutiva Comercial</div>
+          <div class="dev-header-sub">Tapete Coletor de Areia — Queda de Vendas</div>
+        </div>
+        <div class="dev-header-meta" id="dev-data-meta"></div>
+      </div>
+
+      <div class="dev-section-label">Top Gargalos Consolidados</div>
+      <div class="dev-gargalos-grid" id="dev-gargalos-grid"></div>
+      <div class="dev-solucoes-grid" id="dev-solucoes-grid"></div>
+
+      <div style="height:24px"></div>
+      <div class="dev-section-label">Devolutiva por Cliente</div>
+      <div class="dev-clientes-grid" id="dev-clientes-grid"></div>
+    </div>
+  </div>
+</div>
 
 <div class="modal-overlay" id="modal-overlay">
   <div class="modal">
@@ -1340,6 +1443,7 @@ function showPage(id, btn) {
   if (btn) btn.classList.add('active');
   if (id==='dash') renderDash();
   if (id==='cadencia') renderCadencia();
+  if (id==='devolutiva') devRender();
   if (id==='leads' && currentView==='kanban') renderKanban();
 }
 
@@ -3450,6 +3554,156 @@ async function init() {
 
 }
 init();
+
+// ── DEVOLUTIVA (IIFE isolado) ─────────────────────────────────────────
+(function() {
+
+const DEV_PRODUTOS = [
+  'Coletor de Areia','Higiênico Lavável','Colchonete com Botão',
+  'Arranhador MDF','Guia e Peitoral','Arranhafix',
+  'Colar Elizabetano','Colchonete p/ Passar Roupas','Capas p/ Tábua de Passar',
+];
+
+const DEV_CHIPS = [
+  'Preço concorrência','Prazo pagamento','Algoritmo plataforma',
+  'Gestão anúncios','Sazonalidade',
+];
+
+const DEV_GARGALO_DESC = {
+  'Preço concorrência': 'Entrada de concorrentes nacionais e importados com preços menores, dificultando a competitividade da linha YOLOPET.',
+  'Prazo pagamento': 'Clientes priorizando fornecedores com condições de prazo mais favoráveis (30/60 DD).',
+  'Algoritmo plataforma': 'Mudanças de algoritmo e regras de comissão no Shopee impactando visibilidade e conversão.',
+  'Gestão anúncios': 'Falta de atualização e otimização dos anúncios YOLOPET pelos clientes.',
+  'Sazonalidade': 'Queda sazonal verificada nos meses de maio e início de junho.',
+};
+
+const DEV_SOLUCOES = {
+  'Preço concorrência': { bullets: ['Linha Combate: produtos retrabalhados para melhor precificação','Revisão de margens na categoria Coletor de Areia','Desconto adicional de 10% para clientes estratégicos'] },
+  'Prazo pagamento':    { bullets: ['Parcelamento no cartão de crédito (30/60/90 dias)','Negociação de prazo 30/60 DD para clientes de alto giro','Estudo de condições especiais por volume'] },
+  'Algoritmo plataforma': { bullets: [] },
+  'Gestão anúncios':   { bullets: [] },
+  'Sazonalidade':      { bullets: [] },
+};
+
+const DEV_CLIENTES = [
+  { id:'scarmif', nome:'Scarmif', status:'ativo', plataformas:['Mercado Livre','Amazon','Shopee'],
+    produtos:['Colar Elizabetano','Arranhador MDF','Coletor de Areia'],
+    chips:['Preço concorrência'],
+    relato:'Muitos sellers vendendo produtos similares com preço absurdamente mais baixo. Diversos tipos do mesmo tapete de outras marcas. Trabalha com preços acima do mercado — até comparado aos sellers YOLOPET. Desconto de 10% oferecido em março e junho não foi absorvido.',
+    acoes:[{t:'Ofertar linha Combate para competir com marcas de menor valor',done:false},{t:'Apresentar outros segmentos além de pet (domésticos)',done:false},{t:'Tentar visitação na Feira Amigos Pet',done:false}] },
+  { id:'componentes_brasil', nome:'Componentes Brasil', status:'ativo', plataformas:['Shopee','Mercado Livre'],
+    produtos:['Coletor de Areia'],
+    chips:['Algoritmo plataforma','Gestão anúncios','Sazonalidade'],
+    relato:'Forte no Shopee com diversos itens. Entrada de muita concorrência no mercado. Queda brusca no Shopee por mudança de algoritmo — anúncio sendo mostrado pela variação mais cara. Falta atenção nos anúncios YOLOPET, faz tempo que não atualizam.',
+    acoes:[{t:'Montar material de marketing para estimular revisão dos anúncios YOLOPET',done:false},{t:'Oferecer desconto adicional de 10% na categoria',done:false}] },
+  { id:'mariana_siqueira', nome:'Mariana Siqueira', status:'ativo', plataformas:['Shopee','Mercado Livre','Amazon'],
+    produtos:['Coletor de Areia'],
+    chips:['Preço concorrência','Algoritmo plataforma'],
+    relato:'Queda geral em todas as plataformas. Shopee: alteração nas regras de comissão gerou reajuste de R$13 e impactou vendas. Amazon: seller Attabuy (cliente Calmart) vendendo mais barato sem condições especiais. Mercado Livre ainda sem estudo — foco nas outras plataformas.',
+    acoes:[{t:'Oferecer linha Combate para redução de preços nas plataformas',done:false},{t:'Fazer estudo de ofertas — cliente aproveitou desconto 10% em março',done:false}] },
+  { id:'cao_pescador', nome:'Cão Pescador', status:'aguardando', plataformas:[], produtos:[], chips:[], relato:'', acoes:[] },
+  { id:'pet_web', nome:'Pet Web', status:'ativo', plataformas:['Shopee','Mercado Livre'],
+    produtos:['Coletor de Areia'],
+    chips:['Algoritmo plataforma','Preço concorrência'],
+    relato:'Queda significativa nas vendas ainda sem estudo ou justificativa aprofundada. Maior queda no Shopee — cliente reduziu preço mas não refletiu em vendas.',
+    acoes:[] },
+  { id:'tri1pet', nome:'Tri1Pet', status:'ativo', plataformas:['Shopee','Mercado Livre'],
+    produtos:['Coletor de Areia'],
+    chips:['Prazo pagamento','Gestão anúncios'],
+    relato:'Prioriza fornecedores com prazo (30/60 dias). Alto giro de valores na operação. Alega falta de mão de obra para dar energia nos anúncios YOLOPET.',
+    acoes:[{t:'Oferecer parcelamento no cartão de crédito como opção de prazo',done:false},{t:'Solicitar condições de prazo melhoradas (30/60 DD)',done:false}] },
+  { id:'newshop_mix', nome:'Newshop Mix', status:'inativo', plataformas:[], produtos:[], chips:[],
+    relato:'Cliente inativo. Não trabalha mais com a linha de produtos — investiu todos os recursos em fabricação de roupas.',
+    acoes:[] },
+];
+
+function devCalcGargalos() {
+  const count = {};
+  DEV_CHIPS.forEach(p => count[p] = 0);
+  DEV_CLIENTES.forEach(c => c.chips.forEach(ch => { count[ch] = (count[ch]||0) + 1; }));
+  const sorted = Object.entries(count).sort((a,b) => b[1]-a[1]);
+  const top4 = sorted.filter(([,v]) => v > 0).slice(0,4);
+  if (!top4.some(([n]) => n === 'Prazo pagamento')) {
+    const p = sorted.find(([n]) => n === 'Prazo pagamento');
+    if (p) { if (top4.length >= 4) top4[3] = p; else top4.push(p); }
+  }
+  return top4;
+}
+
+function devBadge(s) {
+  if (s === 'ativo')      return '<span class="dev-badge dev-badge-ativo">Ativo</span>';
+  if (s === 'inativo')    return '<span class="dev-badge dev-badge-inativo">Inativo</span>';
+  return '<span class="dev-badge dev-badge-aguardando">Aguardando retorno</span>';
+}
+
+function devRenderCliente(c) {
+  const isAguardando = c.status === 'aguardando';
+  const cardCls = c.status === 'inativo' ? 'dev-cliente-card inativo' : c.status === 'aguardando' ? 'dev-cliente-card aguardando' : 'dev-cliente-card';
+  const dotCls  = c.status === 'ativo' ? 'dev-dot-ativo' : c.status === 'inativo' ? 'dev-dot-inativo' : 'dev-dot-aguardando';
+
+  const plats = c.plataformas.map(p => `<span class="dev-badge dev-badge-ecomm">${p}</span>`).join('');
+  const prods = c.produtos.map(p => `<span class="dev-prod-tag ativo">${p}</span>`).join('');
+  const chips = c.chips.map(ch => `<span class="dev-chip sel">${ch}</span>`).join('');
+  const acoes = c.acoes.map(a => `<div class="dev-acao-item${a.done?' done':''}">${a.t}</div>`).join('');
+
+  return `<div class="${cardCls}">
+    <div class="dev-card-header">
+      <div>
+        <div class="dev-card-name">${c.nome}</div>
+        <div class="dev-card-badges">${devBadge(c.status)}${plats}</div>
+      </div>
+      <div class="dev-status-dot ${dotCls}"></div>
+    </div>
+    <div class="dev-card-body">
+      ${c.produtos.length ? `<div><div class="dev-field-label">Produtos que compra</div><div class="dev-produtos-wrap">${prods}</div></div>` : ''}
+      ${!isAguardando ? `
+        <div class="dev-divider"></div>
+        ${c.chips.length ? `<div><div class="dev-field-label">Problemas relatados</div><div class="dev-problema-chips">${chips}</div></div>` : ''}
+        ${c.relato ? `<div class="dev-relato">${c.relato}</div>` : ''}
+        ${c.acoes.length ? `<div><div class="dev-field-label">Ações / Próximos passos</div><div class="dev-acoes-list">${acoes}</div></div>` : ''}
+      ` : `<div class="dev-empty">Aguardando retorno do cliente para registro.</div>`}
+    </div>
+  </div>`;
+}
+
+window.devRender = function() {
+  // Data
+  const meta = document.getElementById('dev-data-meta');
+  if (meta) meta.innerHTML = `Atualizado: ${new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'})}<br>${DEV_CLIENTES.length} clientes mapeados`;
+
+  // Gargalos
+  const top = devCalcGargalos();
+  const gg = document.getElementById('dev-gargalos-grid');
+  if (gg) gg.innerHTML = top.map(([nome,qtd],i) => `
+    <div class="dev-gargalo-card">
+      <div class="dev-gargalo-num">0${i+1}</div>
+      <div class="dev-gargalo-name">${nome}</div>
+      <div class="dev-gargalo-desc">${DEV_GARGALO_DESC[nome]||''}</div>
+      <div class="dev-gargalo-count">${qtd} cliente${qtd>1?'s':''} afetado${qtd>1?'s':''}</div>
+    </div>`).join('');
+
+  // Soluções
+  const sg = document.getElementById('dev-solucoes-grid');
+  if (sg) {
+    const slots = [...top]; while(slots.length < 4) slots.push(null);
+    sg.innerHTML = slots.map(entry => {
+      if (!entry) return `<div class="dev-solucao-card vazio"><div class="dev-solucao-label">Solução</div><div class="dev-solucao-text">A ser definido</div></div>`;
+      const [nome] = entry;
+      const sol = DEV_SOLUCOES[nome];
+      const hasBullets = sol?.bullets?.length > 0;
+      return `<div class="dev-solucao-card${hasBullets?'':' vazio'}">
+        <div class="dev-solucao-label">Solução</div>
+        ${hasBullets ? `<ul class="dev-solucao-bullets">${sol.bullets.map(b=>`<li>${b}</li>`).join('')}</ul>` : `<div class="dev-solucao-text">A ser definido</div>`}
+      </div>`;
+    }).join('');
+  }
+
+  // Clientes
+  const cg = document.getElementById('dev-clientes-grid');
+  if (cg) cg.innerHTML = DEV_CLIENTES.map(devRenderCliente).join('');
+};
+
+})(); // end IIFE
 
 </script>
 </body>
