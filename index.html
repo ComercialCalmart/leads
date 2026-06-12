@@ -90,6 +90,8 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
 .s-tent1     { color: #1d4ed8; background: #eff6ff; border-color: #93c5fd; }
 .s-tent2     { color: #7c3aed; background: #f5f3ff; border-color: #c4b5fd; }
 .s-tent3     { color: #9a3412; background: #fff7ed; border-color: #fdba74; }
+.s-tent4     { color: #7c2d12; background: #fef2f2; border-color: #fca5a5; }
+.s-tent5     { color: #fff;    background: var(--red); border-color: var(--red); font-weight: 900; }
 .s-negoc     { color: #b45309; background: #fffbeb; border-color: #fcd34d; }
 .s-fechado   { color: var(--green); background: #f0fdf4; border-color: #86efac; }
 .s-perdido   { color: var(--red); background: #fff1f2; border-color: #fca5a5; }
@@ -336,6 +338,12 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
 .estag-empty { text-align:center; padding:36px 20px; color:#bbb; font-size:11px; letter-spacing:2px; text-transform:uppercase; }
 
 .conv-arrow { font-size:14px; color:#ccc; width:20px; text-align:center; flex-shrink:0; }
+
+/* ── LEADS PERDIDOS ──────────────────────────────────────── */
+tr.row-perdido td { opacity: .62; }
+tr.row-perdido td .empresa-nome { color: #888; }
+tr.row-perdido:hover td { opacity: .8; background: #fafafa !important; }
+.dot-perdido { display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--red); margin-left:5px; vertical-align:middle; flex-shrink:0; cursor:default; }
 
 /* ── URGÊNCIA DE LINHA ───────────────────────────────────── */
 tr.row-vencido td { background: #fff5f5 !important; border-left: none; }
@@ -671,6 +679,8 @@ tr:hover .action-btns { opacity:.3; }
           <option value="TENT1">1ª Tentativa</option>
           <option value="TENT2">2ª Tentativa</option>
           <option value="TENT3">3ª Tentativa</option>
+          <option value="TENT4">4ª Tentativa</option>
+          <option value="TENT5">5ª Tentativa</option>
           <option value="NEGOC">Em negociação</option>
           <option value="FECHADO">Fechado</option>
           <option value="PERDIDO">Perdido</option>
@@ -889,6 +899,8 @@ tr:hover .action-btns { opacity:.3; }
             <option value="TENT1">1ª Tentativa</option>
             <option value="TENT2">2ª Tentativa</option>
             <option value="TENT3">3ª Tentativa</option>
+            <option value="TENT4">4ª Tentativa</option>
+            <option value="TENT5">5ª Tentativa</option>
             <option value="NEGOC">Em negociação</option>
             <option value="FECHADO">Fechado</option>
             <option value="PERDIDO">Perdido</option>
@@ -1073,11 +1085,15 @@ tr:hover .action-btns { opacity:.3; }
 <div class="m-sheet" id="motivo-sheet" style="z-index:502">
   <div class="m-sheet-handle"></div>
   <div class="m-sheet-title" id="motivo-title">Por que perdemos?</div>
+  <div style="padding:6px 20px 2px;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#aaa">Comercial</div>
   <button class="m-sheet-btn" onclick="setMotivo('Preço')"><span class="m-sheet-icon">💰</span> Preço</button>
   <button class="m-sheet-btn" onclick="setMotivo('Sem resposta')"><span class="m-sheet-icon">🔇</span> Sem resposta</button>
   <button class="m-sheet-btn" onclick="setMotivo('Já tem fornecedor')"><span class="m-sheet-icon">🤝</span> Já tem fornecedor</button>
   <button class="m-sheet-btn" onclick="setMotivo('Momento errado')"><span class="m-sheet-icon">⏳</span> Momento errado</button>
   <button class="m-sheet-btn" onclick="setMotivo('Outro')"><span class="m-sheet-icon">✎</span> Outro</button>
+  <div style="padding:8px 20px 2px;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#aaa">Modelo de Negócio</div>
+  <button class="m-sheet-btn" onclick="setMotivo('Fábrica 100%')"><span class="m-sheet-icon">🏭</span> Fábrica 100%</button>
+  <button class="m-sheet-btn" onclick="setMotivo('Importa 100%')"><span class="m-sheet-icon">🌐</span> Importa 100%</button>
   <button class="m-sheet-btn" onclick="skipMotivo()" style="color:#aaa"><span class="m-sheet-icon">→</span> Pular</button>
 </div>
 
@@ -1227,8 +1243,8 @@ let pendingDups = [];
 let pendingNew = [];
 
 // ── STATUS ─────────────────────────────────────────────────
-const STATUS_LABELS = { NOVO:'Novo', TENT1:'1ª Tentativa', TENT2:'2ª Tentativa', TENT3:'3ª Tentativa', NEGOC:'Em negociação', FECHADO:'Fechado', PERDIDO:'Perdido' };
-const STATUS_CLASS  = { NOVO:'s-novo', TENT1:'s-tent1', TENT2:'s-tent2', TENT3:'s-tent3', NEGOC:'s-negoc', FECHADO:'s-fechado', PERDIDO:'s-perdido' };
+const STATUS_LABELS = { NOVO:'Novo', TENT1:'1ª Tentativa', TENT2:'2ª Tentativa', TENT3:'3ª Tentativa', TENT4:'4ª Tentativa', TENT5:'5ª Tentativa', NEGOC:'Em negociação', FECHADO:'Fechado', PERDIDO:'Perdido' };
+const STATUS_CLASS  = { NOVO:'s-novo', TENT1:'s-tent1', TENT2:'s-tent2', TENT3:'s-tent3', TENT4:'s-tent4', TENT5:'s-tent5', NEGOC:'s-negoc', FECHADO:'s-fechado', PERDIDO:'s-perdido' };
 const MKT_LABELS = { MELI:'Mercado Livre', AMAZON:'Amazon', SHOPPEE:'Shopee', OUTRO:'Outro' };
 
 // ── DATA ──────────────────────────────────────────────────
@@ -1533,8 +1549,12 @@ async function saveContact() {
         if (!canEdit(contacts[idx])) { showToast('Sem permissão para editar este lead.','err'); closeModal(); return; }
         becamePerdido = data.status === 'PERDIDO' && contacts[idx].status !== 'PERDIDO' && !contacts[idx].motivoPerda;
         const prevStatus = contacts[idx].status;
+        if (data.status === 'PERDIDO' && prevStatus !== 'PERDIDO') data.prox = '';
         contacts[idx] = {...contacts[idx], ...data};
         if (prevStatus !== data.status) {
+          if (prevStatus === 'PERDIDO' && data.status !== 'PERDIDO' && !data.prox) {
+            setTimeout(() => showToast('Lead reativado. Defina o próximo contato.', 'info', 5000), 400);
+          }
           addHistory(contacts[idx], 'status', `Status alterado de ${STATUS_LABELS[prevStatus]||prevStatus} para ${STATUS_LABELS[data.status]||data.status}`);
         } else {
           addHistory(contacts[idx], 'editado', 'Lead editado');
@@ -1656,6 +1676,10 @@ async function inlineSave(id, field, value) {
   contacts[idx][field] = v;
   contacts[idx].updatedAt = new Date().toISOString();
   if (field === 'status' && prevValInline !== v) {
+    if (v === 'PERDIDO') { contacts[idx].prox = ''; }
+    if (prevValInline === 'PERDIDO' && v !== 'PERDIDO') {
+      setTimeout(() => showToast('Lead reativado. Defina o próximo contato.', 'info', 5000), 400);
+    }
     addHistory(contacts[idx], 'status', `Status alterado de ${STATUS_LABELS[prevValInline]||prevValInline} para ${STATUS_LABELS[v]||v}`);
   } else if (field === 'prox' && prevValInline !== v) {
     const d = v ? v.slice(8,10)+'/'+v.slice(5,7)+'/'+v.slice(0,4) : '—';
@@ -1780,21 +1804,20 @@ function getFiltered() {
       return 0;
     });
   } else {
-    // Ordenação padrão por urgência: vencidos → hoje → futuros → sem data → fechados/perdidos
+    // Ordenação padrão: ativos por urgência, PERDIDOS sempre por último
     const todayMs = new Date().setHours(0,0,0,0);
     const urgency = c => {
-      const closed = c.status === 'FECHADO' || c.status === 'PERDIDO';
-      if (closed) return 4;
+      if (c.status === 'PERDIDO') return 10;  // sempre ao final
+      if (c.status === 'FECHADO') return 4;
       if (!c.prox) return 3;
       const dt = new Date(c.prox + 'T00:00:00').getTime();
-      if (dt < todayMs) return 0;          // vencido
-      if (dt === todayMs) return 1;        // hoje
-      return 2;                            // futuro
+      if (dt < todayMs) return 0;
+      if (dt === todayMs) return 1;
+      return 2;
     };
     list.sort((a, b) => {
       const ua = urgency(a), ub = urgency(b);
       if (ua !== ub) return ua - ub;
-      // dentro do mesmo grupo, mais antigo primeiro
       return (a.prox||'9').localeCompare(b.prox||'9');
     });
   }
@@ -1838,7 +1861,8 @@ function renderTable() {
       instaIcon(c.insta, c.id),
     ].join(' ');
 
-    return `<tr class="${urgCls}">
+    const perdidoCls = c.status === 'PERDIDO' ? ' row-perdido' : '';
+    return `<tr class="${urgCls}${perdidoCls}">
       <td class="c" style="font-size:10px;color:#aaa;white-space:nowrap">${c.createdAt ? c.createdAt.slice(8,10)+'/'+c.createdAt.slice(5,7) : '—'}</td>
       <td style="color:#aaa;font-size:10px">${i+1}</td>
       <td style="font-size:11px;color:#555;white-space:nowrap">${c.contato ? esc(c.contato) : '<span style="color:#ccc">—</span>'}</td>
@@ -1867,7 +1891,7 @@ function renderTable() {
       <td class="c" style="font-size:10px;font-weight:700;letter-spacing:1px">${c.estado||'<span style="color:#ccc">—</span>'}</td>
       <td>${makeInlineStatus(c)}</td>
       <td class="c">${makeInlineDate(c,'ultimo')}</td>
-      <td class="c">${makeInlineDate(c,'prox')}</td>
+      ${c.status==='PERDIDO' ? '<td class="c" style="color:#ccc;font-size:12px">—</td>' : makeInlineDate(c,'prox')}
       <td class="td-icon"><div class="links-cell">${links}</div></td>
       <td class="actions-cell">
         <div class="action-btns">
@@ -2203,7 +2227,7 @@ function renderDash() {
   const pct = (n,d) => (d||total) ? Math.round(n/(d||total)*100) : 0;
   const count = v => contacts.filter(c=>c.status===v).length;
   const today = new Date(); today.setHours(0,0,0,0);
-  const vencidos = contacts.filter(c=>c.prox && new Date(c.prox+'T00:00:00')<today).length;
+  const vencidos = contacts.filter(c=>c.prox && new Date(c.prox+'T00:00:00')<today && c.status!=='FECHADO' && c.status!=='PERDIDO').length;
 
   const thisMo = new Date().toISOString().slice(0,7);
   const prevMo = (() => { const d=new Date(); d.setMonth(d.getMonth()-1); return d.toISOString().slice(0,7); })();
@@ -2269,8 +2293,8 @@ function renderDash() {
   renderBarChart('chart-fechados', buildMonthlyData('updatedAt', c=>c.status==='FECHADO'),    '#2a7a4b');
 
   // Funil
-  const statusOrder = ['NOVO','TENT1','TENT2','TENT3','NEGOC','FECHADO','PERDIDO'];
-  const statusColors = { NOVO:'#ccc', TENT1:'#93c5fd', TENT2:'#c4b5fd', TENT3:'#fdba74', NEGOC:'#fcd34d', FECHADO:'#86efac', PERDIDO:'#fca5a5' };
+  const statusOrder = ['NOVO','TENT1','TENT2','TENT3','TENT4','TENT5','NEGOC','FECHADO','PERDIDO'];
+  const statusColors = { NOVO:'#ccc', TENT1:'#93c5fd', TENT2:'#c4b5fd', TENT3:'#fdba74', TENT4:'#fca5a5', TENT5:'#f87171', NEGOC:'#fcd34d', FECHADO:'#86efac', PERDIDO:'#fca5a5' };
   document.getElementById('stats-funnel').innerHTML = statusOrder.map(s=>{
     const n = count(s);
     return `<div class="funnel-row">
@@ -2696,10 +2720,11 @@ function renderCards() {
       c.insta   ? instaIcon(c.insta, c.id) : '',
     ].filter(Boolean).join('');
 
-    return `<div class="m-card" data-id="${c.id}">
+    const mIsPerdido = c.status === 'PERDIDO';
+    return `<div class="m-card${mIsPerdido?' row-perdido':''}" data-id="${c.id}" style="${mIsPerdido?'opacity:.62':''}">
       <div class="m-card-top">
         <div style="flex:1;min-width:0">
-          <div class="m-card-name">${esc(c.nome)}</div>
+          <div class="m-card-name">${esc(c.nome)}${mIsPerdido?'<span class="dot-perdido" title="Lead perdido"></span>':''}</div>
           <div class="m-card-contact">${c.contato ? esc(c.contato) : ''} ${c.cidade||c.estado ? `· <span style="color:#aaa">${esc(loc)}</span>` : ''}${c.inseridoPor ? ` · <span style="color:#ccc;font-size:10px">${esc(c.inseridoPor)}</span>` : ''}</div>
           ${obs}
         </div>
@@ -2713,7 +2738,7 @@ function renderCards() {
         </div>
         <div class="m-date-block" style="text-align:right">
           <span class="m-date-label">Próximo contato</span>
-          <span class="m-date-val ${proxCls}">${proxDisp}</span>
+          <span class="m-date-val ${mIsPerdido?'':proxCls}">${mIsPerdido?'—':proxDisp}</span>
         </div>
       </div>
       <div class="m-card-bottom">
@@ -2899,7 +2924,7 @@ function daysSince(iso) {
 function renderConversao() {
   const el = document.getElementById('stats-conversao');
   if (!el) return;
-  const ORDER = ['NOVO','TENT1','TENT2','TENT3','NEGOC','FECHADO'];
+  const ORDER = ['NOVO','TENT1','TENT2','TENT3','TENT4','TENT5','NEGOC','FECHADO'];
   const idxOf = Object.fromEntries(ORDER.map((s,i)=>[s,i]));
   // PERDIDO fica fora: não sabemos em que etapa morreu
   const pool = contacts.filter(c => c.status !== 'PERDIDO');
@@ -2911,8 +2936,10 @@ function renderConversao() {
     { label:'Abordados (1ª tent.)', i:1 },
     { label:'Engajados (2ª tent.)', i:2 },
     { label:'Insistência (3ª)',     i:3 },
-    { label:'Em negociação',        i:4 },
-    { label:'Fechados',             i:5 },
+    { label:'4ª Tentativa',         i:4 },
+    { label:'5ª Tentativa',         i:5 },
+    { label:'Em negociação',        i:6 },
+    { label:'Fechados',             i:7 },
   ];
 
   let prev = total;
@@ -3092,12 +3119,12 @@ function toggleKanbanArquivo() {
 function renderKanban() {
   const board = document.getElementById('kanban-board');
   if (!board) return;
-  const activeOrder  = ['NOVO','TENT1','TENT2','TENT3','NEGOC'];
+  const activeOrder  = ['NOVO','TENT1','TENT2','TENT3','TENT4','TENT5','NEGOC'];
   const arquivoOrder = ['FECHADO','PERDIDO'];
   const statusOrder  = kanbanShowArquivo ? [...activeOrder, ...arquivoOrder] : activeOrder;
-  const colColors   = { NOVO:'#f5f5f5', TENT1:'#eff6ff', TENT2:'#f5f3ff', TENT3:'#fff7ed', NEGOC:'#fffbeb', FECHADO:'#f0fdf4', PERDIDO:'#fff1f2' };
-  const colBorder   = { NOVO:'#ccc', TENT1:'#93c5fd', TENT2:'#c4b5fd', TENT3:'#fdba74', NEGOC:'#fcd34d', FECHADO:'#86efac', PERDIDO:'#fca5a5' };
-  const colText     = { NOVO:'#555', TENT1:'#1d4ed8', TENT2:'#7c3aed', TENT3:'#9a3412', NEGOC:'#b45309', FECHADO:'#166534', PERDIDO:'#9f1239' };
+  const colColors   = { NOVO:'#f5f5f5', TENT1:'#eff6ff', TENT2:'#f5f3ff', TENT3:'#fff7ed', TENT4:'#fef2f2', TENT5:'#fff1f2', NEGOC:'#fffbeb', FECHADO:'#f0fdf4', PERDIDO:'#fff1f2' };
+  const colBorder   = { NOVO:'#ccc', TENT1:'#93c5fd', TENT2:'#c4b5fd', TENT3:'#fdba74', TENT4:'#fca5a5', TENT5:'#f87171', NEGOC:'#fcd34d', FECHADO:'#86efac', PERDIDO:'#fca5a5' };
+  const colText     = { NOVO:'#555', TENT1:'#1d4ed8', TENT2:'#7c3aed', TENT3:'#9a3412', TENT4:'#7c2d12', TENT5:'#fff', NEGOC:'#b45309', FECHADO:'#166534', PERDIDO:'#9f1239' };
 
   const list = getFiltered();
   const nArquivo = list.filter(c => c.status==='FECHADO'||c.status==='PERDIDO').length;
@@ -3116,10 +3143,11 @@ function renderKanban() {
           const proxDisp = c.prox ? c.prox.slice(8,10)+'/'+c.prox.slice(5,7) : null;
           const proxCls  = dateClass(c.prox);
           const loc = [c.cidade, c.estado].filter(Boolean).join('/');
-          return `<div class="kanban-card" data-id="${c.id}">
-            <div class="kanban-card-name" title="${esc(c.nome)}">${esc(c.nome)}</div>
+          const isPerdido = c.status === 'PERDIDO';
+          return `<div class="kanban-card${isPerdido?' row-perdido':''}" data-id="${c.id}" style="${isPerdido?'opacity:.6':''}">
+            <div class="kanban-card-name" title="${esc(c.nome)}">${esc(c.nome)}${isPerdido?'<span class="dot-perdido" title="Lead perdido"></span>':''}</div>
             <div class="kanban-card-meta">${c.contato ? esc(c.contato)+' · ' : ''}${loc||'—'}</div>
-            ${proxDisp ? `<div class="kanban-card-date ${proxCls}">⏰ ${proxDisp}</div>` : ''}
+            ${(!isPerdido && proxDisp) ? `<div class="kanban-card-date ${proxCls}">⏰ ${proxDisp}</div>` : ''}
           </div>`;
         }).join('')
       : `<div class="kanban-empty">—</div>`;
@@ -3150,10 +3178,20 @@ async function quickRegister(id) {
   if (!canEdit(c)) { showToast('Sem permissão para editar este lead.','err'); return; }
   const idx = contacts.findIndex(x=>x.id===id);
   const todayIso = new Date().toISOString().slice(0,10);
+  const prevStQR = contacts[idx].status;
   contacts[idx].ultimo = todayIso;
   contacts[idx].updatedAt = new Date().toISOString();
   const p3 = new Date(); p3.setDate(p3.getDate()+3);
   contacts[idx].prox = p3.toISOString().slice(0,10);
+  // Avanço automático: TENT1-TENT4 sobem um passo; TENT5 fica vermelho; NOVO fica em NOVO
+  const autoAdvanceFrom = ['TENT1','TENT2','TENT3','TENT4'];
+  if (autoAdvanceFrom.includes(prevStQR)) {
+    const nextSt = STATUS_ORDER[STATUS_ORDER.indexOf(prevStQR)+1];
+    if (nextSt && nextSt !== 'NEGOC') {
+      contacts[idx].status = nextSt;
+      addHistory(contacts[idx], 'status', `Status alterado de ${STATUS_LABELS[prevStQR]} para ${STATUS_LABELS[nextSt]} (automático ao registrar contato)`);
+    }
+  }
   addHistory(contacts[idx], 'contato', 'Contato registrado');
   try {
     await dbUpsert(contacts[idx]);
@@ -3211,7 +3249,7 @@ async function _saveReagendamento(novaData) {
 }
 
 // Quick advance status
-const STATUS_ORDER = ['NOVO','TENT1','TENT2','TENT3','NEGOC','FECHADO'];
+const STATUS_ORDER = ['NOVO','TENT1','TENT2','TENT3','TENT4','TENT5','NEGOC','FECHADO'];
 let _undoSnapshot = null;
 
 async function quickAdvance(id) {
