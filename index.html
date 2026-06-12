@@ -1891,7 +1891,7 @@ function renderTable() {
       <td class="c" style="font-size:10px;font-weight:700;letter-spacing:1px">${c.estado||'<span style="color:#ccc">—</span>'}</td>
       <td>${makeInlineStatus(c)}</td>
       <td class="c">${makeInlineDate(c,'ultimo')}</td>
-      ${c.status==='PERDIDO' ? '<td class="c" style="color:#ccc;font-size:12px">—</td>' : makeInlineDate(c,'prox')}
+      <td class="c">${c.status==='PERDIDO' ? '<span style="color:#ccc;font-size:12px">—</span>' : makeInlineDate(c,'prox')}</td>
       <td class="td-icon"><div class="links-cell">${links}</div></td>
       <td class="actions-cell">
         <div class="action-btns">
