@@ -646,7 +646,7 @@ tr:hover .action-btns { opacity:.3; }
     <button class="btn btn-ghost" onclick="doLogout()" title="Sair">⎋ Sair</button>
     <button class="btn btn-ghost" id="user-indicator" style="gap:6px;cursor:default;opacity:.7">—</button>
     <button class="btn btn-ghost" onclick="exportJSON()">↑ Salvar</button>
-    <label class="btn btn-ghost" style="cursor:pointer;">↓ Importar <input type="file" accept=".csv,.xls,.xlsx,.txt" onchange="importCSV(event)" style="display:none"></label>
+    <label class="btn btn-ghost" style="cursor:pointer;">↓ Importar <input type="file" accept=".csv,.xls,.xlsx,.txt" onchange="importCSV(event)" multiple style="display:none"></label>
     <button class="btn btn-primary" onclick="openModal()">+ Novo Contato</button>
   </div>
 </header>
@@ -1949,20 +1949,116 @@ function mapHeaders(headers) {
   return map;
 }
 
+// Tokenizador CSV real (aspas com vírgula/quebra de linha interna ficam intactas).
+// Substitui o split ingênuo por linha, que corrompia campos multilinha (ex: obs da feira).
+function parseCSVRows(text, sep) {
+  const t = text.replace(/\r/g, '');
+  const rows = [];
+  let row = [], field = '', inQuotes = false;
+  for (let i = 0; i < t.length; i++) {
+    const c = t[i];
+    if (inQuotes) {
+      if (c === '"') {
+        if (t[i+1] === '"') { field += '"'; i++; }
+        else { inQuotes = false; }
+      } else {
+        field += c;
+      }
+    } else if (c === '"') {
+      inQuotes = true;
+    } else if (c === sep) {
+      row.push(field); field = '';
+    } else if (c === '\n') {
+      row.push(field); rows.push(row); row = []; field = '';
+    } else {
+      field += c;
+    }
+  }
+  if (field !== '' || row.length) { row.push(field); rows.push(row); }
+  return rows.filter(r => !(r.length === 1 && r[0].trim() === ''));
+}
+
+// Assinatura fixa do export da ferramenta de captura da feira Amigos Pet
+// (registrado_por, foco, nome, telefone, empresa, cidade, site, meli, amazon, obs, criado_em).
+// Decisões combinadas com o usuário:
+// - registrado_por: ignorado, não entra no CRM (não mapeia para inseridoPor)
+// - nome (pessoa) -> contato | empresa -> nome (empresa é a entidade rastreada no CRM)
+// - cidade combinada ("Cidade - UF") -> split em cidade/estado
+// - foco (SELLER/LOJISTA/OUTRO) -> tag em obs, sem coluna nova no schema
+// - criado_em -> createdAt (preserva data real da captura na feira)
+const FAIR_CSV_SIGNATURE = ['registradopor','foco','nome','telefone','empresa'];
+
+function isFairCSV(normHeaders) {
+  return FAIR_CSV_SIGNATURE.every(h => normHeaders.includes(h));
+}
+
+function splitCidadeUf(raw) {
+  const v = (raw||'').trim();
+  const m = v.match(/^(.+?)\s*-\s*([A-Za-z]{2})$/);
+  if (m) return { cidade: m[1].trim(), estado: m[2].toUpperCase() };
+  return { cidade: v, estado: '' };
+}
+
+function parseFairCSV(rows, normHeaders) {
+  const idx = {};
+  normHeaders.forEach((h,i) => { if (!(h in idx)) idx[h] = i; });
+  const get = (row, key) => (row[idx[key]] || '').trim();
+
+  return rows.slice(1).map(row => {
+    const { cidade, estado } = splitCidadeUf(get(row,'cidade'));
+    const focoRaw = get(row,'foco').toUpperCase();
+    const obsRaw = get(row,'obs');
+    const obs = focoRaw ? `[${focoRaw}] ${obsRaw}`.trim() : obsRaw;
+
+    const criadoEmRaw = get(row,'criadoem');
+    const parsedDate = criadoEmRaw ? new Date(criadoEmRaw) : null;
+    const createdAt = (parsedDate && !isNaN(parsedDate.getTime())) ? parsedDate.toISOString() : new Date().toISOString();
+
+    const empresaRaw = get(row,'empresa');
+    const contatoRaw = get(row,'nome');
+
+    return {
+      id: genId(),
+      nome:    empresaRaw || contatoRaw, // fallback: sem empresa informada, usa o nome da pessoa
+      contato: contatoRaw,
+      mkt:     '',
+      zap:     get(row,'telefone'),
+      email:   '',
+      cidade,
+      estado,
+      cnpj:    '',
+      urlMl:   get(row,'meli'),
+      urlAz:   get(row,'amazon'),
+      urlSh:   '',
+      urlSite: get(row,'site'),
+      insta:   '',
+      obs,
+      status:  'NOVO',
+      prox:    '',
+      createdAt,
+      updatedAt: new Date().toISOString(),
+    };
+  }).filter(c => c.nome || c.contato || c.zap);
+}
+
 function parseCSV(text) {
-  const lines = text.split(/\r?\n/).filter(l=>l.trim());
-  if (lines.length < 2) return [];
-  const sep = lines[0].includes(';') ? ';' : ',';
-  const headers = lines[0].split(sep).map(h=>h.replace(/^"|"$/g,''));
+  const firstLineRaw = text.split(/\r?\n/)[0] || '';
+  const sep = firstLineRaw.includes(';') ? ';' : ',';
+  const rows = parseCSVRows(text, sep);
+  if (rows.length < 2) return [];
+
+  const headers = rows[0].map(h => (h||'').trim());
+  const normHeaders = headers.map(normalizeHeader);
+
+  if (isFairCSV(normHeaders)) return parseFairCSV(rows, normHeaders);
+
   const hmap = mapHeaders(headers);
   const get = (row, field) => {
     const idx = hmap[field];
     if (idx===undefined) return '';
-    const v = (row[idx]||'').replace(/^"|"$/g,'').trim();
-    return v;
+    return (row[idx]||'').trim();
   };
-  return lines.slice(1).map(line => {
-    const row = line.split(sep);
+  return rows.slice(1).map(row => {
     return {
       id: genId(),
       nome:    get(row,'nome'),
@@ -2027,31 +2123,63 @@ function findDuplicate(c) {
   );
 }
 
-function importCSV(e) {
-  const f = e.target.files[0]; if (!f) return;
-  const r = new FileReader();
-  r.onload = async ev => {
-    const parsed = parseCSV(ev.target.result);
-    if (!parsed.length) { showToast('Nenhum contato válido encontrado.', 'err'); return; }
-    const dups = [], news = [];
-    parsed.forEach(c => {
-      const dup = findDuplicate(c);
-      if (dup) dups.push({incoming: c, existing: dup});
-      else news.push(c);
-    });
-    pendingNew = news;
-    pendingDups = dups;
-    if (dups.length) {
-      showDupModal();
-    } else {
-      await sbUpsertMany(news);
-      contacts.unshift(...news);
-      renderTable(); updateBadge();
-      showToast(`${news.length} contato(s) importado(s).`, 'ok');
+function readFileAsText(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = ev => resolve(ev.target.result);
+    r.onerror = () => reject(new Error('Falha ao ler ' + file.name));
+    r.readAsText(file, 'utf-8');
+  });
+}
+
+async function importCSV(e) {
+  const files = Array.from(e.target.files || []);
+  if (!files.length) return;
+  let allParsed = [];
+  for (const f of files) {
+    try {
+      allParsed = allParsed.concat(parseCSV(await readFileAsText(f)));
+    } catch (err) {
+      showToast('Erro ao ler ' + f.name + ': ' + err.message, 'err');
     }
-  };
-  r.readAsText(f,'utf-8');
-  e.target.value='';
+  }
+  e.target.value = '';
+  if (!allParsed.length) { showToast('Nenhum contato válido encontrado.', 'err'); return; }
+
+  // dedup interno entre os arquivos importados juntos nesta mesma ação
+  // (ex: mesma empresa capturada nos dois arquivos da feira). Só concatena obs, nunca descarta dado.
+  const batch = [];
+  allParsed.forEach(c => {
+    const dupInBatch = batch.find(b =>
+      (c.cnpj && c.cnpj===b.cnpj) ||
+      (c.nome && c.nome.toLowerCase()===((b.nome||'').toLowerCase())) ||
+      (c.zap  && fmtPhone(c.zap)===fmtPhone(b.zap||'') && fmtPhone(c.zap).length>7)
+    );
+    if (dupInBatch) {
+      if (c.obs && c.obs !== dupInBatch.obs) {
+        dupInBatch.obs = dupInBatch.obs ? dupInBatch.obs + '. Também capturado em outro arquivo deste import: ' + c.obs : c.obs;
+      }
+    } else {
+      batch.push(c);
+    }
+  });
+
+  const dups = [], news = [];
+  batch.forEach(c => {
+    const dup = findDuplicate(c);
+    if (dup) dups.push({incoming: c, existing: dup});
+    else news.push(c);
+  });
+  pendingNew = news;
+  pendingDups = dups;
+  if (dups.length) {
+    showDupModal();
+  } else {
+    await sbUpsertMany(news);
+    contacts.unshift(...news);
+    renderTable(); updateBadge();
+    showToast(`${news.length} contato(s) importado(s).`, 'ok');
+  }
 }
 
 // ── DUPLICATE HANDLING ───────────────────────────────────
