@@ -706,6 +706,7 @@ tr:hover .action-btns { opacity:.3; }
           <thead>
             <tr>
               <th style="width:44px" class="c sortable" data-sort="createdAt" onclick="sortTable('createdAt')">Cadastro <span class="sort-arrow">↕</span></th>
+              <th style="width:60px" class="sortable" data-sort="origem" onclick="sortTable('origem')">Origem <span class="sort-arrow">↕</span></th>
               <th style="width:18px">#</th>
               <th style="width:68px" class="sortable" data-sort="contato" onclick="sortTable('contato')">Contato <span class="sort-arrow">↕</span></th>
               <th style="width:130px" class="sortable" data-sort="nome" onclick="sortTable('nome')">Empresa <span class="sort-arrow">↕</span></th>
@@ -881,6 +882,17 @@ tr:hover .action-btns { opacity:.3; }
         <div class="form-group full">
           <label>Nome do Contato</label>
           <input type="text" id="f-contato" placeholder="Ex: Marcus, João...">
+        </div>
+        <div class="form-group">
+          <label>Origem</label>
+          <select id="f-origem">
+            <option value="">—</option>
+            <option value="PROSPECÇÃO ATIVA">Prospecção ativa</option>
+            <option value="AMIGOS PET">Amigos Pet</option>
+            <option value="INDICAÇÃO">Indicação</option>
+            <option value="INBOUND">Inbound</option>
+            <option value="OUTRO">Outro</option>
+          </select>
         </div>
         <div class="form-group">
           <label>Principal Marketplace</label>
@@ -1171,7 +1183,7 @@ function showSkeleton() {
   if (empty) empty.style.display = 'none';
   if (!tbody || contacts.length) return; // só mostra se a lista está vazia
   tbody.innerHTML = Array.from({length:6}, (_,i) => `
-    <tr><td colspan="13" style="padding:0">
+    <tr><td colspan="14" style="padding:0">
       <div class="skeleton-row" style="animation-delay:${i*0.08}s">
         <span class="sk sk-sm"></span><span class="sk sk-lg"></span><span class="sk sk-md"></span>
         <span class="sk sk-pill"></span><span class="sk sk-sm"></span><span class="sk sk-sm"></span>
@@ -1215,6 +1227,7 @@ function fromRow(r) {
     urlMl:r.url_ml||'', urlAz:r.url_az||'', urlSh:r.url_sh||'',
     urlSite:r.url_site||'', insta:r.insta||'', obs:r.obs||'',
     ultimo:r.ultimo||'', inseridoPor:r.inserido_por||'',
+    origem:r.origem||'',
     ownerId:r.owner_id||'',
     motivoPerda:r.motivo_perda||'',
     history: (() => { try { return JSON.parse(r.history||'[]'); } catch { return []; } })(),
@@ -1227,6 +1240,7 @@ function toRow(c) {
     url_ml:c.urlMl, url_az:c.urlAz, url_sh:c.urlSh,
     url_site:c.urlSite, insta:c.insta, obs:c.obs,
     ultimo:c.ultimo||null, inserido_por:c.inseridoPor||null,
+    origem:c.origem||null,
     owner_id:c.ownerId||null,
     motivo_perda:c.motivoPerda||null,
     history: JSON.stringify(c.history||[]),
@@ -1501,7 +1515,7 @@ function closeModal() {
   const dw = document.getElementById('dup-warning');
   if (dw) dw.style.display = 'none'; document.getElementById('modal-overlay').classList.remove('open'); editingId=null; }
 
-const FORM_FIELDS = ['nome','contato','mkt','status','zap','email','cidade','estado','cnpj','prox','ultimo','inserido-por','url-ml','url-az','url-sh','url-site','insta','obs'];
+const FORM_FIELDS = ['nome','contato','mkt','status','zap','email','cidade','estado','cnpj','prox','ultimo','inserido-por','origem','url-ml','url-az','url-sh','url-site','insta','obs'];
 function clearForm() {
   FORM_FIELDS.forEach(k => {
     const el = document.getElementById('f-'+k);
@@ -1516,6 +1530,7 @@ function fillForm(c) {
   set('zap',c.zap); set('email',c.email); set('cidade',c.cidade); set('estado',c.estado);
   set('cnpj',c.cnpj);
   set('inserido-por', c.inseridoPor||'');
+  set('origem', c.origem||'');
   set('prox',   c.prox   ? c.prox.split('-').reverse().join('/')   : '');
   set('ultimo', c.ultimo ? c.ultimo.split('-').reverse().join('/') : '');
   set('url-ml',c.urlMl); set('url-az',c.urlAz); set('url-sh',c.urlSh);
@@ -1528,6 +1543,7 @@ function formData() {
     zap: formatZap(g('zap').trim()), email: g('email').trim(),
     cidade: g('cidade').trim(), estado: g('estado').trim().toUpperCase(),
     inseridoPor: g('inserido-por'),
+    origem: g('origem'),
     prox:   dateFromDisplay(g('prox').trim())   || g('prox').trim(),
     ultimo: dateFromDisplay(g('ultimo').trim()) || g('ultimo').trim(),
     urlMl: g('url-ml').trim(), urlAz: g('url-az').trim(),
@@ -1864,6 +1880,7 @@ function renderTable() {
     const perdidoCls = c.status === 'PERDIDO' ? ' row-perdido' : '';
     return `<tr class="${urgCls}${perdidoCls}">
       <td class="c" style="font-size:10px;color:#aaa;white-space:nowrap">${c.createdAt ? c.createdAt.slice(8,10)+'/'+c.createdAt.slice(5,7) : '—'}</td>
+      <td style="font-size:10px;color:#888;white-space:nowrap">${c.origem ? esc(c.origem) : '<span style="color:#ddd">—</span>'}</td>
       <td style="color:#aaa;font-size:10px">${i+1}</td>
       <td style="font-size:11px;color:#555;white-space:nowrap">${c.contato ? esc(c.contato) : '<span style="color:#ccc">—</span>'}</td>
       <td style="font-weight:700;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(c.nome)}${c.inseridoPor ? ' · por ' + esc(c.inseridoPor) : ''}"><span class="empresa-nome">${esc(c.nome)}</span>${c.status==='PERDIDO'?'<span class="dot-perdido" title="Lead perdido"></span>':''} ${obsIcon}</td>
@@ -3447,9 +3464,9 @@ async function undoAdvance(el) {
 // ── EXPORT XLS WITH FILTERS APPLIED ──────────────────────
 function exportJSON() {
   const list = getFiltered(); // usa lista filtrada
-  const headers = ['ID','Nome','Contato','Empresa','Marketplace','WhatsApp','Email','Cidade','UF','CNPJ','Status','Últ. Contato','Próx. Contato','ML URL','Amazon URL','Shopee URL','Site Oficial','Instagram','Observações','Inserido por','Criado em','Atualizado em'];
+  const headers = ['ID','Nome','Contato','Empresa','Origem','Marketplace','WhatsApp','Email','Cidade','UF','CNPJ','Status','Últ. Contato','Próx. Contato','ML URL','Amazon URL','Shopee URL','Site Oficial','Instagram','Observações','Inserido por','Criado em','Atualizado em'];
   const rows = list.map(c => [
-    c.id, c.nome||'', c.contato||'', c.nome||'', c.mkt||'', c.zap||'', c.email||'',
+    c.id, c.nome||'', c.contato||'', c.nome||'', c.origem||'', c.mkt||'', c.zap||'', c.email||'',
     c.cidade||'', c.estado||'', c.cnpj||'', c.status||'', c.ultimo||'', c.prox||'',
     c.urlMl||'', c.urlAz||'', c.urlSh||'', c.urlSite||'', c.insta||'', c.obs||'',
     c.inseridoPor||'', c.createdAt||'', c.updatedAt||''
