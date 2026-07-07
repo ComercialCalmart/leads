@@ -380,7 +380,6 @@ tr:hover .action-btns { opacity:.3; }
 .chip-meus { font-family:var(--font); font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; padding:6px 12px; border:1.5px solid #ddd; border-radius:20px; cursor:pointer; background:var(--white); color:#888; transition:all .12s; white-space:nowrap; }
 .chip-meus:hover { border-color:var(--black); color:var(--black); }
 .chip-meus.active { background:var(--black); color:var(--white); border-color:var(--black); }
-
 /* ── TOAST ───────────────────────────────────────────────── */
 #toast-container { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); z-index:9000; display:flex; flex-direction:column; align-items:center; gap:8px; pointer-events:none; }
 .toast { font-family:var(--font); font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; padding:11px 22px; border-radius:24px; border:1.5px solid; white-space:nowrap; opacity:0; transform:translateY(10px); transition:opacity .22s, transform .22s cubic-bezier(.34,1.4,.64,1); pointer-events:none; box-shadow:0 6px 24px rgba(15,17,21,.18); }
@@ -646,7 +645,7 @@ tr:hover .action-btns { opacity:.3; }
     <button class="btn btn-ghost" onclick="doLogout()" title="Sair">⎋ Sair</button>
     <button class="btn btn-ghost" id="user-indicator" style="gap:6px;cursor:default;opacity:.7">—</button>
     <button class="btn btn-ghost" onclick="exportJSON()">↑ Salvar</button>
-    <label class="btn btn-ghost" style="cursor:pointer;">↓ Importar <input type="file" accept=".csv,.xls,.xlsx,.txt" onchange="importCSV(event)" multiple style="display:none"></label>
+    <label class="btn btn-ghost" style="cursor:pointer;">↓ Importar <input type="file" accept=".csv,.xls,.xlsx,.txt" onchange="importCSV(event)" style="display:none"></label>
     <button class="btn btn-primary" onclick="openModal()">+ Novo Contato</button>
   </div>
 </header>
@@ -695,6 +694,7 @@ tr:hover .action-btns { opacity:.3; }
         <span class="save-status" id="save-status"></span>
         <button class="btn-clear-filters" id="btn-clear-filters" onclick="clearFilters()" title="Limpar filtros">✕ Limpar</button>
         <button class="chip-meus" id="chip-meus" onclick="toggleMeus()" title="Mostrar só os meus leads">👤 Só meus</button>
+        <button class="chip-meus" id="chip-hide-perdidos" onclick="toggleHidePerdidos()" title="Ocultar leads perdidos">🚫 Ocultar perdidos</button>
         <div class="view-toggle" style="margin-left:auto">
           <button class="view-btn active" id="vbtn-list" onclick="setView('list')">☰ Lista</button>
           <button class="view-btn" id="vbtn-kanban" onclick="setView('kanban')">⬛ Funil</button>
@@ -706,7 +706,6 @@ tr:hover .action-btns { opacity:.3; }
           <thead>
             <tr>
               <th style="width:44px" class="c sortable" data-sort="createdAt" onclick="sortTable('createdAt')">Cadastro <span class="sort-arrow">↕</span></th>
-              <th style="width:60px" class="sortable" data-sort="origem" onclick="sortTable('origem')">Origem <span class="sort-arrow">↕</span></th>
               <th style="width:18px">#</th>
               <th style="width:68px" class="sortable" data-sort="contato" onclick="sortTable('contato')">Contato <span class="sort-arrow">↕</span></th>
               <th style="width:130px" class="sortable" data-sort="nome" onclick="sortTable('nome')">Empresa <span class="sort-arrow">↕</span></th>
@@ -882,17 +881,6 @@ tr:hover .action-btns { opacity:.3; }
         <div class="form-group full">
           <label>Nome do Contato</label>
           <input type="text" id="f-contato" placeholder="Ex: Marcus, João...">
-        </div>
-        <div class="form-group">
-          <label>Origem</label>
-          <select id="f-origem">
-            <option value="">—</option>
-            <option value="PROSPECÇÃO">Prospecção</option>
-            <option value="AMIGOS PET">Amigos Pet</option>
-            <option value="INDICAÇÃO">Indicação</option>
-            <option value="INBOUND">Inbound</option>
-            <option value="OUTRO">Outro</option>
-          </select>
         </div>
         <div class="form-group">
           <label>Principal Marketplace</label>
@@ -1133,6 +1121,7 @@ tr:hover .action-btns { opacity:.3; }
   <div class="m-filter-label">Vendedor</div>
   <div class="m-filter-opts">
     <button class="m-chip" id="m-chip-meus" onclick="toggleMeus()">👤 Só meus leads</button>
+    <button class="m-chip" id="m-chip-hide-perdidos" onclick="toggleHidePerdidos()">🚫 Ocultar perdidos</button>
   </div>
   <div class="m-filter-label">Visualização</div>
   <div class="m-filter-opts">
@@ -1183,7 +1172,7 @@ function showSkeleton() {
   if (empty) empty.style.display = 'none';
   if (!tbody || contacts.length) return; // só mostra se a lista está vazia
   tbody.innerHTML = Array.from({length:6}, (_,i) => `
-    <tr><td colspan="14" style="padding:0">
+    <tr><td colspan="13" style="padding:0">
       <div class="skeleton-row" style="animation-delay:${i*0.08}s">
         <span class="sk sk-sm"></span><span class="sk sk-lg"></span><span class="sk sk-md"></span>
         <span class="sk sk-pill"></span><span class="sk sk-sm"></span><span class="sk sk-sm"></span>
@@ -1227,7 +1216,6 @@ function fromRow(r) {
     urlMl:r.url_ml||'', urlAz:r.url_az||'', urlSh:r.url_sh||'',
     urlSite:r.url_site||'', insta:r.insta||'', obs:r.obs||'',
     ultimo:r.ultimo||'', inseridoPor:r.inserido_por||'',
-    origem:r.origem||'',
     ownerId:r.owner_id||'',
     motivoPerda:r.motivo_perda||'',
     history: (() => { try { return JSON.parse(r.history||'[]'); } catch { return []; } })(),
@@ -1240,7 +1228,6 @@ function toRow(c) {
     url_ml:c.urlMl, url_az:c.urlAz, url_sh:c.urlSh,
     url_site:c.urlSite, insta:c.insta, obs:c.obs,
     ultimo:c.ultimo||null, inserido_por:c.inseridoPor||null,
-    origem:c.origem||null,
     owner_id:c.ownerId||null,
     motivo_perda:c.motivoPerda||null,
     history: JSON.stringify(c.history||[]),
@@ -1515,7 +1502,7 @@ function closeModal() {
   const dw = document.getElementById('dup-warning');
   if (dw) dw.style.display = 'none'; document.getElementById('modal-overlay').classList.remove('open'); editingId=null; }
 
-const FORM_FIELDS = ['nome','contato','mkt','status','zap','email','cidade','estado','cnpj','prox','ultimo','inserido-por','origem','url-ml','url-az','url-sh','url-site','insta','obs'];
+const FORM_FIELDS = ['nome','contato','mkt','status','zap','email','cidade','estado','cnpj','prox','ultimo','inserido-por','url-ml','url-az','url-sh','url-site','insta','obs'];
 function clearForm() {
   FORM_FIELDS.forEach(k => {
     const el = document.getElementById('f-'+k);
@@ -1530,7 +1517,6 @@ function fillForm(c) {
   set('zap',c.zap); set('email',c.email); set('cidade',c.cidade); set('estado',c.estado);
   set('cnpj',c.cnpj);
   set('inserido-por', c.inseridoPor||'');
-  set('origem', c.origem||'');
   set('prox',   c.prox   ? c.prox.split('-').reverse().join('/')   : '');
   set('ultimo', c.ultimo ? c.ultimo.split('-').reverse().join('/') : '');
   set('url-ml',c.urlMl); set('url-az',c.urlAz); set('url-sh',c.urlSh);
@@ -1543,7 +1529,6 @@ function formData() {
     zap: formatZap(g('zap').trim()), email: g('email').trim(),
     cidade: g('cidade').trim(), estado: g('estado').trim().toUpperCase(),
     inseridoPor: g('inserido-por'),
-    origem: g('origem'),
     prox:   dateFromDisplay(g('prox').trim())   || g('prox').trim(),
     ultimo: dateFromDisplay(g('ultimo').trim()) || g('ultimo').trim(),
     urlMl: g('url-ml').trim(), urlAz: g('url-az').trim(),
@@ -1786,6 +1771,16 @@ function toggleMeus() {
   renderTable();
 }
 
+let filterHidePerdidos = false;
+function toggleHidePerdidos() {
+  filterHidePerdidos = !filterHidePerdidos;
+  document.getElementById('chip-hide-perdidos')?.classList.toggle('active', filterHidePerdidos);
+  const chipM = document.getElementById('m-chip-hide-perdidos');
+  if (chipM) chipM.classList.toggle('active', filterHidePerdidos);
+  updateClearBtn();
+  renderTable();
+}
+
 function getFiltered() {
   const q     = (document.getElementById('search-input')?.value||'').toLowerCase();
   const fSt   = document.getElementById('filter-status')?.value||'';
@@ -1796,6 +1791,7 @@ function getFiltered() {
 
   const list = contacts.filter(c => {
     if (filterMeus && me && c.inseridoPor !== me) return false;
+    if (filterHidePerdidos && c.status === 'PERDIDO') return false;
     if (q) {
       const haystack = [c.nome,c.zap,c.email,c.cidade,c.estado,c.cnpj].join(' ').toLowerCase();
       if (!haystack.includes(q)) return false;
@@ -1880,7 +1876,6 @@ function renderTable() {
     const perdidoCls = c.status === 'PERDIDO' ? ' row-perdido' : '';
     return `<tr class="${urgCls}${perdidoCls}">
       <td class="c" style="font-size:10px;color:#aaa;white-space:nowrap">${c.createdAt ? c.createdAt.slice(8,10)+'/'+c.createdAt.slice(5,7) : '—'}</td>
-      <td style="font-size:10px;color:#888;white-space:nowrap">${c.origem ? esc(c.origem) : '<span style="color:#ddd">—</span>'}</td>
       <td style="color:#aaa;font-size:10px">${i+1}</td>
       <td style="font-size:11px;color:#555;white-space:nowrap">${c.contato ? esc(c.contato) : '<span style="color:#ccc">—</span>'}</td>
       <td style="font-weight:700;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(c.nome)}${c.inseridoPor ? ' · por ' + esc(c.inseridoPor) : ''}"><span class="empresa-nome">${esc(c.nome)}</span>${c.status==='PERDIDO'?'<span class="dot-perdido" title="Lead perdido"></span>':''} ${obsIcon}</td>
@@ -1966,116 +1961,20 @@ function mapHeaders(headers) {
   return map;
 }
 
-// Tokenizador CSV real (aspas com vírgula/quebra de linha interna ficam intactas).
-// Substitui o split ingênuo por linha, que corrompia campos multilinha (ex: obs da feira).
-function parseCSVRows(text, sep) {
-  const t = text.replace(/\r/g, '');
-  const rows = [];
-  let row = [], field = '', inQuotes = false;
-  for (let i = 0; i < t.length; i++) {
-    const c = t[i];
-    if (inQuotes) {
-      if (c === '"') {
-        if (t[i+1] === '"') { field += '"'; i++; }
-        else { inQuotes = false; }
-      } else {
-        field += c;
-      }
-    } else if (c === '"') {
-      inQuotes = true;
-    } else if (c === sep) {
-      row.push(field); field = '';
-    } else if (c === '\n') {
-      row.push(field); rows.push(row); row = []; field = '';
-    } else {
-      field += c;
-    }
-  }
-  if (field !== '' || row.length) { row.push(field); rows.push(row); }
-  return rows.filter(r => !(r.length === 1 && r[0].trim() === ''));
-}
-
-// Assinatura fixa do export da ferramenta de captura da feira Amigos Pet
-// (registrado_por, foco, nome, telefone, empresa, cidade, site, meli, amazon, obs, criado_em).
-// Decisões combinadas com o usuário:
-// - registrado_por: ignorado, não entra no CRM (não mapeia para inseridoPor)
-// - nome (pessoa) -> contato | empresa -> nome (empresa é a entidade rastreada no CRM)
-// - cidade combinada ("Cidade - UF") -> split em cidade/estado
-// - foco (SELLER/LOJISTA/OUTRO) -> tag em obs, sem coluna nova no schema
-// - criado_em -> createdAt (preserva data real da captura na feira)
-const FAIR_CSV_SIGNATURE = ['registradopor','foco','nome','telefone','empresa'];
-
-function isFairCSV(normHeaders) {
-  return FAIR_CSV_SIGNATURE.every(h => normHeaders.includes(h));
-}
-
-function splitCidadeUf(raw) {
-  const v = (raw||'').trim();
-  const m = v.match(/^(.+?)\s*-\s*([A-Za-z]{2})$/);
-  if (m) return { cidade: m[1].trim(), estado: m[2].toUpperCase() };
-  return { cidade: v, estado: '' };
-}
-
-function parseFairCSV(rows, normHeaders) {
-  const idx = {};
-  normHeaders.forEach((h,i) => { if (!(h in idx)) idx[h] = i; });
-  const get = (row, key) => (row[idx[key]] || '').trim();
-
-  return rows.slice(1).map(row => {
-    const { cidade, estado } = splitCidadeUf(get(row,'cidade'));
-    const focoRaw = get(row,'foco').toUpperCase();
-    const obsRaw = get(row,'obs');
-    const obs = focoRaw ? `[${focoRaw}] ${obsRaw}`.trim() : obsRaw;
-
-    const criadoEmRaw = get(row,'criadoem');
-    const parsedDate = criadoEmRaw ? new Date(criadoEmRaw) : null;
-    const createdAt = (parsedDate && !isNaN(parsedDate.getTime())) ? parsedDate.toISOString() : new Date().toISOString();
-
-    const empresaRaw = get(row,'empresa');
-    const contatoRaw = get(row,'nome');
-
-    return {
-      id: genId(),
-      nome:    empresaRaw || contatoRaw, // fallback: sem empresa informada, usa o nome da pessoa
-      contato: contatoRaw,
-      mkt:     '',
-      zap:     get(row,'telefone'),
-      email:   '',
-      cidade,
-      estado,
-      cnpj:    '',
-      urlMl:   get(row,'meli'),
-      urlAz:   get(row,'amazon'),
-      urlSh:   '',
-      urlSite: get(row,'site'),
-      insta:   '',
-      obs,
-      status:  'NOVO',
-      prox:    '',
-      createdAt,
-      updatedAt: new Date().toISOString(),
-    };
-  }).filter(c => c.nome || c.contato || c.zap);
-}
-
 function parseCSV(text) {
-  const firstLineRaw = text.split(/\r?\n/)[0] || '';
-  const sep = firstLineRaw.includes(';') ? ';' : ',';
-  const rows = parseCSVRows(text, sep);
-  if (rows.length < 2) return [];
-
-  const headers = rows[0].map(h => (h||'').trim());
-  const normHeaders = headers.map(normalizeHeader);
-
-  if (isFairCSV(normHeaders)) return parseFairCSV(rows, normHeaders);
-
+  const lines = text.split(/\r?\n/).filter(l=>l.trim());
+  if (lines.length < 2) return [];
+  const sep = lines[0].includes(';') ? ';' : ',';
+  const headers = lines[0].split(sep).map(h=>h.replace(/^"|"$/g,''));
   const hmap = mapHeaders(headers);
   const get = (row, field) => {
     const idx = hmap[field];
     if (idx===undefined) return '';
-    return (row[idx]||'').trim();
+    const v = (row[idx]||'').replace(/^"|"$/g,'').trim();
+    return v;
   };
-  return rows.slice(1).map(row => {
+  return lines.slice(1).map(line => {
+    const row = line.split(sep);
     return {
       id: genId(),
       nome:    get(row,'nome'),
@@ -2140,63 +2039,31 @@ function findDuplicate(c) {
   );
 }
 
-function readFileAsText(file) {
-  return new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = ev => resolve(ev.target.result);
-    r.onerror = () => reject(new Error('Falha ao ler ' + file.name));
-    r.readAsText(file, 'utf-8');
-  });
-}
-
-async function importCSV(e) {
-  const files = Array.from(e.target.files || []);
-  if (!files.length) return;
-  let allParsed = [];
-  for (const f of files) {
-    try {
-      allParsed = allParsed.concat(parseCSV(await readFileAsText(f)));
-    } catch (err) {
-      showToast('Erro ao ler ' + f.name + ': ' + err.message, 'err');
-    }
-  }
-  e.target.value = '';
-  if (!allParsed.length) { showToast('Nenhum contato válido encontrado.', 'err'); return; }
-
-  // dedup interno entre os arquivos importados juntos nesta mesma ação
-  // (ex: mesma empresa capturada nos dois arquivos da feira). Só concatena obs, nunca descarta dado.
-  const batch = [];
-  allParsed.forEach(c => {
-    const dupInBatch = batch.find(b =>
-      (c.cnpj && c.cnpj===b.cnpj) ||
-      (c.nome && c.nome.toLowerCase()===((b.nome||'').toLowerCase())) ||
-      (c.zap  && fmtPhone(c.zap)===fmtPhone(b.zap||'') && fmtPhone(c.zap).length>7)
-    );
-    if (dupInBatch) {
-      if (c.obs && c.obs !== dupInBatch.obs) {
-        dupInBatch.obs = dupInBatch.obs ? dupInBatch.obs + '. Também capturado em outro arquivo deste import: ' + c.obs : c.obs;
-      }
+function importCSV(e) {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = async ev => {
+    const parsed = parseCSV(ev.target.result);
+    if (!parsed.length) { showToast('Nenhum contato válido encontrado.', 'err'); return; }
+    const dups = [], news = [];
+    parsed.forEach(c => {
+      const dup = findDuplicate(c);
+      if (dup) dups.push({incoming: c, existing: dup});
+      else news.push(c);
+    });
+    pendingNew = news;
+    pendingDups = dups;
+    if (dups.length) {
+      showDupModal();
     } else {
-      batch.push(c);
+      await sbUpsertMany(news);
+      contacts.unshift(...news);
+      renderTable(); updateBadge();
+      showToast(`${news.length} contato(s) importado(s).`, 'ok');
     }
-  });
-
-  const dups = [], news = [];
-  batch.forEach(c => {
-    const dup = findDuplicate(c);
-    if (dup) dups.push({incoming: c, existing: dup});
-    else news.push(c);
-  });
-  pendingNew = news;
-  pendingDups = dups;
-  if (dups.length) {
-    showDupModal();
-  } else {
-    await sbUpsertMany(news);
-    contacts.unshift(...news);
-    renderTable(); updateBadge();
-    showToast(`${news.length} contato(s) importado(s).`, 'ok');
-  }
+  };
+  r.readAsText(f,'utf-8');
+  e.target.value='';
 }
 
 // ── DUPLICATE HANDLING ───────────────────────────────────
@@ -3031,6 +2898,9 @@ function clearFilters() {
   if (fp) fp.value = '';
   filterMeus = false;
   document.getElementById('chip-meus')?.classList.remove('active');
+  filterHidePerdidos = false;
+  document.getElementById('chip-hide-perdidos')?.classList.remove('active');
+  document.getElementById('m-chip-hide-perdidos')?.classList.remove('active');
   updateClearBtn();
   renderTable();
 }
@@ -3039,10 +2909,9 @@ function updateClearBtn() {
   const q  = document.getElementById('search-input')?.value || '';
   const fs = document.getElementById('filter-status')?.value || '';
   const fp = document.getElementById('filter-prox')?.value || '';
-  const active = !!(q || fs || fp || filterMeus);
+  const active = !!(q || fs || fp || filterMeus || filterHidePerdidos);
   const btn = document.getElementById('btn-clear-filters');
   if (!btn) return;
-  // Force override any CSS or inline style
   btn.style.setProperty('display', active ? 'inline-flex' : 'none', 'important');
 }
 
@@ -3464,9 +3333,9 @@ async function undoAdvance(el) {
 // ── EXPORT XLS WITH FILTERS APPLIED ──────────────────────
 function exportJSON() {
   const list = getFiltered(); // usa lista filtrada
-  const headers = ['ID','Nome','Contato','Empresa','Origem','Marketplace','WhatsApp','Email','Cidade','UF','CNPJ','Status','Últ. Contato','Próx. Contato','ML URL','Amazon URL','Shopee URL','Site Oficial','Instagram','Observações','Inserido por','Criado em','Atualizado em'];
+  const headers = ['ID','Nome','Contato','Empresa','Marketplace','WhatsApp','Email','Cidade','UF','CNPJ','Status','Últ. Contato','Próx. Contato','ML URL','Amazon URL','Shopee URL','Site Oficial','Instagram','Observações','Inserido por','Criado em','Atualizado em'];
   const rows = list.map(c => [
-    c.id, c.nome||'', c.contato||'', c.nome||'', c.origem||'', c.mkt||'', c.zap||'', c.email||'',
+    c.id, c.nome||'', c.contato||'', c.nome||'', c.mkt||'', c.zap||'', c.email||'',
     c.cidade||'', c.estado||'', c.cnpj||'', c.status||'', c.ultimo||'', c.prox||'',
     c.urlMl||'', c.urlAz||'', c.urlSh||'', c.urlSite||'', c.insta||'', c.obs||'',
     c.inseridoPor||'', c.createdAt||'', c.updatedAt||''
@@ -3693,6 +3562,7 @@ async function afterLogin() {
   await loadMyProfile();
   // Garantir filtros limpos ao entrar
   filterMeus = false;
+  filterHidePerdidos = false;
   const ss = document.getElementById('search-input');
   const fs = document.getElementById('filter-status');
   const fp = document.getElementById('filter-prox');
