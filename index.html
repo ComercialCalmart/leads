@@ -646,25 +646,7 @@ tr:hover .action-btns { opacity:.3; }
     <button class="btn btn-ghost" onclick="doLogout()" title="Sair">⎋ Sair</button>
     <button class="btn btn-ghost" id="user-indicator" style="gap:6px;cursor:default;opacity:.7">—</button>
     <button class="btn btn-ghost" onclick="exportJSON()">↑ Salvar</button>
-    <select id="import-origem" title="Origem aplicada aos leads importados" style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:6px 8px;border:1.5px solid #ddd;border-radius:6px;background:var(--white);color:#666;cursor:pointer">
-      <option value="">Origem: —</option>
-      <option value="PROSPECÇÃO">Prospecção</option>
-      <option value="AMIGOS PET">Amigos Pet</option>
-      <option value="PETSA">Petsa</option>
-      <option value="INDICAÇÃO">Indicação</option>
-      <option value="INBOUND">Inbound</option>
-      <option value="OUTRO">Outro</option>
-    </select>
-    <select id="import-dono" title="Responsável pelos leads importados" style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:6px 8px;border:1.5px solid #ddd;border-radius:6px;background:var(--white);color:#666;cursor:pointer">
-      <option value="">Responsável: —</option>
-      <option value="Diego">Diego</option>
-      <option value="Matheus">Matheus</option>
-      <option value="Lucas Alves">Lucas Alves</option>
-      <option value="Lucas Catarin">Lucas Catarin</option>
-      <option value="Robson">Robson</option>
-      <option value="Zé Catarin">Zé Catarin</option>
-    </select>
-    <label class="btn btn-ghost" style="cursor:pointer;">↓ Importar <input type="file" accept=".csv,.xls,.xlsx,.txt" onchange="importCSV(event)" multiple style="display:none"></label>
+    <button class="btn btn-ghost" onclick="openImportModal()">↓ Importar</button>
     <button class="btn btn-primary" onclick="openModal()">+ Novo Contato</button>
   </div>
 </header>
@@ -711,6 +693,12 @@ tr:hover .action-btns { opacity:.3; }
           <option value="INDICAÇÃO">Indicação</option>
           <option value="INBOUND">Inbound</option>
           <option value="OUTRO">Outro</option>
+        </select>
+        <select class="filter-select" id="filter-dono" onchange="renderTable();updateClearBtn()">
+          <option value="">Todos os responsáveis</option>
+          <option value="Diego">Diego</option>
+          <option value="Lucas">Lucas</option>
+          <option value="Matheus">Matheus</option>
         </select>
         <select class="filter-select" id="filter-prox" onchange="renderTable();updateClearBtn()">
           <option value="">Próx. contato</option>
@@ -1063,6 +1051,46 @@ tr:hover .action-btns { opacity:.3; }
   </div>
 </div>
 
+<!-- IMPORT MODAL -->
+<div class="modal-overlay" id="import-overlay">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-header">
+      <h3>Importar Contatos</h3>
+      <button class="modal-close" onclick="closeImportModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:12px;color:#888;line-height:1.6;margin:0 0 18px">
+        Selecione um ou mais arquivos CSV. As opções abaixo são aplicadas a todos os contatos deste import.
+      </p>
+      <div class="form-group full" style="margin-bottom:14px">
+        <label>Origem destes contatos</label>
+        <select id="import-origem">
+          <option value="">Manter a do arquivo (se houver)</option>
+          <option value="PROSPECÇÃO">Prospecção</option>
+          <option value="AMIGOS PET">Amigos Pet</option>
+          <option value="PETSA">Petsa</option>
+          <option value="INDICAÇÃO">Indicação</option>
+          <option value="INBOUND">Inbound</option>
+          <option value="OUTRO">Outro</option>
+        </select>
+      </div>
+      <div class="form-group full" style="margin-bottom:20px">
+        <label>Responsável por estes contatos</label>
+        <select id="import-dono">
+          <option value="">Não atribuir</option>
+          <option value="Diego">Diego</option>
+          <option value="Lucas">Lucas</option>
+          <option value="Matheus">Matheus</option>
+        </select>
+      </div>
+      <label class="btn btn-primary" style="cursor:pointer;width:100%;justify-content:center">
+        Escolher arquivos CSV
+        <input type="file" accept=".csv,.txt" onchange="importCSV(event)" multiple style="display:none">
+      </label>
+    </div>
+  </div>
+</div>
+
 <!-- DUPLICATE MODAL -->
 <div class="modal-overlay" id="dup-overlay">
   <div class="modal" style="max-width:540px">
@@ -1371,7 +1399,13 @@ function wazNumber(zap) {
   if (!d) return '';
   if (raw.startsWith('+')) return d;
   if (d.startsWith('55') && (d.length === 12 || d.length === 13)) return d;
-  if (d.length === 10 || d.length === 11) return '55' + d;
+  // BR celular: DDD + 9 dígitos, o primeiro sempre 9.
+  if (d.length === 11 && d[2] === '9') return '55' + d;
+  // BR fixo: DDD + 8 dígitos, começando de 2 a 5.
+  if (d.length === 10 && d[2] >= '2' && d[2] <= '5') return '55' + d;
+  // Não bate com padrão brasileiro e não veio com DDI explícito.
+  // Pode ser internacional que perdeu o "+" ao passar por planilha, ou número incompleto.
+  // Não gera link: melhor o ícone cinza do que abrir conversa com o número errado.
   return '';
 }
 
@@ -1856,6 +1890,7 @@ function getFiltered() {
   const fSt   = document.getElementById('filter-status')?.value||'';
   const fProx = document.getElementById('filter-prox')?.value||'';
   const fOrig = document.getElementById('filter-origem')?.value||'';
+  const fDono = document.getElementById('filter-dono')?.value||'';
   const today = new Date(); today.setHours(0,0,0,0);
   const in7   = new Date(today); in7.setDate(in7.getDate()+7);
   const me    = getCurrentUser();
@@ -1864,6 +1899,7 @@ function getFiltered() {
     if (filterMeus && me && c.inseridoPor !== me) return false;
     if (filterHidePerdidos && c.status === 'PERDIDO') return false;
     if (fOrig && (c.origem||'') !== fOrig) return false;
+    if (fDono && (c.inseridoPor||'') !== fDono) return false;
     if (q) {
       const haystack = [c.nome,c.zap,c.email,c.cidade,c.estado,c.cnpj].join(' ').toLowerCase();
       if (!haystack.includes(q)) return false;
@@ -2251,6 +2287,13 @@ function readFileAsText(file) {
   });
 }
 
+function openImportModal() {
+  document.getElementById('import-overlay')?.classList.add('open');
+}
+function closeImportModal() {
+  document.getElementById('import-overlay')?.classList.remove('open');
+}
+
 async function importCSV(e) {
   const files = Array.from(e.target.files || []);
   if (!files.length) return;
@@ -2273,6 +2316,7 @@ async function importCSV(e) {
     }
   }
   e.target.value = '';
+  closeImportModal();
   if (!allParsed.length) { showToast('Nenhum contato válido encontrado.', 'err'); return; }
 
   // dedup interno entre os arquivos importados na mesma ação.
@@ -3144,6 +3188,8 @@ function clearFilters() {
   if (fp) fp.value = '';
   const fo = document.getElementById('filter-origem');
   if (fo) fo.value = '';
+  const fd = document.getElementById('filter-dono');
+  if (fd) fd.value = '';
   filterMeus = false;
   document.getElementById('chip-meus')?.classList.remove('active');
   filterHidePerdidos = false;
@@ -3158,7 +3204,8 @@ function updateClearBtn() {
   const fs = document.getElementById('filter-status')?.value || '';
   const fp = document.getElementById('filter-prox')?.value || '';
   const fo = document.getElementById('filter-origem')?.value || '';
-  const active = !!(q || fs || fp || fo || filterMeus || filterHidePerdidos);
+  const fd = document.getElementById('filter-dono')?.value || '';
+  const active = !!(q || fs || fp || fo || fd || filterMeus || filterHidePerdidos);
   const btn = document.getElementById('btn-clear-filters');
   if (!btn) return;
   // Force override any CSS or inline style
@@ -3758,12 +3805,11 @@ async function doLogin() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error_description || data.message || 'Credenciais inválidas.');
     const emailName = email.split('@')[0].toLowerCase();
+    // Time comercial ativo. Nomes curtos e padronizados: o valor gravado em
+    // inserido_por precisa bater exatamente com as opções do filtro de responsável.
     const mapped = {
       'comercial':    'Matheus',
-      'ti':           'Lucas Alves',
-      'lucas.catarin':'Lucas Catarin',
-      'jrcatarin':    'Zé Catarin',
-      'robson':       'Robson',
+      'lucas.catarin':'Lucas',
       'comercial.sp': 'Diego'
     };
     const name = mapped[emailName] || emailName;
