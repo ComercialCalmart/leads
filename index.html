@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CALMART — Prospecção</title>
+<title>CALMART · Prospecção</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;0,9..40,900&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -116,7 +116,7 @@ body { background: var(--body-bg); font-family: var(--font); color: var(--black)
 .il-site { background: #eff6ff; color: #1d4ed8; border: 1.5px solid #93c5fd; }
 .il-obs  { background: #f0fdf4; color: #15803d; border: 1.5px solid #86efac; cursor: default; font-size: 11px; }
 
-/* ICON CELLS — Zap, Email, Links */
+/* ICON CELLS: Zap, Email, Links */
 .td-icon { text-align: center; padding: 4px 4px !important; }
 .icon-svg { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 4px; transition: transform .15s, opacity .15s; cursor: pointer; }
 .icon-svg:hover { transform: scale(1.12); opacity: .85; }
@@ -380,6 +380,7 @@ tr:hover .action-btns { opacity:.3; }
 .chip-meus { font-family:var(--font); font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; padding:6px 12px; border:1.5px solid #ddd; border-radius:20px; cursor:pointer; background:var(--white); color:#888; transition:all .12s; white-space:nowrap; }
 .chip-meus:hover { border-color:var(--black); color:var(--black); }
 .chip-meus.active { background:var(--black); color:var(--white); border-color:var(--black); }
+
 /* ── TOAST ───────────────────────────────────────────────── */
 #toast-container { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); z-index:9000; display:flex; flex-direction:column; align-items:center; gap:8px; pointer-events:none; }
 .toast { font-family:var(--font); font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; padding:11px 22px; border-radius:24px; border:1.5px solid; white-space:nowrap; opacity:0; transform:translateY(10px); transition:opacity .22s, transform .22s cubic-bezier(.34,1.4,.64,1); pointer-events:none; box-shadow:0 6px 24px rgba(15,17,21,.18); }
@@ -645,7 +646,25 @@ tr:hover .action-btns { opacity:.3; }
     <button class="btn btn-ghost" onclick="doLogout()" title="Sair">⎋ Sair</button>
     <button class="btn btn-ghost" id="user-indicator" style="gap:6px;cursor:default;opacity:.7">—</button>
     <button class="btn btn-ghost" onclick="exportJSON()">↑ Salvar</button>
-    <label class="btn btn-ghost" style="cursor:pointer;">↓ Importar <input type="file" accept=".csv,.xls,.xlsx,.txt" onchange="importCSV(event)" style="display:none"></label>
+    <select id="import-origem" title="Origem aplicada aos leads importados" style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:6px 8px;border:1.5px solid #ddd;border-radius:6px;background:var(--white);color:#666;cursor:pointer">
+      <option value="">Origem: —</option>
+      <option value="PROSPECÇÃO">Prospecção</option>
+      <option value="AMIGOS PET">Amigos Pet</option>
+      <option value="PETSA">Petsa</option>
+      <option value="INDICAÇÃO">Indicação</option>
+      <option value="INBOUND">Inbound</option>
+      <option value="OUTRO">Outro</option>
+    </select>
+    <select id="import-dono" title="Responsável pelos leads importados" style="font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:6px 8px;border:1.5px solid #ddd;border-radius:6px;background:var(--white);color:#666;cursor:pointer">
+      <option value="">Responsável: —</option>
+      <option value="Diego">Diego</option>
+      <option value="Matheus">Matheus</option>
+      <option value="Lucas Alves">Lucas Alves</option>
+      <option value="Lucas Catarin">Lucas Catarin</option>
+      <option value="Robson">Robson</option>
+      <option value="Zé Catarin">Zé Catarin</option>
+    </select>
+    <label class="btn btn-ghost" style="cursor:pointer;">↓ Importar <input type="file" accept=".csv,.xls,.xlsx,.txt" onchange="importCSV(event)" multiple style="display:none"></label>
     <button class="btn btn-primary" onclick="openModal()">+ Novo Contato</button>
   </div>
 </header>
@@ -684,6 +703,15 @@ tr:hover .action-btns { opacity:.3; }
           <option value="FECHADO">Fechado</option>
           <option value="PERDIDO">Perdido</option>
         </select>
+        <select class="filter-select" id="filter-origem" onchange="renderTable();updateClearBtn()">
+          <option value="">Todas as origens</option>
+          <option value="PROSPECÇÃO">Prospecção</option>
+          <option value="AMIGOS PET">Amigos Pet</option>
+          <option value="PETSA">Petsa</option>
+          <option value="INDICAÇÃO">Indicação</option>
+          <option value="INBOUND">Inbound</option>
+          <option value="OUTRO">Outro</option>
+        </select>
         <select class="filter-select" id="filter-prox" onchange="renderTable();updateClearBtn()">
           <option value="">Próx. contato</option>
           <option value="vencido">Vencidos</option>
@@ -706,6 +734,7 @@ tr:hover .action-btns { opacity:.3; }
           <thead>
             <tr>
               <th style="width:44px" class="c sortable" data-sort="createdAt" onclick="sortTable('createdAt')">Cadastro <span class="sort-arrow">↕</span></th>
+              <th style="width:60px" class="sortable" data-sort="origem" onclick="sortTable('origem')">Origem <span class="sort-arrow">↕</span></th>
               <th style="width:18px">#</th>
               <th style="width:68px" class="sortable" data-sort="contato" onclick="sortTable('contato')">Contato <span class="sort-arrow">↕</span></th>
               <th style="width:130px" class="sortable" data-sort="nome" onclick="sortTable('nome')">Empresa <span class="sort-arrow">↕</span></th>
@@ -775,6 +804,14 @@ tr:hover .action-btns { opacity:.3; }
       <div class="section dash-chart-card">
         <div class="section-title"><span>Motivos de Perda</span></div>
         <div class="funnel-wrap" id="stats-motivos"></div>
+      </div>
+    </div>
+
+    <!-- Performance por vendedor -->
+    <div class="dash-charts-row">
+      <div class="section dash-chart-card" style="grid-column:1/-1">
+        <div class="section-title"><span>Performance por Vendedor</span></div>
+        <div id="perf-vendedores" style="overflow-x:auto"></div>
       </div>
     </div>
 
@@ -881,6 +918,18 @@ tr:hover .action-btns { opacity:.3; }
         <div class="form-group full">
           <label>Nome do Contato</label>
           <input type="text" id="f-contato" placeholder="Ex: Marcus, João...">
+        </div>
+        <div class="form-group">
+          <label>Origem</label>
+          <select id="f-origem">
+            <option value="">—</option>
+            <option value="PROSPECÇÃO">Prospecção</option>
+            <option value="AMIGOS PET">Amigos Pet</option>
+            <option value="PETSA">Petsa</option>
+            <option value="INDICAÇÃO">Indicação</option>
+            <option value="INBOUND">Inbound</option>
+            <option value="OUTRO">Outro</option>
+          </select>
         </div>
         <div class="form-group">
           <label>Principal Marketplace</label>
@@ -1172,7 +1221,7 @@ function showSkeleton() {
   if (empty) empty.style.display = 'none';
   if (!tbody || contacts.length) return; // só mostra se a lista está vazia
   tbody.innerHTML = Array.from({length:6}, (_,i) => `
-    <tr><td colspan="13" style="padding:0">
+    <tr><td colspan="14" style="padding:0">
       <div class="skeleton-row" style="animation-delay:${i*0.08}s">
         <span class="sk sk-sm"></span><span class="sk sk-lg"></span><span class="sk sk-md"></span>
         <span class="sk sk-pill"></span><span class="sk sk-sm"></span><span class="sk sk-sm"></span>
@@ -1216,6 +1265,7 @@ function fromRow(r) {
     urlMl:r.url_ml||'', urlAz:r.url_az||'', urlSh:r.url_sh||'',
     urlSite:r.url_site||'', insta:r.insta||'', obs:r.obs||'',
     ultimo:r.ultimo||'', inseridoPor:r.inserido_por||'',
+    origem:r.origem||'',
     ownerId:r.owner_id||'',
     motivoPerda:r.motivo_perda||'',
     history: (() => { try { return JSON.parse(r.history||'[]'); } catch { return []; } })(),
@@ -1228,6 +1278,7 @@ function toRow(c) {
     url_ml:c.urlMl, url_az:c.urlAz, url_sh:c.urlSh,
     url_site:c.urlSite, insta:c.insta, obs:c.obs,
     ultimo:c.ultimo||null, inserido_por:c.inseridoPor||null,
+    origem:c.origem||null,
     owner_id:c.ownerId||null,
     motivo_perda:c.motivoPerda||null,
     history: JSON.stringify(c.history||[]),
@@ -1309,6 +1360,21 @@ function statusBadge(v) {
   return `<span class="badge ${cls}">${lbl}</span>`;
 }
 
+// Monta o número para wa.me respeitando internacionais.
+// Regras: veio com "+" já é internacional, usa como está.
+// Já começa com 55 e tem tamanho de BR completo, usa como está.
+// 10 ou 11 dígitos é BR sem DDI, prefixa 55.
+// Qualquer outra coisa é número incompleto, devolve vazio (não gera link).
+function wazNumber(zap) {
+  const raw = (zap||'').trim();
+  const d = raw.replace(/\D/g,'');
+  if (!d) return '';
+  if (raw.startsWith('+')) return d;
+  if (d.startsWith('55') && (d.length === 12 || d.length === 13)) return d;
+  if (d.length === 10 || d.length === 11) return '55' + d;
+  return '';
+}
+
 function fmtPhone(p) {
   return (p||'').replace(/\D/g,'');
 }
@@ -1327,13 +1393,13 @@ function formatZap(raw) {
     // fixo: (XX) XXXX-XXXX
     return `(${n.slice(0,2)}) ${n.slice(2,6)}-${n.slice(6)}`;
   }
-  // não reconhecido — devolve como veio
+  // não reconhecido, devolve como veio
   return raw;
 }
 function wazLink(zap, display) {
   if (!zap) return '<span style="color:#ccc">—</span>';
-  const num = fmtPhone(zap);
-  const full = num.length >= 10 ? '55'+num : num;
+  const full = wazNumber(zap);
+  if (!full) return `<span style="color:#ccc">${esc(zap)}</span>`;
   return `<a href="https://wa.me/${full}" target="_blank" class="waz-link">
     <svg class="waz-icon" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.116 1.524 5.845L.057 23.737a.5.5 0 0 0 .614.612l5.951-1.462A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.9 0-3.673-.508-5.2-1.393l-.373-.215-3.533.867.902-3.453-.234-.381A9.935 9.935 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
     ${esc(zap)}
@@ -1372,7 +1438,7 @@ function maskDateShort(el) {
   let v = el.value.replace(/\D/g,'').slice(0,4);
   if (v.length >= 3) v = v.slice(0,2)+'/'+v.slice(2);
   el.value = v;
-  // update color live — need full year, assume current year
+  // update color live, need full year, assume current year
   if (v.length === 5) {
     const year = new Date().getFullYear();
     const iso = `${year}-${v.slice(3,5)}-${v.slice(0,2)}`;
@@ -1415,9 +1481,9 @@ function dateClassUltimo(d) {
   const today = new Date(); today.setHours(0,0,0,0);
   const dt    = new Date(d+'T00:00:00');
   const days  = Math.floor((today - dt) / 86400000);
-  if (days <= 1)  return 'date-futuro';  // verde — recente
-  if (days <= 7)  return 'date-hoje';    // amarelo — atenção
-  return 'date-vencido';                 // vermelho — muito tempo
+  if (days <= 1)  return 'date-futuro';  // verde, recente
+  if (days <= 7)  return 'date-hoje';    // amarelo, atenção
+  return 'date-vencido';                 // vermelho, muito tempo
 }
 function fmtDate(d) {
   if (!d) return '<span style="color:#ccc">—</span>';
@@ -1502,7 +1568,7 @@ function closeModal() {
   const dw = document.getElementById('dup-warning');
   if (dw) dw.style.display = 'none'; document.getElementById('modal-overlay').classList.remove('open'); editingId=null; }
 
-const FORM_FIELDS = ['nome','contato','mkt','status','zap','email','cidade','estado','cnpj','prox','ultimo','inserido-por','url-ml','url-az','url-sh','url-site','insta','obs'];
+const FORM_FIELDS = ['nome','contato','mkt','status','zap','email','cidade','estado','cnpj','prox','ultimo','inserido-por','origem','url-ml','url-az','url-sh','url-site','insta','obs'];
 function clearForm() {
   FORM_FIELDS.forEach(k => {
     const el = document.getElementById('f-'+k);
@@ -1517,6 +1583,7 @@ function fillForm(c) {
   set('zap',c.zap); set('email',c.email); set('cidade',c.cidade); set('estado',c.estado);
   set('cnpj',c.cnpj);
   set('inserido-por', c.inseridoPor||'');
+  set('origem', c.origem||'');
   set('prox',   c.prox   ? c.prox.split('-').reverse().join('/')   : '');
   set('ultimo', c.ultimo ? c.ultimo.split('-').reverse().join('/') : '');
   set('url-ml',c.urlMl); set('url-az',c.urlAz); set('url-sh',c.urlSh);
@@ -1529,6 +1596,7 @@ function formData() {
     zap: formatZap(g('zap').trim()), email: g('email').trim(),
     cidade: g('cidade').trim(), estado: g('estado').trim().toUpperCase(),
     inseridoPor: g('inserido-por'),
+    origem: g('origem'),
     prox:   dateFromDisplay(g('prox').trim())   || g('prox').trim(),
     ultimo: dateFromDisplay(g('ultimo').trim()) || g('ultimo').trim(),
     urlMl: g('url-ml').trim(), urlAz: g('url-az').trim(),
@@ -1563,7 +1631,7 @@ async function saveContact() {
         savedId = editingId;
         await dbUpsert(contacts[idx]);
       } else {
-        // não achou localmente mas existe no banco — upsert direto
+        // não achou localmente mas existe no banco, upsert direto
         data.id = editingId;
         await dbUpsert(data);
         contacts.unshift(data);
@@ -1631,11 +1699,11 @@ async function _commitDelete() {
   const { lead, timer } = _pendingDelete;
   clearTimeout(timer);
   _pendingDelete = null;
-  // Não há como salvar o histórico pois o lead será deletado — comportamento esperado
+  // Não há como salvar o histórico pois o lead será deletado, comportamento esperado
   try {
     await dbDelete(lead.id);
   } catch(e) {
-    // Falhou no banco — devolve para a lista
+    // Falhou no banco, devolve para a lista
     contacts.unshift(lead);
     renderTable(); updateBadge();
     showToast('Erro ao excluir: '+e.message, 'err');
@@ -1651,7 +1719,7 @@ async function undoDelete() {
   contacts.unshift(restored);
   _pendingDelete = null;
   document.getElementById('toast-delete')?.remove();
-  try { await dbUpsert(restored); } catch(e) {}
+  try { await dbUpsert(restored); } catch(e) { showToast('Erro ao restaurar: '+e.message, 'err'); }
   renderTable(); updateBadge();
   showToast('Exclusão desfeita.', 'info');
 }
@@ -1761,6 +1829,18 @@ function sortTable(field) {
   renderTable();
 }
 
+let mFilterStatus = '';
+let mSheetId = null;
+let filterHidePerdidos = false;
+function toggleHidePerdidos() {
+  filterHidePerdidos = !filterHidePerdidos;
+  document.getElementById('chip-hide-perdidos')?.classList.toggle('active', filterHidePerdidos);
+  const chipMP = document.getElementById('m-chip-hide-perdidos');
+  if (chipMP) chipMP.classList.toggle('active', filterHidePerdidos);
+  updateClearBtn();
+  renderTable();
+}
+
 let filterMeus = false;
 function toggleMeus() {
   filterMeus = !filterMeus;
@@ -1771,20 +1851,11 @@ function toggleMeus() {
   renderTable();
 }
 
-let filterHidePerdidos = false;
-function toggleHidePerdidos() {
-  filterHidePerdidos = !filterHidePerdidos;
-  document.getElementById('chip-hide-perdidos')?.classList.toggle('active', filterHidePerdidos);
-  const chipM = document.getElementById('m-chip-hide-perdidos');
-  if (chipM) chipM.classList.toggle('active', filterHidePerdidos);
-  updateClearBtn();
-  renderTable();
-}
-
 function getFiltered() {
   const q     = (document.getElementById('search-input')?.value||'').toLowerCase();
   const fSt   = document.getElementById('filter-status')?.value||'';
   const fProx = document.getElementById('filter-prox')?.value||'';
+  const fOrig = document.getElementById('filter-origem')?.value||'';
   const today = new Date(); today.setHours(0,0,0,0);
   const in7   = new Date(today); in7.setDate(in7.getDate()+7);
   const me    = getCurrentUser();
@@ -1792,6 +1863,7 @@ function getFiltered() {
   const list = contacts.filter(c => {
     if (filterMeus && me && c.inseridoPor !== me) return false;
     if (filterHidePerdidos && c.status === 'PERDIDO') return false;
+    if (fOrig && (c.origem||'') !== fOrig) return false;
     if (q) {
       const haystack = [c.nome,c.zap,c.email,c.cidade,c.estado,c.cnpj].join(' ').toLowerCase();
       if (!haystack.includes(q)) return false;
@@ -1876,11 +1948,12 @@ function renderTable() {
     const perdidoCls = c.status === 'PERDIDO' ? ' row-perdido' : '';
     return `<tr class="${urgCls}${perdidoCls}">
       <td class="c" style="font-size:10px;color:#aaa;white-space:nowrap">${c.createdAt ? c.createdAt.slice(8,10)+'/'+c.createdAt.slice(5,7) : '—'}</td>
+      <td style="font-size:10px;color:#888;white-space:nowrap">${c.origem ? esc(c.origem) : '<span style="color:#ddd">—</span>'}</td>
       <td style="color:#aaa;font-size:10px">${i+1}</td>
       <td style="font-size:11px;color:#555;white-space:nowrap">${c.contato ? esc(c.contato) : '<span style="color:#ccc">—</span>'}</td>
       <td style="font-weight:700;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(c.nome)}${c.inseridoPor ? ' · por ' + esc(c.inseridoPor) : ''}"><span class="empresa-nome">${esc(c.nome)}</span>${c.status==='PERDIDO'?'<span class="dot-perdido" title="Lead perdido"></span>':''} ${obsIcon}</td>
-      <td class="td-icon" title="${esc(c.zap||'Sem número')}">${c.zap
-        ? `<a href="https://wa.me/55${fmtPhone(c.zap)}" target="_blank" class="icon-svg">
+      <td class="td-icon" title="${esc(c.zap||'Sem número')}">${wazNumber(c.zap)
+        ? `<a href="https://wa.me/${wazNumber(c.zap)}" target="_blank" class="icon-svg">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.116 1.524 5.845L.057 23.737a.5.5 0 0 0 .614.612l5.951-1.462A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.9 0-3.673-.508-5.2-1.393l-.373-.215-3.533.867.902-3.453-.234-.381A9.935 9.935 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
            </a>`
         : `<span class="icon-svg-dead"><svg viewBox="0 0 24 24" width="20" height="20" fill="#ccc"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.116 1.524 5.845L.057 23.737a.5.5 0 0 0 .614.612l5.951-1.462A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.9 0-3.673-.508-5.2-1.393l-.373-.215-3.533.867.902-3.453-.234-.381A9.935 9.935 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg></span>`
@@ -1911,7 +1984,7 @@ function renderTable() {
           ${canDelete(c) ? `<button class="btn-del" onclick="askDelete('${c.id}')" title="Excluir">✕</button>` : ''}
         </div>
         <div class="quick-actions">
-          ${c.zap ? `<a href="https://wa.me/55${fmtPhone(c.zap)}" target="_blank" class="btn-qa btn-qa-zap" title="WhatsApp">💬</a>` : '<span class="btn-qa" style="opacity:.2" title="Sem Zap">💬</span>'}
+          ${wazNumber(c.zap) ? `<a href="https://wa.me/${wazNumber(c.zap)}" target="_blank" class="btn-qa btn-qa-zap" title="WhatsApp">💬</a>` : '<span class="btn-qa" style="opacity:.2" title="Sem Zap">💬</span>'}
           <button class="btn-qa btn-qa-reg" onclick="quickRegister('${c.id}')" title="Registrar contato">✓</button>
           <button class="btn-qa btn-qa-age" onclick="openReagendar('${c.id}')" title="Reagendar">📅</button>
         </div>
@@ -1929,16 +2002,17 @@ function updateBadge() {
 }
 
 // ── EXPORT / IMPORT JSON ─────────────────────────────────
-/* exportJSON antiga removida — versão com filtros está abaixo */
-// (importJSON removido — função destrutiva sem uso. Importação oficial: importCSV.)
+/* exportJSON antiga removida, versão com filtros está abaixo */
+// (importJSON removido, função destrutiva sem uso. Importação oficial: importCSV.)
 
 // ── CSV IMPORT ────────────────────────────────────────────
 const CSV_MAP = {
-  nome:   ['empresa','loja','seller','razão social','razao social','nome','company','store'],
-  zap:    ['whatsapp','celular','telefone','contato','phone','tel','fone','cel'],
+  nome:   ['empresa','loja','seller','razão social','razao social','company','store'],
+  contatoNome: ['nome do contato','nome contato','contato nome','responsável','responsavel','comprador','nome'],
+  zap:    ['whatsapp','zap','celular','telefone','phone','tel','fone','cel'],
   email:  ['email','e-mail','correio','correio eletrônico','mail'],
   cnpj:   ['cnpj','documento','cpf/cnpj','cadastro','doc'],
-  cidade: ['cidade','city'],
+  cidade: ['cidade','city','município','municipio'],
   estado: ['estado','uf','state'],
   mkt:    ['marketplace','mkt','plataforma'],
   urlMl:  ['mercado livre','url ml','link ml','meli'],
@@ -1946,7 +2020,7 @@ const CSV_MAP = {
   urlSh:  ['shopee','url shopee','link shopee'],
   urlSite:['site','url site','site oficial'],
   insta:  ['instagram','insta','ig'],
-  obs:    ['observações','observacoes','obs','notas','notes'],
+  obs:    ['observações','observacoes','obs','notas','notes','anotações','anotacoes'],
 };
 
 function normalizeHeader(h) { return h.toLowerCase().trim().replace(/[^a-z0-9áéíóúãõâêôç ]/g,''); }
@@ -1961,41 +2035,167 @@ function mapHeaders(headers) {
   return map;
 }
 
-function parseCSV(text) {
-  const lines = text.split(/\r?\n/).filter(l=>l.trim());
-  if (lines.length < 2) return [];
-  const sep = lines[0].includes(';') ? ';' : ',';
-  const headers = lines[0].split(sep).map(h=>h.replace(/^"|"$/g,''));
-  const hmap = mapHeaders(headers);
-  const get = (row, field) => {
-    const idx = hmap[field];
-    if (idx===undefined) return '';
-    const v = (row[idx]||'').replace(/^"|"$/g,'').trim();
-    return v;
-  };
-  return lines.slice(1).map(line => {
-    const row = line.split(sep);
+// Tokenizador CSV real (aspas com vírgula/quebra de linha interna ficam intactas).
+function parseCSVRows(text, sep) {
+  const t = text.replace(/^\uFEFF/, '').replace(/\r/g, '');
+  const rows = [];
+  let row = [], field = '', inQuotes = false;
+  for (let i = 0; i < t.length; i++) {
+    const c = t[i];
+    if (inQuotes) {
+      if (c === '"') {
+        if (t[i+1] === '"') { field += '"'; i++; }
+        else { inQuotes = false; }
+      } else { field += c; }
+    } else if (c === '"') { inQuotes = true; }
+    else if (c === sep) { row.push(field); field = ''; }
+    else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+    else { field += c; }
+  }
+  if (field !== '' || row.length) { row.push(field); rows.push(row); }
+  return rows.filter(r => !(r.length === 1 && r[0].trim() === ''));
+}
+
+// Assinatura do export das ferramentas de captura de feira
+// (registrado_por, foco, nome, telefone, empresa, cidade, site, meli, amazon, obs, criado_em).
+// Regras: registrado_por ignorado | empresa->nome | nome->contato | cidade "X - UF" -> split
+// | foco -> tag em obs | criado_em -> createdAt | origem definida pelo seletor de lote.
+const FAIR_CSV_SIGNATURE = ['foco','nome','telefone','empresa'];
+function isFairCSV(normHeaders) {
+  return FAIR_CSV_SIGNATURE.every(h => normHeaders.includes(h));
+}
+
+function splitCidadeUf(raw) {
+  const v = (raw||'').trim();
+  const m = v.match(/^(.+?)\s*[-\/]\s*([A-Za-z]{2})$/);
+  if (m) return { cidade: m[1].trim(), estado: m[2].toUpperCase() };
+  return { cidade: v, estado: '' };
+}
+
+function parseFairCSV(rows, normHeaders) {
+  const idx = {};
+  normHeaders.forEach((h,i) => { if (!(h in idx)) idx[h] = i; });
+  const get = (row, key) => (row[idx[key]] || '').trim();
+
+  return rows.slice(1).map(row => {
+    const { cidade, estado } = splitCidadeUf(get(row,'cidade'));
+    const focoRaw = get(row,'foco').toUpperCase();
+    const obsRaw = get(row,'obs');
+    const obs = focoRaw ? `[${focoRaw}] ${obsRaw}`.trim() : obsRaw;
+
+    const criadoEmRaw = get(row,'criadoem') || get(row,'data') || get(row,'criado');
+    const parsedDate = criadoEmRaw ? new Date(criadoEmRaw) : null;
+    const createdAt = (parsedDate && !isNaN(parsedDate.getTime())) ? parsedDate.toISOString() : new Date().toISOString();
+
+    const empresaRaw = get(row,'empresa');
+    const contatoRaw = get(row,'nome');
+
     return {
       id: genId(),
-      nome:    get(row,'nome'),
-      mkt:     normalizeMkt(get(row,'mkt')),
-      zap:     get(row,'zap'),
-      email:   get(row,'email'),
-      cidade:  get(row,'cidade'),
-      estado:  get(row,'estado').toUpperCase().slice(0,2),
-      cnpj:    get(row,'cnpj'),
-      urlMl:   get(row,'urlMl'),
-      urlAz:   get(row,'urlAz'),
-      urlSh:   get(row,'urlSh'),
-      urlSite: get(row,'urlSite'),
-      insta:   get(row,'insta'),
-      obs:     get(row,'obs'),
-      status:  'NOVO',
-      prox:    '',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      nome:    empresaRaw || contatoRaw, // sem empresa informada, usa o nome da pessoa
+      contato: contatoRaw,
+      mkt: '', zap: get(row,'telefone'), email: get(row,'email'),
+      cidade, estado, cnpj: get(row,'cnpj'),
+      urlMl: get(row,'meli'), urlAz: get(row,'amazon'), urlSh: get(row,'shopee'),
+      urlSite: get(row,'site'), insta: get(row,'instagram'),
+      obs, status: 'NOVO', prox: '',
+      createdAt, updatedAt: new Date().toISOString(),
     };
-  }).filter(c=>c.nome||c.zap||c.cnpj);
+  }).filter(c => c.nome || c.contato || c.zap);
+}
+
+// Assinatura do export da ferramenta PETSA (Registros-Petsa):
+// origem, registrado_por, empresa, contato, whatsapp, estado, segmento, interesse, obs, criado_em.
+// Regras: registrado_por ignorado | empresa->nome (fallback contato) | contato->contato
+// | segmento e interesse viram tags em obs | criado_em->createdAt | origem do arquivo respeitada.
+const PETSA_CSV_SIGNATURE = ['empresa','contato','whatsapp','segmento'];
+function isPetsaCSV(normHeaders) {
+  return PETSA_CSV_SIGNATURE.every(h => normHeaders.includes(h));
+}
+
+function parsePetsaCSV(rows, normHeaders) {
+  const idx = {};
+  normHeaders.forEach((h,i) => { if (!(h in idx)) idx[h] = i; });
+  const get = (row, key) => (row[idx[key]] || '').trim();
+
+  return rows.slice(1).map(row => {
+    const empresaRaw = get(row,'empresa');
+    let contatoRaw = get(row,'contato');
+
+    // Na captura rápida às vezes o telefone foi digitado no campo de contato.
+    // Se o contato for só dígitos, não é nome de pessoa: descarta como contato.
+    if (contatoRaw && /^[\d\s()+-]+$/.test(contatoRaw)) contatoRaw = '';
+
+    const segmento  = get(row,'segmento');
+    const interesse = get(row,'interesse');
+    const obsRaw    = get(row,'obs');
+    const partes = [];
+    if (segmento)  partes.push(`[${segmento.toUpperCase()}]`);
+    if (interesse) partes.push(`Interesse: ${interesse}.`);
+    if (obsRaw)    partes.push(obsRaw);
+    const obs = partes.join(' ').trim();
+
+    const criadoEmRaw = get(row,'criadoem');
+    const d = criadoEmRaw ? new Date(criadoEmRaw) : null;
+    const createdAt = (d && !isNaN(d.getTime())) ? d.toISOString() : new Date().toISOString();
+
+    // origem gravada pela própria ferramenta ("PETSA 2026") normalizada para o padrão do CRM
+    const origemArq = get(row,'origem').toUpperCase();
+    const origem = origemArq.includes('PETSA') ? 'PETSA' : (origemArq || '');
+
+    return {
+      id: genId(),
+      nome:    empresaRaw || contatoRaw,
+      contato: contatoRaw,
+      mkt: '', zap: get(row,'whatsapp'), email: '',
+      cidade: '', estado: get(row,'estado').toUpperCase().slice(0,2), cnpj: '',
+      urlMl: '', urlAz: '', urlSh: '', urlSite: '', insta: '',
+      obs, origem, status: 'NOVO', prox: '',
+      createdAt, updatedAt: new Date().toISOString(),
+    };
+  }).filter(c => c.nome || c.contato || c.zap);
+}
+
+function parseCSV(text) {
+  const clean = text.replace(/^\uFEFF/, '');
+  const firstLineRaw = clean.split(/\r?\n/)[0] || '';
+  const sep = firstLineRaw.includes(';') ? ';' : (firstLineRaw.includes('\t') ? '\t' : ',');
+  const rows = parseCSVRows(clean, sep);
+  if (rows.length < 2) return [];
+
+  const headers = rows[0].map(h => (h||'').trim());
+  const normHeaders = headers.map(normalizeHeader);
+
+  if (isPetsaCSV(normHeaders)) return parsePetsaCSV(rows, normHeaders);
+  if (isFairCSV(normHeaders)) return parseFairCSV(rows, normHeaders);
+
+  const hmap = mapHeaders(headers);
+  const get = (row, field) => {
+    const i = hmap[field];
+    if (i===undefined) return '';
+    return (row[i]||'').trim();
+  };
+  return rows.slice(1).map(row => ({
+    id: genId(),
+    nome:    get(row,'nome') || get(row,'contatoNome'),
+    contato: get(row,'contatoNome'),
+    mkt:     normalizeMkt(get(row,'mkt')),
+    zap:     get(row,'zap'),
+    email:   get(row,'email'),
+    cidade:  splitCidadeUf(get(row,'cidade')).cidade,
+    estado:  get(row,'estado').toUpperCase().slice(0,2) || splitCidadeUf(get(row,'cidade')).estado,
+    cnpj:    get(row,'cnpj'),
+    urlMl:   get(row,'urlMl'),
+    urlAz:   get(row,'urlAz'),
+    urlSh:   get(row,'urlSh'),
+    urlSite: get(row,'urlSite'),
+    insta:   get(row,'insta'),
+    obs:     get(row,'obs'),
+    status:  'NOVO',
+    prox:    '',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  })).filter(c=>c.nome||c.zap||c.cnpj);
 }
 
 function normalizeMkt(v) {
@@ -2039,31 +2239,77 @@ function findDuplicate(c) {
   );
 }
 
-function importCSV(e) {
-  const f = e.target.files[0]; if (!f) return;
-  const r = new FileReader();
-  r.onload = async ev => {
-    const parsed = parseCSV(ev.target.result);
-    if (!parsed.length) { showToast('Nenhum contato válido encontrado.', 'err'); return; }
-    const dups = [], news = [];
-    parsed.forEach(c => {
-      const dup = findDuplicate(c);
-      if (dup) dups.push({incoming: c, existing: dup});
-      else news.push(c);
-    });
-    pendingNew = news;
-    pendingDups = dups;
-    if (dups.length) {
-      showDupModal();
-    } else {
-      await sbUpsertMany(news);
-      contacts.unshift(...news);
-      renderTable(); updateBadge();
-      showToast(`${news.length} contato(s) importado(s).`, 'ok');
+// Origem aplicada ao próximo lote importado (definida pelo seletor ao lado do botão Importar).
+const ORIGENS = ['PROSPECÇÃO','AMIGOS PET','PETSA','INDICAÇÃO','INBOUND','OUTRO'];
+
+function readFileAsText(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = ev => resolve(ev.target.result);
+    r.onerror = () => reject(new Error('Falha ao ler ' + file.name));
+    r.readAsText(file, 'utf-8');
+  });
+}
+
+async function importCSV(e) {
+  const files = Array.from(e.target.files || []);
+  if (!files.length) return;
+  const origemLote = document.getElementById('import-origem')?.value || '';
+  const donoLote   = document.getElementById('import-dono')?.value || '';
+
+  let allParsed = [];
+  const resumo = [];
+  for (const f of files) {
+    try {
+      const lidos = parseCSV(await readFileAsText(f));
+      lidos.forEach(c => {
+        if (origemLote && !c.origem) c.origem = origemLote;
+        if (donoLote) c.inseridoPor = donoLote;
+      });
+      resumo.push(`${f.name}: ${lidos.length}`);
+      allParsed = allParsed.concat(lidos);
+    } catch (err) {
+      showToast('Erro ao ler ' + f.name + ': ' + err.message, 'err');
     }
-  };
-  r.readAsText(f,'utf-8');
-  e.target.value='';
+  }
+  e.target.value = '';
+  if (!allParsed.length) { showToast('Nenhum contato válido encontrado.', 'err'); return; }
+
+  // dedup interno entre os arquivos importados na mesma ação.
+  // Só concatena obs, nunca descarta dado.
+  const batch = [];
+  allParsed.forEach(c => {
+    const dupInBatch = batch.find(b =>
+      (c.cnpj && c.cnpj === b.cnpj) ||
+      (c.nome && b.nome && c.nome.toLowerCase() === b.nome.toLowerCase()) ||
+      (c.zap && fmtPhone(c.zap) === fmtPhone(b.zap||'') && fmtPhone(c.zap).length > 7)
+    );
+    if (dupInBatch) {
+      if (c.obs && c.obs !== dupInBatch.obs) {
+        dupInBatch.obs = dupInBatch.obs
+          ? dupInBatch.obs + '. Também neste import: ' + c.obs
+          : c.obs;
+      }
+    } else { batch.push(c); }
+  });
+
+  const dups = [], news = [];
+  batch.forEach(c => {
+    const dup = findDuplicate(c);
+    if (dup) dups.push({incoming: c, existing: dup});
+    else news.push(c);
+  });
+  pendingNew = news;
+  pendingDups = dups;
+  if (dups.length) {
+    showDupModal();
+  } else {
+    await sbUpsertMany(news);
+    contacts.unshift(...news);
+    renderTable(); updateBadge();
+    const tag = (origemLote ? ` como ${origemLote}` : '') + (donoLote ? ` para ${donoLote}` : '');
+    showToast(`${news.length} contato(s) importado(s)${tag}. (${resumo.join(' | ')})`, 'ok');
+  }
 }
 
 // ── DUPLICATE HANDLING ───────────────────────────────────
@@ -2103,7 +2349,7 @@ function smartMerge(existing, incoming) {
   });
   // obs: concatena se houver novidade, nunca apaga
   if (incoming.obs && incoming.obs !== existing.obs) {
-    merged.obs = existing.obs ? existing.obs + '\n— Importado: ' + incoming.obs : incoming.obs;
+    merged.obs = existing.obs ? existing.obs + '\nImportado: ' + incoming.obs : incoming.obs;
   }
   merged.updatedAt = new Date().toISOString();
   return merged;
@@ -2317,7 +2563,7 @@ function renderDash() {
     </div>`;
   }).join('');
 
-  // Vendedores — abas por mês
+  // Vendedores, abas por mês
   const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
   // Coletar meses com leads
   const moKeys = [...new Set(contacts.map(c => c.createdAt ? c.createdAt.slice(0,7) : null).filter(Boolean))].sort().reverse();
@@ -2390,7 +2636,7 @@ async function sbUpsertMany(list) {
   }
 }
 
-// (SEEDS removidos — produção usa apenas o banco)
+// (SEEDS removidos, produção usa apenas o banco)
 
 
 // ── CADÊNCIA COMERCIAL ────────────────────────────────────
@@ -2407,11 +2653,11 @@ function buildSteps(vendedor) {
 
 Vi a operação de vocês no Mercado Livre e achei interessante o que estão construindo.
 
-Sou ${nome}, da Calmart — indústria com mais de 35 anos de atuação, e nos últimos anos alguns dos nossos itens da linha pet ultrapassaram 500 mil unidades vendidas só no marketplace.
+Sou ${nome}, da Calmart, indústria com mais de 35 anos de atuação, e nos últimos anos alguns dos nossos itens da linha pet ultrapassaram 500 mil unidades vendidas só no marketplace.
 
 Ainda estou mapeando algumas operações que fazem sentido para expandir. A de vocês apareceu.
 
-Se quiser, posso te mandar um resumo rápido do que trabalhamos — sem compromisso nenhum.`
+Se quiser, posso te mandar um resumo rápido do que trabalhamos, sem compromisso nenhum.`
     },
     {
       id: `${vendedor}_cad_2`,
@@ -2421,11 +2667,11 @@ Se quiser, posso te mandar um resumo rápido do que trabalhamos — sem compromi
 
 Só passando para não perder o fio.
 
-Caso minha mensagem anterior tenha passado batido, sem problema — a operação de vocês continua interessante do nosso lado.
+Caso minha mensagem anterior tenha passado batido, sem problema, a operação de vocês continua interessante do nosso lado.
 
 Se tiver um momento, posso te passar uma visão rápida das categorias que estamos desenvolvendo. É mais fácil avaliar com números na mão.
 
-— ${nome}`
+${nome}`
     },
     {
       id: `${vendedor}_cad_3`,
@@ -2435,41 +2681,41 @@ Se tiver um momento, posso te passar uma visão rápida das categorias que estam
 
 Última vez que passo aqui para não tomar seu tempo.
 
-Se não fizer sentido agora, tudo bem — guardo o contato e retomo em outro momento.
+Se não fizer sentido agora, tudo bem, guardo o contato e retomo em outro momento.
 
 Se quiser entender melhor o que trabalhamos antes de decidir, é só falar. Consigo adaptar o que envio para o perfil da operação de vocês.
 
-— ${nome}`
+${nome}`
     },
     {
       id: `${vendedor}_cad_4`,
       num: 'Fase 4', title: 'Apresentação', meta: 'Sob demanda · PDF ou Zap', editTitle: true,
       intent: 'Objetivo: consolidar credibilidade. Enviado apenas quando o prospect sinalizou interesse.',
-      msg: `[Edite aqui a apresentação institucional — ${nome}]
+      msg: `[Edite aqui a apresentação institucional, ${nome}]
 
-35 anos de mercado — solidez, histórico e capacidade comprovada.
+35 anos de mercado: solidez, histórico e capacidade comprovada.
 
 Nossa estrutura fabril foi construída para projetos variados com capacidade de produção on time, sem gargalo e sem surpresa no prazo.
 
 Diferenciais que fazem diferença na prática:
-— Preços competitivos com produção 100% local
-— Linha de produção de excelência
-— Produtos com centenas de milhares de vendas comprovadas junto aos nossos parceiros de marketplace
+- Preços competitivos com produção 100% local
+- Linha de produção de excelência
+- Produtos com centenas de milhares de vendas comprovadas junto aos nossos parceiros de marketplace
 
-Logística ágil e local — entrega rápida, menos fricção operacional para o seu negócio.`
+Logística ágil e local, entrega rápida, menos fricção operacional para o seu negócio.`
     },
     {
       id: `${vendedor}_cad_5`,
       num: 'Fase 5', title: 'Proposta', meta: 'Sob demanda · PDF ou reunião', editTitle: true,
       intent: 'Objetivo: fechar. Só chega aqui quem pediu. Seja direto, específico e fácil de dizer sim.',
-      msg: `[Edite aqui o portfólio e condições comerciais — ${nome}]
+      msg: `[Edite aqui o portfólio e condições comerciais, ${nome}]
 
-— Linha pet: itens mais vendidos + top SKUs no ML
-— Fotos e descrições prontas para listing
-— Tabela de preços (custo, sugestão de venda, margem estimada)
-— Condições de pagamento e pedido mínimo
-— Prazo de entrega por região
-— Suporte para onboarding no marketplace`
+- Linha pet: itens mais vendidos + top SKUs no ML
+- Fotos e descrições prontas para listing
+- Tabela de preços (custo, sugestão de venda, margem estimada)
+- Condições de pagamento e pedido mínimo
+- Prazo de entrega por região
+- Suporte para onboarding no marketplace`
     }
   ];
 }
@@ -2681,7 +2927,7 @@ function renderCards() {
   if (!list.length) { el.innerHTML = ''; empty.style.display = 'block'; return; }
   empty.style.display = 'none';
 
-  // Delegate all card interactions — reliable on iOS Safari
+  // Delegate all card interactions, reliable on iOS Safari
   el.onclick = e => {
     const qa   = e.target.closest('.m-qa-btn');
     const more = e.target.closest('.m-more-btn');
@@ -2713,8 +2959,8 @@ function renderCards() {
     const proxCls    = dateClass(c.prox);
     const obs = c.obs ? `<span style="font-size:11px;color:#aaa;font-style:italic;display:block;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(c.obs.slice(0,60))}</span>` : '';
 
-    const waz = c.zap
-      ? `<a href="https://wa.me/55${fmtPhone(c.zap)}" target="_blank" style="text-decoration:none" title="${esc(c.zap)}">
+    const waz = wazNumber(c.zap)
+      ? `<a href="https://wa.me/${wazNumber(c.zap)}" target="_blank" style="text-decoration:none" title="${esc(c.zap)}">
           <svg viewBox="0 0 24 24" width="26" height="26" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.116 1.524 5.845L.057 23.737a.5.5 0 0 0 .614.612l5.951-1.462A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.9 0-3.673-.508-5.2-1.393l-.373-.215-3.533.867.902-3.453-.234-.381A9.935 9.935 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>
          </a>` : `<svg viewBox="0 0 24 24" width="26" height="26" fill="#ddd"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.116 1.524 5.845L.057 23.737a.5.5 0 0 0 .614.612l5.951-1.462A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.9 0-3.673-.508-5.2-1.393l-.373-.215-3.533.867.902-3.453-.234-.381A9.935 9.935 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/></svg>`;
 
@@ -2896,6 +3142,8 @@ function clearFilters() {
   if (ss) ss.value = '';
   if (fs) fs.value = '';
   if (fp) fp.value = '';
+  const fo = document.getElementById('filter-origem');
+  if (fo) fo.value = '';
   filterMeus = false;
   document.getElementById('chip-meus')?.classList.remove('active');
   filterHidePerdidos = false;
@@ -2909,9 +3157,11 @@ function updateClearBtn() {
   const q  = document.getElementById('search-input')?.value || '';
   const fs = document.getElementById('filter-status')?.value || '';
   const fp = document.getElementById('filter-prox')?.value || '';
-  const active = !!(q || fs || fp || filterMeus || filterHidePerdidos);
+  const fo = document.getElementById('filter-origem')?.value || '';
+  const active = !!(q || fs || fp || fo || filterMeus || filterHidePerdidos);
   const btn = document.getElementById('btn-clear-filters');
   if (!btn) return;
+  // Force override any CSS or inline style
   btn.style.setProperty('display', active ? 'inline-flex' : 'none', 'important');
 }
 
@@ -3143,7 +3393,7 @@ function renderKanban() {
   const list = getFiltered();
   const nArquivo = list.filter(c => c.status==='FECHADO'||c.status==='PERDIDO').length;
 
-  // delegate clicks — works reliably on iOS Safari
+  // delegate clicks, works reliably on iOS Safari
   board.onclick = e => {
     const card = e.target.closest('.kanban-card[data-id]');
     if (card) openModal(card.dataset.id);
@@ -3333,9 +3583,9 @@ async function undoAdvance(el) {
 // ── EXPORT XLS WITH FILTERS APPLIED ──────────────────────
 function exportJSON() {
   const list = getFiltered(); // usa lista filtrada
-  const headers = ['ID','Nome','Contato','Empresa','Marketplace','WhatsApp','Email','Cidade','UF','CNPJ','Status','Últ. Contato','Próx. Contato','ML URL','Amazon URL','Shopee URL','Site Oficial','Instagram','Observações','Inserido por','Criado em','Atualizado em'];
+  const headers = ['ID','Nome','Contato','Empresa','Origem','Marketplace','WhatsApp','Email','Cidade','UF','CNPJ','Status','Últ. Contato','Próx. Contato','ML URL','Amazon URL','Shopee URL','Site Oficial','Instagram','Observações','Inserido por','Criado em','Atualizado em'];
   const rows = list.map(c => [
-    c.id, c.nome||'', c.contato||'', c.nome||'', c.mkt||'', c.zap||'', c.email||'',
+    c.id, c.nome||'', c.contato||'', c.nome||'', c.origem||'', c.mkt||'', c.zap||'', c.email||'',
     c.cidade||'', c.estado||'', c.cnpj||'', c.status||'', c.ultimo||'', c.prox||'',
     c.urlMl||'', c.urlAz||'', c.urlSh||'', c.urlSite||'', c.insta||'', c.obs||'',
     c.inseridoPor||'', c.createdAt||'', c.updatedAt||''
