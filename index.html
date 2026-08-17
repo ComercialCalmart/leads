@@ -672,7 +672,7 @@ tr:hover .action-btns { opacity:.3; }
         <span class="tag" id="total-badge">0</span>
       </div>
       <div class="toolbar">
-        <input type="search" class="search-input" id="search-input" placeholder="Buscar empresa, zap, email, cidade..." oninput="renderTable();updateClearBtn()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <input type="search" class="search-input" id="search-input" placeholder="Buscar empresa, contato, zap, email, cidade, obs..." oninput="renderTable();updateClearBtn()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
         <select class="filter-select" id="filter-status" onchange="renderTable();updateClearBtn()">
           <option value="">Todos os status</option>
           <option value="NOVO">Novo</option>
@@ -972,16 +972,13 @@ tr:hover .action-btns { opacity:.3; }
           <input type="text" id="f-prox" placeholder="dd/mm/aaaa" maxlength="10" oninput="maskDate(this)">
         </div>
 
-        <!-- Campo interno: não exibido visualmente, mas salvo no banco -->
+        <!-- Campo interno: não exibido visualmente, mas salvo no banco.
+             Os valores precisam bater exatamente com o filtro de responsável. -->
         <select id="f-inserido-por" style="display:none">
           <option value="">—</option>
           <option value="Diego">Diego</option>
-          <option value="Lucas Alves">Lucas Alves</option>
-          <option value="Lucas Catarin">Lucas Catarin</option>
+          <option value="Lucas">Lucas</option>
           <option value="Matheus">Matheus</option>
-          <option value="Robson">Robson</option>
-          <option value="Zé Catarin">Zé Catarin</option>
-          <option value="Outro">Outro</option>
         </select>
 
         <div class="divider">Canais</div>
@@ -1607,12 +1604,31 @@ function clearForm() {
   FORM_FIELDS.forEach(k => {
     const el = document.getElementById('f-'+k);
     if (!el) return;
-    if (el.tagName==='SELECT') el.value = k==='status' ? 'NOVO' : '';
+    if (el.tagName==='SELECT') {
+      // limpa opções injetadas por fillForm para valores fora da lista
+      Array.from(el.options).forEach(o => { if (o.dataset.temp) o.remove(); });
+      el.value = k==='status' ? 'NOVO' : '';
+    }
     else el.value = '';
   });
 }
 function fillForm(c) {
-  const set = (k,v) => { const el=document.getElementById('f-'+k); if(el) el.value=v||''; };
+  // Em <select>, atribuir um valor inexistente resulta em '' silenciosamente,
+  // o que apagaria o dado ao salvar. Se o valor não existir nas opções,
+  // injeta uma opção temporária para preservar o registro como está.
+  const set = (k,v) => {
+    const el = document.getElementById('f-'+k);
+    if (!el) return;
+    const val = v || '';
+    if (el.tagName === 'SELECT' && val && !Array.from(el.options).some(o => o.value === val)) {
+      const opt = document.createElement('option');
+      opt.value = val;
+      opt.textContent = val + ' (fora da lista)';
+      opt.dataset.temp = '1';
+      el.appendChild(opt);
+    }
+    el.value = val;
+  };
   set('nome',c.nome); set('contato',c.contato); set('mkt',c.mkt); set('status',c.status||'NOVO');
   set('zap',c.zap); set('email',c.email); set('cidade',c.cidade); set('estado',c.estado);
   set('cnpj',c.cnpj);
@@ -1901,7 +1917,7 @@ function getFiltered() {
     if (fOrig && (c.origem||'') !== fOrig) return false;
     if (fDono && (c.inseridoPor||'') !== fDono) return false;
     if (q) {
-      const haystack = [c.nome,c.zap,c.email,c.cidade,c.estado,c.cnpj].join(' ').toLowerCase();
+      const haystack = [c.nome,c.contato,c.zap,c.email,c.cidade,c.estado,c.cnpj,c.origem,c.obs].join(' ').toLowerCase();
       if (!haystack.includes(q)) return false;
     }
     if (fSt  && c.status !== fSt)  return false;
@@ -1919,6 +1935,10 @@ function getFiltered() {
     list.sort((a, b) => {
       const va = (a[sortField]||'').toLowerCase();
       const vb = (b[sortField]||'').toLowerCase();
+      // vazios sempre ao final, nas duas direções
+      if (!va && !vb) return 0;
+      if (!va) return 1;
+      if (!vb) return -1;
       if (va < vb) return -1 * dir;
       if (va > vb) return  1 * dir;
       return 0;
@@ -2275,7 +2295,9 @@ function findDuplicate(c) {
   );
 }
 
-// Origem aplicada ao próximo lote importado (definida pelo seletor ao lado do botão Importar).
+// Lista canônica de origens. Mantida como referência única do vocabulário
+// aceito; os <select> de filtro, formulário e import repetem esses valores.
+// Não removida: serve de checagem ao adicionar uma origem nova.
 const ORIGENS = ['PROSPECÇÃO','AMIGOS PET','PETSA','INDICAÇÃO','INBOUND','OUTRO'];
 
 function readFileAsText(file) {
@@ -3027,7 +3049,7 @@ function renderCards() {
       <div class="m-card-top">
         <div style="flex:1;min-width:0">
           <div class="m-card-name">${esc(c.nome)}${mIsPerdido?'<span class="dot-perdido" title="Lead perdido"></span>':''}</div>
-          <div class="m-card-contact">${c.contato ? esc(c.contato) : ''} ${c.cidade||c.estado ? `· <span style="color:#aaa">${esc(loc)}</span>` : ''}${c.inseridoPor ? ` · <span style="color:#ccc;font-size:10px">${esc(c.inseridoPor)}</span>` : ''}</div>
+          <div class="m-card-contact">${c.contato ? esc(c.contato) : ''} ${c.cidade||c.estado ? `· <span style="color:#aaa">${esc(loc)}</span>` : ''}${c.origem ? ` · <span style="color:#aaa;font-size:10px">${esc(c.origem)}</span>` : ''}${c.inseridoPor ? ` · <span style="color:#ccc;font-size:10px">${esc(c.inseridoPor)}</span>` : ''}</div>
           ${obs}
         </div>
         <span class="m-status ${statusCls}">${statusLbl}</span>
