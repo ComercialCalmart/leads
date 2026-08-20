@@ -2330,6 +2330,10 @@ async function importCSV(e) {
       lidos.forEach(c => {
         if (origemLote && !c.origem) c.origem = origemLote;
         if (donoLote) c.inseridoPor = donoLote;
+        // ownerId garante que a RLS do Supabase aceite UPDATE deste lead.
+        // Sem ele, leads importados ficam com owner_id NULL e o Supabase
+        // retorna 200 silenciosamente sem gravar (bug de permissão de UPDATE).
+        if (!c.ownerId && authSession?.user?.id) c.ownerId = authSession.user.id;
       });
       resumo.push(`${f.name}: ${lidos.length}`);
       allParsed = allParsed.concat(lidos);
@@ -3516,10 +3520,11 @@ async function quickRegister(id) {
   contacts[idx].updatedAt = new Date().toISOString();
   const p3 = new Date(); p3.setDate(p3.getDate()+3);
   contacts[idx].prox = p3.toISOString().slice(0,10);
-  // Avanço automático: TENT1-TENT4 sobem um passo; TENT5 fica vermelho; NOVO fica em NOVO
-  const autoAdvanceFrom = ['TENT1','TENT2','TENT3','TENT4'];
+  // Avanço automático ao registrar contato:
+  // NOVO → TENT1, TENT1-TENT4 sobem um passo, TENT5 fica vermelho, NEGOC/FECHADO/PERDIDO não avançam.
+  const autoAdvanceFrom = ['NOVO','TENT1','TENT2','TENT3','TENT4'];
   if (autoAdvanceFrom.includes(prevStQR)) {
-    const nextSt = STATUS_ORDER[STATUS_ORDER.indexOf(prevStQR)+1];
+    const nextSt = prevStQR === 'NOVO' ? 'TENT1' : STATUS_ORDER[STATUS_ORDER.indexOf(prevStQR)+1];
     if (nextSt && nextSt !== 'NEGOC') {
       contacts[idx].status = nextSt;
       addHistory(contacts[idx], 'status', `Status alterado de ${STATUS_LABELS[prevStQR]} para ${STATUS_LABELS[nextSt]} (automático ao registrar contato)`);
